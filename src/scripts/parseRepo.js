@@ -18,135 +18,95 @@ import {parse as parseReactDocs} from 'react-docgen';
 
 import dbconfig from '../../dbconfig.json';
 
-function main(): Promise<*> {
+async function main(): Promise<*> {
   const nodeFilepath = process.argv[0];
   const directory = process.argv[2];
+  if (!directory) {
+    throw new Error('Need to specify a directory to process.');
+  }
+  if (!hasPackageJSON(directory)) {
+    throw new Error('Not a NPM directory.');
+  }
   const repoName = process.argv[3];
+  if (!repoName) {
+    throw new Error('Need to specify a repository name for storage.');
+  }
 
-  let mysqlConnection: ?Object = null;
-  let compiledComponents: ?Array<{
-    name: string,
-    doc: Object,
-    filepath: string,
-    compiled: string,
-  }> = null;
-  let repoID: ?string = null;
+  printAction('Connecting to MySQL...');
+  const mysqlConnection = await connectToMySQL(dbconfig);
 
-  return Promise.resolve()
-    // Validate input
-    .then(() => {
-      if (!directory) {
-        throw new Error('Need to specify a directory to process.');
-      }
-      if (!hasPackageJSON(directory)) {
-        throw new Error('Not a NPM directory.');
-      }
-      if (!repoName) {
-        throw new Error('Need to specify a repository name for storage.');
-      }
-    })
+  try {
+    printAction('Parsing directory...');
+    const components = getComponents(directory);
+    printActionResult(`Parsed ${components.length} components.`);
 
-    // MySQL setup
-    .then(() => {
-      printAction('Connecting to MySQL...');
-      return connectToMySQL(dbconfig);
-    })
-    .then((connection) => {
-      printActionResult('Connected.');
-      mysqlConnection = connection;
-    })
-
-    // Get components
-    .then(() => {
-      printAction(`Parsing directory...`);
-      const components = getComponents(directory);
-      printActionResult(`Parsed ${components.length} components.`);
-      return components;
-    })
-    .then(components => {
-      printAction('Compiling components...');
-      return Promise.all(
-        components.map(({name, filepath, doc}) => {
-          return compileComponent(nodeFilepath, directory, filepath)
-            .then(compiled => {
-              return {
-                name,
-                filepath,
-                doc,
-                compiled,
-              };
-            });
-        })
-      );
-    })
-    .then(compiled => {
-      compiledComponents = compiled;
-      const totalLOC = compiledComponents.map(
-        component => component.compiled.split('\n').length
-      ).reduce((a, b) => a + b);
-      const totalBytes = compiledComponents.map(
-        component => component.compiled.length
-      ).reduce((a, b) => a + b);
-      printActionResult(
-        `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
-      );
-    })
-
-    // Save to db
-
-    .then(() => {
-      printAction('Saving new repo to database...');
-      return executeSQL(
-        mysqlConnection,
-        SQL`INSERT INTO repository (name) VALUES (${repoName})`
-      );
-    })
-    .then(sqlResult => {
-      repoID = sqlResult.insertId;
-      printActionResult(`Saved as repo #${repoID}.`);
-    })
-    .then(() => {
-      printAction('Saving compiled components to database...');
-      return Promise.all(
-        nullthrows(compiledComponents).map(compiledComponent => {
-          const relativeFilepath =
-            getComponentRelativeFilepath(directory, compiledComponent.filepath);
-          return executeSQL(
-            mysqlConnection,
-            SQL`
-              INSERT INTO component (
-                name,
-                repository_id,
-                filepath,
-                compiled_bundle
-              )
-              VALUES (
-                ${compiledComponent.name},
-                ${nullthrows(repoID)},
-                ${relativeFilepath},
-                ${compiledComponent.compiled}
-               )
-            `,
-          );
-        })
-      );
-    })
-    .then(sqlResults => {
-      printActionResult('Saved.');
-    })
-
-    // MySQL cleanup
-    .then(
-      () => {
-        cleanupMySQL(mysqlConnection);
-        mysqlConnection = null;
-      },
-      err => {
-        cleanupMySQL(mysqlConnection);
-        mysqlConnection = null;
-        throw err;
-      },
+    printAction('Compiling components...');
+    const compiledComponents: Array<{
+      name: string,
+      doc: Object,
+      filepath: string,
+      compiled: string,
+    }> = await Promise.all(
+      components.map(component => {
+        return compileComponent(nodeFilepath, directory, component.filepath)
+          .then(compiled => {
+            return {
+              ...component,
+              compiled,
+            };
+          });
+      })
     );
+
+    const totalLOC = compiledComponents.map(
+      component => component.compiled.split('\n').length
+    ).reduce((a, b) => a + b);
+    const totalBytes = compiledComponents.map(
+      component => component.compiled.length
+    ).reduce((a, b) => a + b);
+    printActionResult(
+      `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
+    );
+
+    printAction('Saving new repo to database...');
+    const repoID: string = (await executeSQL(
+      mysqlConnection,
+      SQL`INSERT INTO repository (name) VALUES (${repoName})`
+    )).insertId;
+    printActionResult(`Saved as repo #${repoID}.`);
+
+    printAction('Saving compiled components to database...');
+    await Promise.all(
+      compiledComponents.map(compiledComponent => {
+        const relativeFilepath =
+          getComponentRelativeFilepath(directory, compiledComponent.filepath);
+        return executeSQL(
+          mysqlConnection,
+          SQL`
+            INSERT INTO component (
+              name,
+              repository_id,
+              filepath,
+              compiled_bundle
+            )
+            VALUES (
+              ${compiledComponent.name},
+              ${nullthrows(repoID)},
+              ${relativeFilepath},
+              ${compiledComponent.compiled}
+             )
+          `,
+        );
+      })
+    );
+    printActionResult('Saved.');
+  }
+  catch (err) {
+    cleanupMySQL(mysqlConnection);
+    throw err;
+  }
+
+  cleanupMySQL(mysqlConnection);
 }
 
 main().catch(err => printError(err));
@@ -200,7 +160,7 @@ function getComponents(
   return components;
 }
 
-function compileComponent(
+async function compileComponent(
   nodeFilepath: string,
   directory: string,
   filepath: string,
@@ -208,19 +168,19 @@ function compileComponent(
   const scriptStr =
     createComponentWebpackSerializedScript(directory, filepath, false);
 
-  return launchChildProcess(
+  return await launchChildProcess(
     nodeFilepath,
     directory,
     scriptStr,
   );
 }
 
-function launchChildProcess(
+async function launchChildProcess(
   nodeFilepath: string,
   directory: string,
   inputSerializedFunc: string,
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     const env = Object.create(process.env);
     env.NODE_ENV = 'development';
     const child = spawn(nodeFilepath, [], {
@@ -399,8 +359,8 @@ function hasBabelRC(dir: string): boolean {
 
 //// Database
 
-function connectToMySQL(dbconfig: Object): Promise<Object> {
-  return new Promise((resolve, reject) => {
+async function connectToMySQL(dbconfig: Object): Promise<Object> {
+  return await new Promise((resolve, reject) => {
     const connection = mysql.createConnection({
       host: dbconfig.host,
       user: dbconfig.user,
@@ -417,13 +377,12 @@ function connectToMySQL(dbconfig: Object): Promise<Object> {
   });
 }
 
-function executeSQL(connection: ?Object, sql: string): Promise<Object> {
-  return new Promise((resolve, reject) => {
-    if (!connection) {
-      reject('Not connected to MySQL');
-      return;
-    }
-    connection.query(sql, (error, results, fields) => {
+async function executeSQL(connection: ?Object, sql: string): Promise<Object> {
+  if (!connection) {
+    throw new Error('Not connected to MySQL');
+  }
+  return await new Promise((resolve, reject) => {
+    nullthrows(connection).query(sql, (error, results, fields) => {
       if (error) {
         reject(error);
         return;
