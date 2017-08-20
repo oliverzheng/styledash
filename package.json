@@ -5,6 +5,7 @@
   "dependencies": {
     "babel-cli": "^6.26.0",
     "colors": "^1.1.2",
+    "filesize": "^3.5.10",
     "find-root": "^1.1.0",
     "memory-fs": "^0.4.1",
     "mysql": "^2.14.1",

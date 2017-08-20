@@ -11,6 +11,7 @@ import colors from 'colors/safe';
 import webpack from 'webpack';
 import findRoot from 'find-root';
 import mysql from 'mysql';
+import filesize from 'filesize';
 import {parse as parseReactDocs} from 'react-docgen';
 
 import dbconfig from '../../dbconfig.json';
@@ -72,7 +73,12 @@ function main(): Promise<*> {
       const totalLOC = compiledComponents.map(
         component => component.compiled.split('\n').length
       ).reduce((a, b) => a + b);
-      printActionResult(`Produced a total of ${totalLOC} lines of code.`);
+      const totalBytes = compiledComponents.map(
+        component => component.compiled.length
+      ).reduce((a, b) => a + b);
+      printActionResult(
+        `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
+      );
     })
 
     // MySQL cleanup
