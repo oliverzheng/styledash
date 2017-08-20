@@ -1,0 +1,23 @@
+type Query {
+  hello: String
+  viewer: Viewer
+}
+
+type Viewer {
+  name: String!
+  repositories: [Repository]!
+}
+
+type Repository {
+  id: String!
+  name: String!
+  components: [Component]!
+}
+
+type Component {
+  id: String!
+  name: String!
+  repository: Repository!
+  filepath: String!
+  compiledBundle: String
+}

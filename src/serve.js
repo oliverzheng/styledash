@@ -1,5 +1,8 @@
 /** @flow */
 
+import fs from 'fs';
+import path from 'path';
+
 import express from 'express';
 import {
   graphql,
@@ -23,39 +26,21 @@ import {
   printActionResult,
   printError,
 } from './consoleUtil';
+import {SERVER_PORT} from './serverConfig';
 
-const PORT = 8000;
-
-const schema = buildSchema(`
-  type Query {
-    hello: String
-    viewer: Viewer
-  }
-
-  type Viewer {
-    repositories: [Repository]!
-  }
-
-  type Repository {
-    id: String!
-    name: String!
-    components: [Component]!
-  }
-
-  type Component {
-    id: String!
-    name: String!
-    repository: Repository!
-    filepath: String!
-    compiledBundle: String
-  }
-`);
+const schema = buildSchema(
+  fs.readFileSync(path.resolve(__dirname, './data/schema.graphql')).toString()
+);
 
 class Viewer {
   _conn: Connection;
 
   constructor(conn: Connection) {
     this._conn = conn;
+  }
+
+  name(): string {
+    return 'herp derp';
   }
 
   async repositories(): Promise<Array<Repository>> {
@@ -157,6 +142,16 @@ async function main() {
   try {
     const app = express();
 
+    // TODO - react is hot-served via webpack on a different port right now
+    app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept',
+      );
+      next();
+    });
+
     app.get('/', (req, res) => {
       res.send('derp');
     });
@@ -176,8 +171,8 @@ async function main() {
       graphiql: false,
     })); 
 
-    printAction(`Setting up listener on port ${PORT}...`);
-    app.listen(PORT, () => {
+    printAction(`Setting up listener on port ${SERVER_PORT}...`);
+    app.listen(SERVER_PORT, () => {
       printActionResult('Listener setup.');
     });
   }
