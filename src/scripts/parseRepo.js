@@ -10,113 +10,188 @@ import {Readable} from 'stream';
 import colors from 'colors/safe';
 import webpack from 'webpack';
 import findRoot from 'find-root';
+import mysql from 'mysql';
 import {parse as parseReactDocs} from 'react-docgen';
 
-const nodeFilepath = process.argv[0];
-const directory = process.argv[2];
-if (!directory) {
-  printError('Need to specify a directory to process.');
-}
+import dbconfig from '../../dbconfig.json';
 
-printAction(`Parsing directory ${directory}`);
+function main(): Promise<*> {
+  const nodeFilepath = process.argv[0];
+  const directory = process.argv[2];
+  const repoName = process.argv[3];
 
-if (!hasPackageJSON(directory)) {
-  printError('Not a NPM directory.');
-}
+  let mysql_connection = null;
 
-const IGNORE_DIRECTORIES = {
-  'node_modules': true,
-  '.git': true,
-  'doc': true,
-  'docs': true,
-  'test': true,
-  'tests': true,
-  '__test__': true,
-  '__tests__': true,
-};
-
-const reactFilepaths = [];
-walkDirectory(
-  directory,
-  (filepath, isDir) => {
-    const basename = path.basename(filepath);
-    if (IGNORE_DIRECTORIES[basename]) {
-      return false;
-    }
-    if (couldFilepathContainComponent(filepath)) {
-      const doc = getComponentDoc(filepath);
-      if (doc) {
-        reactFilepaths.push(filepath);
+  return Promise.resolve()
+    // Validate input
+    .then(() => {
+      if (!directory) {
+        throw new Error('Need to specify a directory to process.');
       }
-      console.log(filepath, doc ? 'is react' : 'is not');
-    }
-    return true;
-  }
-);
-
-if (reactFilepaths.length > 0) {
-  // Do just the fisrt right now
-  const scriptStr =
-    createComponentWebpackSerializedScript(directory, reactFilepaths[0], false);
-
-  launchChildProcess(
-    directory,
-    scriptStr,
-    (err, data) => {
-      console.log('end');
-      if (err) {
-        console.log('error', err);
-      } else {
-        console.log('data', data);
+      if (!hasPackageJSON(directory)) {
+        throw new Error('Not a NPM directory.');
       }
-    },
-  );
+      if (!repoName) {
+        throw new Error('Need to specify a repository name for storage.');
+      }
+    })
+
+    // MySQL setup
+    .then(() => {
+      printAction('Connecting to MySQL...');
+      return connectToMySQL(dbconfig);
+    })
+    .then((connection) => {
+      printActionResult('Connected.');
+      mysql_connection = connection;
+    })
+
+    // Get components
+    .then(() => {
+      printAction(`Parsing directory...`);
+      const components = getComponents(directory);
+      printActionResult(`Parsed ${components.length} components.`);
+      return components;
+    })
+    .then(components => {
+      printAction('Compiling components...');
+      return Promise.all(
+        components.map(({filepath, doc}) => {
+          return compileComponent(nodeFilepath, directory, filepath)
+            .then(compiled => {
+              return {
+                filepath,
+                doc,
+                compiled,
+              };
+            });
+        })
+      );
+    })
+    .then(compiledComponents => {
+      const totalLOC = compiledComponents.map(
+        component => component.compiled.split('\n').length
+      ).reduce((a, b) => a + b);
+      printActionResult(`Produced a total of ${totalLOC} lines of code.`);
+    })
+
+    // MySQL cleanup
+    .then(
+      () => {
+        cleanupMySQL(mysql_connection);
+        mysql_connection = null;
+      },
+      err => {
+        cleanupMySQL(mysql_connection);
+        mysql_connection = null;
+        throw err;
+      },
+    );
 }
+
+main().catch(err => printError(err));
 
 
 //// Generating output
 
+function getComponents(
+  directory: string,
+): Array<{
+  filepath: string,
+  doc: Object,
+}> {
+  const IGNORE_DIRECTORIES = {
+    'node_modules': true,
+    '.git': true,
+    'doc': true,
+    'docs': true,
+    'test': true,
+    'tests': true,
+    '__test__': true,
+    '__tests__': true,
+  };
+
+  const components: Array<{
+    filepath: string,
+    doc: Object,
+  }> = [];
+  walkDirectory(
+    directory,
+    (filepath, isDir) => {
+      const basename = path.basename(filepath);
+      if (IGNORE_DIRECTORIES[basename]) {
+        return false;
+      }
+      if (couldFilepathContainComponent(filepath)) {
+        const doc = getComponentDoc(filepath);
+        if (doc) {
+          components.push({
+            filepath,
+            doc,
+          });
+        }
+      }
+      return true;
+    }
+  );
+  return components;
+}
+
+function compileComponent(
+  nodeFilepath: string,
+  directory: string,
+  filepath: string,
+): Promise<string> {
+  const scriptStr =
+    createComponentWebpackSerializedScript(directory, filepath, false);
+
+  return launchChildProcess(
+    nodeFilepath,
+    directory,
+    scriptStr,
+  );
+}
+
 function launchChildProcess(
+  nodeFilepath: string,
   directory: string,
   inputSerializedFunc: string,
-  onExitCallback: (err: ?string, data: ?string) => void,
-) {
-  const env = Object.create(process.env);
-  env.NODE_ENV = 'development';
-  const child = spawn(nodeFilepath, [], {
-    cwd: directory,
-    env,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const env = Object.create(process.env);
+    env.NODE_ENV = 'development';
+    const child = spawn(nodeFilepath, [], {
+      cwd: directory,
+      env,
+    });
+
+    const childStdout = [];
+    child.stdout.on('data', (data) => {
+      childStdout.push(data);
+    });
+
+    const childStderr = [];
+    child.stderr.on('data', (data) => {
+      childStderr.push(data);
+    });
+
+    child.on('exit', (code, signal) => {
+      if (code === 0) {
+        resolve(childStdout.join(''));
+      } else {
+        resolve(childStderr.join(''));
+      }
+    });
+
+    child.on('error', () => {
+      reject({err: 'child derped', args: arguments});
+    });
+
+    const childInputStream = new Readable();
+    childInputStream.push(inputSerializedFunc);
+    childInputStream.push(null);
+    childInputStream.pipe(child.stdin);
   });
-
-  const childStdout = [];
-  child.stdout.on('data', (data) => {
-    childStdout.push(data);
-  });
-
-  const childStderr = [];
-  child.stderr.on('data', (data) => {
-    childStderr.push(data);
-  });
-
-  child.on('exit', (code, signal) => {
-    const out = childStdout.length !== 0
-      ? childStdout.join('')
-      : null;
-    const err = childStderr.length !== 0
-      ? childStderr.join('')
-      : null;
-
-    onExitCallback(err, out);
-  });
-
-  child.on('error', () => {
-    console.log('child derped', arguments);
-  });
-
-  const childInputStream = new Readable();
-  childInputStream.push(inputSerializedFunc);
-  childInputStream.push(null);
-  childInputStream.pipe(child.stdin);
 }
 
 function createComponentWebpackSerializedScript(
@@ -259,13 +334,59 @@ function hasBabelRC(dir: string): boolean {
 }
 
 
+//// Database
+
+function connectToMySQL(dbconfig: Object): Promise<Object> {
+  return new Promise((resolve, reject) => {
+    const connection = mysql.createConnection({
+      host: dbconfig.host,
+      user: dbconfig.user,
+      password: dbconfig.password,
+      database: dbconfig.database,
+    });
+    connection.connect((err) => {
+      if (err) {
+        reject('Cannot connect to db: ' + err);
+        return;
+      }
+      resolve(connection);
+    });
+  });
+}
+
+function executeSQL(connection: ?Object, sql: string): Promise<Object> {
+  return new Promise((resolve, reject) => {
+    if (!connection) {
+      reject('Not connected to MySQL');
+      return;
+    }
+    connection.query(sql, (error, results, fields) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(results);
+    });
+  });
+}
+
+function cleanupMySQL(connection) {
+  if (connection) {
+    connection.destroy();
+  }
+}
+
+
 //// Script printing util
 
 function printAction(action: string): void {
   console.log(colors.bold('==> ' + action));
 }
 
+function printActionResult(result: string): void {
+  console.log('    ' + result);
+}
+
 function printError(error: string): void {
   console.log(colors.red(error));
-  process.exit();
 }
