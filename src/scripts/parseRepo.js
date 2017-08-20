@@ -6,17 +6,24 @@ import process from 'process';
 import {spawn} from 'child_process';
 import {Readable} from 'stream';
 
-// Emits webpack warning - see https://github.com/Marak/colors.js/issues/137
-import colors from 'colors/safe';
 import webpack from 'webpack';
 import findRoot from 'find-root';
-import mysql from 'mysql';
+import SQL from 'sql-template-strings';
 import filesize from 'filesize';
 import nullthrows from 'nullthrows';
-import SQL from 'sql-template-strings';
 import {parse as parseReactDocs} from 'react-docgen';
 
 import dbconfig from '../../dbconfig.json';
+import {
+  connectToMySQL,
+  executeSQL,
+  cleanupConnection,
+} from '../mysql';
+import {
+  printAction,
+  printActionResult,
+  printError,
+} from '../consoleUtil';
 
 async function main(): Promise<*> {
   const nodeFilepath = process.argv[0];
@@ -102,11 +109,11 @@ async function main(): Promise<*> {
     printActionResult('Saved.');
   }
   catch (err) {
-    cleanupMySQL(mysqlConnection);
+    cleanupConnection(mysqlConnection);
     throw err;
   }
 
-  cleanupMySQL(mysqlConnection);
+  cleanupConnection(mysqlConnection);
 }
 
 main().catch(err => printError(err));
@@ -354,61 +361,4 @@ function hasPackageJSON(dir: string): boolean {
 function hasBabelRC(dir: string): boolean {
   const babelRCFilepath = path.resolve(dir, '.babelrc');
   return fs.existsSync(babelRCFilepath);
-}
-
-
-//// Database
-
-async function connectToMySQL(dbconfig: Object): Promise<Object> {
-  return await new Promise((resolve, reject) => {
-    const connection = mysql.createConnection({
-      host: dbconfig.host,
-      user: dbconfig.user,
-      password: dbconfig.password,
-      database: dbconfig.database,
-    });
-    connection.connect((err) => {
-      if (err) {
-        reject('Cannot connect to db: ' + err);
-        return;
-      }
-      resolve(connection);
-    });
-  });
-}
-
-async function executeSQL(connection: ?Object, sql: string): Promise<Object> {
-  if (!connection) {
-    throw new Error('Not connected to MySQL');
-  }
-  return await new Promise((resolve, reject) => {
-    nullthrows(connection).query(sql, (error, results, fields) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(results);
-    });
-  });
-}
-
-function cleanupMySQL(connection) {
-  if (connection) {
-    connection.destroy();
-  }
-}
-
-
-//// Script printing util
-
-function printAction(action: string): void {
-  console.log(colors.bold('==> ' + action));
-}
-
-function printActionResult(result: string): void {
-  console.log('    ' + result);
-}
-
-function printError(error: string): void {
-  console.log(colors.red(error));
 }

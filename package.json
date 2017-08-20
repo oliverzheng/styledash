@@ -6,9 +6,13 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
     "colors": "^1.1.2",
+    "express": "^4.15.4",
+    "express-graphql": "^0.6.7",
     "filesize": "^3.5.10",
     "find-root": "^1.1.0",
+    "graphql": "^0.10.5",
     "memory-fs": "^0.4.1",
     "mysql": "^2.14.1",
     "nullthrows": "^1.0.0",
@@ -23,7 +27,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "parse-debug": "mkdir -p build/scripts/ && babel src/scripts/parseRepo.js --out-file build/scripts/parse.js --source-maps inline && babel-node build/scripts/parse.js",
+    "parse-debug": "babel-node src/scripts/parseRepo.js",
+    "serve": "babel-node src/serve.js",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
