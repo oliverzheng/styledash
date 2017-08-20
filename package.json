@@ -9,10 +9,12 @@
     "find-root": "^1.1.0",
     "memory-fs": "^0.4.1",
     "mysql": "^2.14.1",
+    "nullthrows": "^1.0.0",
     "react": "^15.6.1",
     "react-docgen": "^2.17.0",
     "react-dom": "^15.6.1",
     "react-scripts": "1.0.11",
+    "sql-template-strings": "^2.2.2",
     "webpack": "^3.5.5"
   },
   "scripts": {

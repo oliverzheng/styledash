@@ -12,6 +12,8 @@ import webpack from 'webpack';
 import findRoot from 'find-root';
 import mysql from 'mysql';
 import filesize from 'filesize';
+import nullthrows from 'nullthrows';
+import SQL from 'sql-template-strings';
 import {parse as parseReactDocs} from 'react-docgen';
 
 import dbconfig from '../../dbconfig.json';
@@ -21,7 +23,14 @@ function main(): Promise<*> {
   const directory = process.argv[2];
   const repoName = process.argv[3];
 
-  let mysql_connection = null;
+  let mysqlConnection: ?Object = null;
+  let compiledComponents: ?Array<{
+    name: string,
+    doc: Object,
+    filepath: string,
+    compiled: string,
+  }> = null;
+  let repoID: ?string = null;
 
   return Promise.resolve()
     // Validate input
@@ -44,7 +53,7 @@ function main(): Promise<*> {
     })
     .then((connection) => {
       printActionResult('Connected.');
-      mysql_connection = connection;
+      mysqlConnection = connection;
     })
 
     // Get components
@@ -57,10 +66,11 @@ function main(): Promise<*> {
     .then(components => {
       printAction('Compiling components...');
       return Promise.all(
-        components.map(({filepath, doc}) => {
+        components.map(({name, filepath, doc}) => {
           return compileComponent(nodeFilepath, directory, filepath)
             .then(compiled => {
               return {
+                name,
                 filepath,
                 doc,
                 compiled,
@@ -69,7 +79,8 @@ function main(): Promise<*> {
         })
       );
     })
-    .then(compiledComponents => {
+    .then(compiled => {
+      compiledComponents = compiled;
       const totalLOC = compiledComponents.map(
         component => component.compiled.split('\n').length
       ).reduce((a, b) => a + b);
@@ -81,15 +92,58 @@ function main(): Promise<*> {
       );
     })
 
+    // Save to db
+
+    .then(() => {
+      printAction('Saving new repo to database...');
+      return executeSQL(
+        mysqlConnection,
+        SQL`INSERT INTO repository (name) VALUES (${repoName})`
+      );
+    })
+    .then(sqlResult => {
+      repoID = sqlResult.insertId;
+      printActionResult(`Saved as repo #${repoID}.`);
+    })
+    .then(() => {
+      printAction('Saving compiled components to database...');
+      return Promise.all(
+        nullthrows(compiledComponents).map(compiledComponent => {
+          const relativeFilepath =
+            getComponentRelativeFilepath(directory, compiledComponent.filepath);
+          return executeSQL(
+            mysqlConnection,
+            SQL`
+              INSERT INTO component (
+                name,
+                repository_id,
+                filepath,
+                compiled_bundle
+              )
+              VALUES (
+                ${compiledComponent.name},
+                ${nullthrows(repoID)},
+                ${relativeFilepath},
+                ${compiledComponent.compiled}
+               )
+            `,
+          );
+        })
+      );
+    })
+    .then(sqlResults => {
+      printActionResult('Saved.');
+    })
+
     // MySQL cleanup
     .then(
       () => {
-        cleanupMySQL(mysql_connection);
-        mysql_connection = null;
+        cleanupMySQL(mysqlConnection);
+        mysqlConnection = null;
       },
       err => {
-        cleanupMySQL(mysql_connection);
-        mysql_connection = null;
+        cleanupMySQL(mysqlConnection);
+        mysqlConnection = null;
         throw err;
       },
     );
@@ -103,6 +157,7 @@ main().catch(err => printError(err));
 function getComponents(
   directory: string,
 ): Array<{
+  name: string,
   filepath: string,
   doc: Object,
 }> {
@@ -118,6 +173,7 @@ function getComponents(
   };
 
   const components: Array<{
+    name: string,
     filepath: string,
     doc: Object,
   }> = [];
@@ -132,6 +188,7 @@ function getComponents(
         const doc = getComponentDoc(filepath);
         if (doc) {
           components.push({
+            name: path.basename(filepath).replace(/\.[^/.]+$/, ''),
             filepath,
             doc,
           });
