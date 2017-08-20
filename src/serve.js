@@ -29,6 +29,10 @@ const PORT = 8000;
 const schema = buildSchema(`
   type Query {
     hello: String
+    viewer: Viewer
+  }
+
+  type Viewer {
     repositories: [Repository]!
   }
 
@@ -46,6 +50,18 @@ const schema = buildSchema(`
     compiledBundle: String
   }
 `);
+
+class Viewer {
+  _conn: Connection;
+
+  constructor(conn: Connection) {
+    this._conn = conn;
+  }
+
+  async repositories(): Promise<Array<Repository>> {
+    return await Repository.getAllRepositories(this._conn);
+  }
+}
 
 class Repository {
   _conn: Connection;
@@ -127,8 +143,8 @@ class Component {
 
 const root = {
   hello: () => 'Hello world',
-  repositories: async (args, context) => {
-    return await Repository.getAllRepositories(context.connection);
+  viewer: (args, context) => {
+    return new Viewer(context.connection);
   },
 };
 
