@@ -156,20 +156,15 @@ async function main() {
       res.send('derp');
     });
 
-    app.get('/graphql', graphqlHTTP({
-      schema: schema,
-      rootValue: root,
-      graphiql: true,
-    }));
-
-    app.post('/graphql', graphqlHTTP({
+    const graphQLHandlerOpts = {
       schema: schema,
       rootValue: root,
       context: {
         connection: conn,
       },
-      graphiql: false,
-    })); 
+    };
+    app.get('/graphql', graphqlHTTP({...graphQLHandlerOpts, graphiql: true}));
+    app.post('/graphql', graphqlHTTP({...graphQLHandlerOpts, graphiql: false}));
 
     printAction(`Setting up listener on port ${SERVER_PORT}...`);
     app.listen(SERVER_PORT, () => {

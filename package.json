@@ -65,7 +65,7 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "parse-debug": "babel-node src/scripts/parseRepo.js",
-    "serve": "babel-node src/serve.js",
+    "serve": "babel-watch src/serve.js",
     "relay": "relay-compiler --src ./src --schema ./src/data/schema.graphql",
     "relay-watch": "relay-compiler --src ./src --schema ./src/data/schema.graphql --watch"
   },
@@ -74,6 +74,7 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-flow": "^6.23.0",
+    "babel-watch": "^2.0.7",
     "relay-compiler": "^1.2.0"
   },
   "jest": {
