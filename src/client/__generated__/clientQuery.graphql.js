@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 1c2714177ccd816823aa99b0c1da5b2d
+ * @relayHash d44eb0e26487007451fb04f18251e2d8
  */
 
 /* eslint-disable */
@@ -9,14 +9,14 @@
 
 /*::
 import type {ConcreteBatch} from 'relay-runtime';
-export type srcQueryResponse = {|
+export type clientQueryResponse = {|
   +hello: ?string;
 |};
 */
 
 
 /*
-query srcQuery {
+query clientQuery {
   hello
 }
 */
@@ -26,7 +26,7 @@ const batch /*: ConcreteBatch*/ = {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "srcQuery",
+    "name": "clientQuery",
     "selections": [
       {
         "kind": "ScalarField",
@@ -41,11 +41,11 @@ const batch /*: ConcreteBatch*/ = {
   "id": null,
   "kind": "Batch",
   "metadata": {},
-  "name": "srcQuery",
+  "name": "clientQuery",
   "query": {
     "argumentDefinitions": [],
     "kind": "Root",
-    "name": "srcQuery",
+    "name": "clientQuery",
     "operation": "query",
     "selections": [
       {
@@ -57,7 +57,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query srcQuery {\n  hello\n}\n"
+  "text": "query clientQuery {\n  hello\n}\n"
 };
 
 module.exports = batch;

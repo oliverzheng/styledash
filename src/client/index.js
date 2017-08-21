@@ -14,7 +14,7 @@ import {
 import {QueryRenderer, graphql} from 'react-relay';
 
 import loadComponentBundle from './loadComponentBundle';
-import {SERVER_ADDRESS} from './serverConfig';
+import {SERVER_ADDRESS} from '../serverConfig';
 
 async function fetchQuery(
   operation,
@@ -43,7 +43,7 @@ ReactDOM.render(
   <QueryRenderer
     environment={environment}
     query={graphql`
-      query srcQuery {
+      query clientQuery {
         hello
       }
     `}

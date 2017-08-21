@@ -68,7 +68,7 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "parse-debug": "babel-node src/scripts/parseRepo.js",
-    "serve": "babel-watch src/serve.js",
+    "server": "babel-watch src/server.js",
     "relay": "relay-compiler --src ./src --schema ./src/data/schema.graphql",
     "relay-watch": "relay-compiler --src ./src --schema ./src/data/schema.graphql --watch"
   },
