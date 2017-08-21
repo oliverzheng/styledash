@@ -13,6 +13,7 @@ import {
 } from 'graphql';
 import graphqlHTTP from 'express-graphql';
 import SQL from 'sql-template-strings';
+import nullthrows from 'nullthrows';
 
 import dbconfig from '../dbconfig.json';
 import {
@@ -122,6 +123,10 @@ class Component {
       this._conn,
       SQL`SELECT compiled_bundle FROM component WHERE id = ${this.id}`,
     );
+    // TODO Figure out how db-based objects work in the app
+    if (res.length === 0) {
+      throw new Error(`Non-existent component with ID ${this.id}`);
+    }
     return res[0].compiled_bundle;
   }
 }
@@ -154,6 +159,17 @@ async function main() {
 
     app.get('/', (req, res) => {
       res.send('derp');
+    });
+
+    app.get('/component/:componentID/bundle.js', (req, res) => {
+      const component = new Component(conn, req.params.componentID);
+      component.compiledBundle()
+        .then(bundle => {
+          res.type('application/javascript').send(bundle);
+        })
+        .catch(err => {
+          res.status(404).send('Not found');
+        });
     });
 
     const graphQLHandlerOpts = {

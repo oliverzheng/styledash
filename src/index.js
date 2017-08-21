@@ -13,6 +13,7 @@ import {
 } from 'relay-runtime';
 import {QueryRenderer, graphql} from 'react-relay';
 
+import loadComponentBundle from './loadComponentBundle';
 import {SERVER_ADDRESS} from './serverConfig';
 
 async function fetchQuery(
@@ -38,9 +39,6 @@ const environment = new Environment({
   store: new Store(new RecordSource()),
 });
 
-const mountNode = document.getElementById('root');
-// ReactDOM.render(<App />, mountNode);
-
 ReactDOM.render(
   <QueryRenderer
     environment={environment}
@@ -58,7 +56,14 @@ ReactDOM.render(
       }
     }}
   />,
-  mountNode,
+  document.getElementById('root'),
 );
+
+loadComponentBundle(
+  `${SERVER_ADDRESS}/component/10/bundle.js`,
+).then(Component => {
+  const mountNode = document.getElementById('root2');
+  ReactDOM.render(<Component />, mountNode);
+});
 
 registerServiceWorker();

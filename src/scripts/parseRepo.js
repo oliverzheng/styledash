@@ -304,6 +304,8 @@ function createWebpackConfig(
       // The output will be in memory, so this path doesn't matter, as long as
       // all the components have unique paths.
       path: path.dirname(relativeFilepath),
+      library: 'componentOnLoad',
+      libraryTarget: 'jsonp',
     },
   };
 }
