@@ -10,7 +10,7 @@ import {SERVER_ADDRESS} from '../serverConfig';
 
 type PropType = {
   component: {
-    id: string,
+    componentID: string,
     name: string,
     repository: {
       name: string,
@@ -80,7 +80,7 @@ export default Relay.createContainer(
     fragments: {
       component: () => Relay.QL`
         fragment on Component {
-          id
+          componentID
           name
           repository {
             name

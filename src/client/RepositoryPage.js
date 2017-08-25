@@ -7,10 +7,9 @@ import PageHeader from './PageHeader';
 
 type PropType = {
   repository: {
-    id: string,
     name: string,
     components: Array<{
-      id: string,
+      componentID: string,
       name: string,
     }>,
   },
@@ -28,8 +27,8 @@ class RepositoryPage extends React.Component<PropType> {
         <ul>
           {
             repository.components.map(c =>
-              <li key={c.id}>
-                <a href={`/component/${c.id}/`}>
+              <li key={c.componentID}>
+                <a href={`/component/${c.componentID}/`}>
                   {c.name}
                 </a>
               </li>
@@ -47,10 +46,9 @@ export default Relay.createContainer(
     fragments: {
       repository: () => Relay.QL`
         fragment on Repository {
-          id
           name
           components {
-            id
+            componentID
             name
           }
         }

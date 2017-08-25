@@ -41,6 +41,11 @@ class Viewer {
     this._conn = conn;
   }
 
+  id(): string {
+    // TODO
+    return 'viewer:some_user_id';
+  }
+
   async username(): Promise<string> {
     return await username();
   }
@@ -52,7 +57,7 @@ class Viewer {
 
 class Repository {
   _conn: Connection;
-  id: string;
+  _id: string;
 
   static async getAllRepositories(
     conn: Connection,
@@ -66,13 +71,21 @@ class Repository {
 
   constructor(conn: Connection, id: string) {
     this._conn = conn;
-    this.id = id;
+    this._id = id;
+  }
+
+  id(): string {
+    return `repository:${this._id}`;
+  }
+
+  repositoryID(): string {
+    return this._id;
   }
 
   async name(): Promise<string> {
     const res = await executeSQL(
       this._conn,
-      SQL`SELECT name FROM repository WHERE id = ${this.id}`,
+      SQL`SELECT name FROM repository WHERE id = ${this._id}`,
     );
     return res[0].name;
   }
@@ -80,7 +93,7 @@ class Repository {
   async components(): Promise<Array<Component>> {
     const res = await executeSQL(
       this._conn,
-      SQL`SELECT id FROM component WHERE repository_id = ${this.id}`,
+      SQL`SELECT id FROM component WHERE repository_id = ${this._id}`,
     );
     return res.map(row => new Component(this._conn, row.id));
   }
@@ -88,17 +101,25 @@ class Repository {
 
 class Component {
   _conn: Connection;
-  id: string;
+  _id: string;
 
   constructor(conn: Connection, id: string) {
     this._conn = conn;
-    this.id = id;
+    this._id = id;
+  }
+
+  id(): string {
+    return `component:${this._id}`;
+  }
+
+  componentID(): string {
+    return this._id;
   }
 
   async name(): Promise<string> {
     const res = await executeSQL(
       this._conn,
-      SQL`SELECT name FROM component WHERE id = ${this.id}`,
+      SQL`SELECT name FROM component WHERE id = ${this._id}`,
     );
     return res[0].name;
   }
@@ -106,7 +127,7 @@ class Component {
   async repository(): Promise<Repository> {
     const res = await executeSQL(
       this._conn,
-      SQL`SELECT repository_id FROM component WHERE id = ${this.id}`,
+      SQL`SELECT repository_id FROM component WHERE id = ${this._id}`,
     );
     return new Repository(this._conn, res[0].repository_id);
   }
@@ -114,38 +135,58 @@ class Component {
   async filepath(): Promise<string> {
     const res = await executeSQL(
       this._conn,
-      SQL`SELECT filepath FROM component WHERE id = ${this.id}`,
+      SQL`SELECT filepath FROM component WHERE id = ${this._id}`,
     );
     return res[0].filepath;
   }
 
   compiledBundleURI(): string {
-    return `/component/${this.id}/bundle.js`;
+    return `/component/${this._id}/bundle.js`;
   }
 
   // Not exposed through graphql
   async compiledBundle(): Promise<string> {
     const res = await executeSQL(
       this._conn,
-      SQL`SELECT compiled_bundle FROM component WHERE id = ${this.id}`,
+      SQL`SELECT compiled_bundle FROM component WHERE id = ${this._id}`,
     );
     // TODO Figure out how db-based objects work in the app
     if (res.length === 0) {
-      throw new Error(`Non-existent component with ID ${this.id}`);
+      throw new Error(`Non-existent component with ID ${this._id}`);
     }
     return res[0].compiled_bundle;
   }
 }
 
+function resolveNode(conn: Connection, id: string): ?Object {
+  const separatorIndex = id.indexOf(':');
+  const type = id.substr(0, separatorIndex);
+  const objID = id.substr(separatorIndex + 1);
+
+  switch (type) {
+    case 'viewer':
+      return new Viewer(conn);
+    case 'repository':
+      return new Repository(conn, objID);
+    case 'component':
+      return new Component(conn, objID);
+  }
+
+  return null;
+}
+
 const root = {
+  node: (args, context) => {
+    return resolveNode(context.connection, args.id);
+  },
   viewer: (args, context) => {
     return new Viewer(context.connection);
   },
   repository: (args, context) => {
-    return new Repository(context.connection, args.id);
+    return new Repository(context.connection, args.repositoryID);
   },
   component: (args, context) => {
-    return new Component(context.connection, args.id);
+    return new Component(context.connection, args.componentID);
   },
 };
 

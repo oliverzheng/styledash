@@ -18,7 +18,7 @@ export class RepositoryRoute extends Relay.Route {
   static queries = {
     repository: () => Relay.QL`
       query {
-        repository(id: $repositoryID)
+        repository(repositoryID: $repositoryID)
       }
     `,
     viewer: () => Relay.QL`
@@ -37,7 +37,7 @@ export class ComponentRoute extends Relay.Route {
   static queries = {
     component: () => Relay.QL`
       query {
-        component(id: $componentID)
+        component(componentID: $componentID)
       }
     `,
     viewer: () => Relay.QL`

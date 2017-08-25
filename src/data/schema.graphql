@@ -1,24 +1,32 @@
-type Query {
-  viewer: Viewer
-  repository(id: String!): Repository
-  component(id: String!): Component
+interface Node {
+  id: ID!
 }
 
-type Viewer {
+type Viewer implements Node {
+  id: ID!
   username: String!
   repositories: [Repository]!
 }
 
-type Repository {
-  id: String!
+type Repository implements Node {
+  id: ID!
+  repositoryID: ID!
   name: String!
   components: [Component]!
 }
 
-type Component {
-  id: String!
+type Component implements Node {
+  id: ID!
+  componentID: ID!
   name: String!
   repository: Repository!
   filepath: String!
   compiledBundleURI: String!
+}
+
+type Query {
+  viewer: Viewer
+  node(id: ID!): Node
+  repository(repositoryID: ID!): Repository
+  component(componentID: ID!): Component
 }
