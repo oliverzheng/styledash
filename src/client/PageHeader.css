@@ -1,0 +1,26 @@
+.PageHeader-header {
+  text-align: center;
+  border-bottom: 1px solid #CCC;
+  padding: 0 40px;
+  margin-bottom: 20px;
+}
+
+.PageHeader-header h2 {
+  margin: 0;
+  line-height: 70px;
+}
+
+.PageHeader-user {
+  float: right;
+  line-height: 70px;
+}
+
+.PageHeader-menu {
+  padding: 0 40px;
+  margin-bottom: 20px;
+}
+
+.PageHeader-menu > div {
+  display: inline-block;
+  margin-right: 20px;
+}

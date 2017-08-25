@@ -1,10 +1,10 @@
 type Query {
-  hello: String
   viewer: Viewer
+  repository(id: String!): Repository
 }
 
 type Viewer {
-  name: String!
+  username: String!
   repositories: [Repository]!
 }
 

@@ -7106,7 +7106,7 @@ url-parse@1.0.x:
     querystringify "0.0.x"
     requires-port "1.0.x"
 
-url-parse@^1.1.8:
+url-parse@^1.1.8, url-parse@^1.1.9:
   version "1.1.9"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.1.9.tgz#c67f1d775d51f0a18911dd7b3ffad27bb9e5bd19"
   dependencies:
@@ -7131,6 +7131,13 @@ use@^2.0.0:
 user-home@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/user-home/-/user-home-1.1.1.tgz#2b5be23a32b63a7c9deb8d0f28d485724a3df190"
+
+username@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/username/-/username-3.0.0.tgz#b3dba982a72b4ce59d52f159fa1aeba266af5fc8"
+  dependencies:
+    execa "^0.7.0"
+    mem "^1.1.0"
 
 util-deprecate@~1.0.1:
   version "1.0.2"

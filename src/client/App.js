@@ -1,21 +1,92 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+/** @flow */
 
-class App extends Component {
-  render() {
+import React from 'react';
+import invariant from 'invariant';
+import Relay from 'react-relay/classic';
+import URI from 'url-parse';
+
+import HomePage from './HomePage';
+import RepositoryPage from './RepositoryPage';
+import {HomeRoute, RepositoryRoute} from './routes';
+
+
+function getComponentForRoute(route: Relay.Route) {
+  if (route instanceof HomeRoute) {
+    return HomePage;
+  } else if (route instanceof RepositoryRoute) {
+    return RepositoryPage;
+  }
+
+  invariant(false, 'Missing route->component mapping');
+}
+
+function getRouteFromURI(uriStr: string): ?Relay.Route {
+  const uri = new URI(uriStr);
+  // TODO
+  if (uri.pathname === '/') {
+    return new HomeRoute();
+  } else if (uri.pathname === '/repository/17/') {
+    return new RepositoryRoute({repositoryID: '17'});
+  }
+
+  return null;
+}
+
+
+type PropType = {
+  graphQLURI: string,
+};
+
+type StateType = {
+  route: Relay.Route,
+};
+
+export default class App extends React.Component<PropType, StateType> {
+  state = {
+    route: new HomeRoute(),
+  };
+
+  componentWillMount(): void {
+    Relay.injectNetworkLayer(
+      new Relay.DefaultNetworkLayer(this.props.graphQLURI),
+    );
+  }
+
+  render(): React$Element<*> {
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+      <div onClick={this._onClick}>
+        <Relay.RootContainer
+          Component={getComponentForRoute(this.state.route)}
+          route={this.state.route}
+          renderLoading={this._renderLoading}
+          renderFetched={this._renderFetched}
+        />
       </div>
     );
   }
-}
 
-export default App;
+  _renderLoading = (): React$Element<*> => {
+    return <div>Loading</div>;
+  }
+
+  _renderFetched = (data: Object): React$Element<*> => {
+    const Component = getComponentForRoute(this.state.route);
+    return (
+      <Component {...data} />
+    );
+  }
+
+
+  _onClick = (e: SyntheticEvent<*>) => {
+    const {target} = e;
+    if (target instanceof HTMLAnchorElement) {
+      const route = getRouteFromURI(target.href);
+      if (route) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.setState({route});
+      }
+    }
+  }
+}

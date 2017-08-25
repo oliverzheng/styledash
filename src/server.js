@@ -14,6 +14,7 @@ import {
 import graphqlHTTP from 'express-graphql';
 import SQL from 'sql-template-strings';
 import nullthrows from 'nullthrows';
+import username from 'username';
 
 import dbconfig from '../dbconfig.json';
 import {
@@ -40,8 +41,8 @@ class Viewer {
     this._conn = conn;
   }
 
-  name(): string {
-    return 'herp derp';
+  async username(): Promise<string> {
+    return await username();
   }
 
   async repositories(): Promise<Array<Repository>> {
@@ -132,9 +133,11 @@ class Component {
 }
 
 const root = {
-  hello: () => 'Hello world',
   viewer: (args, context) => {
     return new Viewer(context.connection);
+  },
+  repository: (args, context) => {
+    return new Repository(context.connection, args.id);
   },
 };
 
