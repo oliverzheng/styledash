@@ -1,6 +1,7 @@
 type Query {
   viewer: Viewer
   repository(id: String!): Repository
+  component(id: String!): Component
 }
 
 type Viewer {
@@ -19,5 +20,5 @@ type Component {
   name: String!
   repository: Repository!
   filepath: String!
-  compiledBundle: String
+  compiledBundleURI: String!
 }

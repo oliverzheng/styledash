@@ -32,3 +32,22 @@ export class RepositoryRoute extends Relay.Route {
   };
   static routeName = 'RepositoryRoute';
 }
+
+export class ComponentRoute extends Relay.Route {
+  static queries = {
+    component: () => Relay.QL`
+      query {
+        component(id: $componentID)
+      }
+    `,
+    viewer: () => Relay.QL`
+      query {
+        viewer
+      }
+    `,
+  };
+  static paramDefinitions = {
+    componentID: {required: true},
+  };
+  static routeName = 'ComponentRoute';
+}

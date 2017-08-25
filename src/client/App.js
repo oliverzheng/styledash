@@ -7,7 +7,12 @@ import URI from 'url-parse';
 
 import HomePage from './HomePage';
 import RepositoryPage from './RepositoryPage';
-import {HomeRoute, RepositoryRoute} from './routes';
+import ComponentPage from './ComponentPage';
+import {
+  HomeRoute,
+  RepositoryRoute,
+  ComponentRoute,
+} from './routes';
 
 
 function getComponentForRoute(route: Relay.Route) {
@@ -15,6 +20,8 @@ function getComponentForRoute(route: Relay.Route) {
     return HomePage;
   } else if (route instanceof RepositoryRoute) {
     return RepositoryPage;
+  } else if (route instanceof ComponentRoute) {
+    return ComponentPage;
   }
 
   invariant(false, 'Missing route->component mapping');
@@ -27,6 +34,8 @@ function getRouteFromURI(uriStr: string): ?Relay.Route {
     return new HomeRoute();
   } else if (uri.pathname === '/repository/17/') {
     return new RepositoryRoute({repositoryID: '17'});
+  } else if (uri.pathname === '/component/11/') {
+    return new ComponentRoute({componentID: '11'});
   }
 
   return null;

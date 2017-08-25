@@ -119,6 +119,11 @@ class Component {
     return res[0].filepath;
   }
 
+  compiledBundleURI(): string {
+    return `/component/${this.id}/bundle.js`;
+  }
+
+  // Not exposed through graphql
   async compiledBundle(): Promise<string> {
     const res = await executeSQL(
       this._conn,
@@ -138,6 +143,9 @@ const root = {
   },
   repository: (args, context) => {
     return new Repository(context.connection, args.id);
+  },
+  component: (args, context) => {
+    return new Component(context.connection, args.id);
   },
 };
 

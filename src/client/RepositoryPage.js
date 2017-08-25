@@ -9,16 +9,33 @@ type PropType = {
   repository: {
     id: string,
     name: string,
+    components: Array<{
+      id: string,
+      name: string,
+    }>,
   },
   viewer: Object,
 };
 
 class RepositoryPage extends React.Component<PropType> {
   render(): React$Element<*> {
+    const {repository} = this.props;
     return (
       <div>
         <PageHeader viewer={this.props.viewer} />
-        repository name: {this.props.repository.name}
+        <p>repository name: {repository.name}</p>
+        <p>Components:</p>
+        <ul>
+          {
+            repository.components.map(c =>
+              <li key={c.id}>
+                <a href={`/component/${c.id}/`}>
+                  {c.name}
+                </a>
+              </li>
+            )
+          }
+        </ul>
       </div>
     );
   }
@@ -32,6 +49,10 @@ export default Relay.createContainer(
         fragment on Repository {
           id
           name
+          components {
+            id
+            name
+          }
         }
       `,
       viewer: () => Relay.QL`
