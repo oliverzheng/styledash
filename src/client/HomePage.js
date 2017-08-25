@@ -4,6 +4,7 @@ import React from 'react';
 import Relay from 'react-relay/classic';
 
 import PageHeader from './PageHeader';
+import Link from './Link';
 
 type PropType = {
   viewer: {
@@ -26,9 +27,9 @@ class HomePage extends React.Component<PropType> {
           {
             viewer.repositories.map(repo =>
               <li key={repo.repositoryID}>
-                <a href={`/repository/${repo.repositoryID}/`}>
+                <Link href={`/repository/${repo.repositoryID}/`}>
                   {repo.name}
-                </a>
+                </Link>
               </li>
             )
           }
@@ -38,7 +39,7 @@ class HomePage extends React.Component<PropType> {
   }
 }
 
-export default Relay.createContainer(
+const HomePageContainer = Relay.createContainer(
   HomePage,
   {
     fragments: {
@@ -54,3 +55,9 @@ export default Relay.createContainer(
     },
   },
 );
+
+HomePageContainer.queries = {
+  viewer: () => Relay.QL`query { viewer }`,
+};
+
+export default HomePageContainer;

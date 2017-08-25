@@ -3,6 +3,8 @@
 import React from 'react';
 import Relay from 'react-relay/classic';
 
+import Link from './Link';
+
 import './PageHeader.css';
 
 type PropType = {
@@ -23,14 +25,14 @@ class PageHeader extends React.Component<PropType> {
         </div>
         <div className="PageHeader-menu">
           <div>
-            <a href="/">
+            <Link href="/">
               Go home
-            </a>
+            </Link>
           </div>
           <div>
-            <a href="/repository/17/">
+            <Link href="/repository/17/">
               Go to repo #17
-            </a>
+            </Link>
           </div>
         </div>
       </div>

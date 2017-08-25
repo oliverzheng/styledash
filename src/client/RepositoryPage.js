@@ -4,6 +4,7 @@ import React from 'react';
 import Relay from 'react-relay/classic';
 
 import PageHeader from './PageHeader';
+import Link from './Link';
 
 type PropType = {
   repository: {
@@ -28,9 +29,9 @@ class RepositoryPage extends React.Component<PropType> {
           {
             repository.components.map(c =>
               <li key={c.componentID}>
-                <a href={`/component/${c.componentID}/`}>
+                <Link href={`/component/${c.componentID}/`}>
                   {c.name}
-                </a>
+                </Link>
               </li>
             )
           }
@@ -40,7 +41,7 @@ class RepositoryPage extends React.Component<PropType> {
   }
 }
 
-export default Relay.createContainer(
+const RepositoryPageContainer = Relay.createContainer(
   RepositoryPage,
   {
     fragments: {
@@ -61,3 +62,18 @@ export default Relay.createContainer(
     },
   },
 );
+
+RepositoryPageContainer.queries = {
+  viewer: () => Relay.QL`
+    query {
+      viewer
+    }
+  `,
+  repository: () => Relay.QL`
+    query {
+      repository(repositoryID: $repositoryID)
+    }
+  `,
+};
+
+export default RepositoryPageContainer;

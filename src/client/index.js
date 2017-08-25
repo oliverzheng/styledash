@@ -2,8 +2,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
 
+import App from './App';
 import {SERVER_GRAPHQL_ADDRESS} from '../serverConfig';
 
 import './index.css';

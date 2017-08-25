@@ -30,12 +30,16 @@ class ComponentPage extends React.Component<PropType, StateType> {
     bundledComponent: null,
   };
 
-  componentWillMount(): void {
+  componentDidMount(): void {
     this._loadComponentBundle(this.props.component.compiledBundleURI);
   }
 
   componentWillReceiveProps(nextProps: PropType): void {
-    this._loadComponentBundle(nextProps.component.compiledBundleURI);
+    if (
+      nextProps.component.compiledBundleURI !== this.props.component.compiledBundleURI
+    ) {
+      this._loadComponentBundle(nextProps.component.compiledBundleURI);
+    }
   }
 
   _loadComponentBundle(bundleURI: string): void {
@@ -74,7 +78,7 @@ class ComponentPage extends React.Component<PropType, StateType> {
   }
 }
 
-export default Relay.createContainer(
+const ComponentPageContainer = Relay.createContainer(
   ComponentPage,
   {
     fragments: {
@@ -97,3 +101,18 @@ export default Relay.createContainer(
     },
   },
 );
+
+ComponentPageContainer.queries = {
+  viewer: () => Relay.QL`
+    query {
+      viewer
+    }
+  `,
+  component: () => Relay.QL`
+    query {
+      component(componentID: $componentID)
+    }
+  `,
+};
+
+export default ComponentPageContainer;
