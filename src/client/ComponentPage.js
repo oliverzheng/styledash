@@ -42,12 +42,18 @@ class ComponentPage extends React.Component<PropType, StateType> {
     }
   }
 
-  _loadComponentBundle(bundleURI: string): void {
-    loadComponentBundle(`${SERVER_ADDRESS}${bundleURI}`).then(Component => {
+  _loadComponentBundle(bundleURI: ?string): void {
+    if (bundleURI == null) {
       this.setState({
-        bundledComponent: Component,
+        bundledComponent: null,
       });
-    });
+    } else {
+      loadComponentBundle(`${SERVER_ADDRESS}${bundleURI}`).then(Component => {
+        this.setState({
+          bundledComponent: Component,
+        });
+      });
+    }
   }
 
   render(): React$Element<*> {
