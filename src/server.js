@@ -144,6 +144,14 @@ class Component {
     return `/component/${this._id}/bundle.js`;
   }
 
+  async reactDoc(): Promise<string> {
+    const res = await executeSQL(
+      this._conn,
+      SQL`SELECT react_doc FROM component WHERE id = ${this._id}`,
+    );
+    return res[0].react_doc;
+  }
+
   // Not exposed through graphql
   async compiledBundle(): Promise<string> {
     const res = await executeSQL(

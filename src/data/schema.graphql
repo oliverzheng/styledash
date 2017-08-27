@@ -22,6 +22,7 @@ type Component implements Node {
   repository: Repository!
   filepath: String!
   compiledBundleURI: String!
+  reactDoc: String!
 }
 
 type Query {

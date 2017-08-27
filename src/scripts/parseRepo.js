@@ -94,13 +94,15 @@ async function main(): Promise<*> {
               name,
               repository_id,
               filepath,
-              compiled_bundle
+              compiled_bundle,
+              react_doc
             )
             VALUES (
               ${compiledComponent.name},
               ${nullthrows(repoID)},
               ${relativeFilepath},
-              ${compiledComponent.compiled}
+              ${compiledComponent.compiled},
+              ${JSON.stringify(compiledComponent.doc)}
              )
           `,
         );
@@ -248,7 +250,7 @@ function createComponentWebpackSerializedScript(
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env', 'react'],
+            presets: ['env', 'react', 'es2015', 'stage-0'],
           },
         },
       }, {
