@@ -3,6 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
+import os from 'os';
 import {spawn} from 'child_process';
 import {Readable} from 'stream';
 
@@ -12,6 +13,7 @@ import findRoot from 'find-root';
 import SQL from 'sql-template-strings';
 import filesize from 'filesize';
 import nullthrows from 'nullthrows';
+import PromisePool from 'es6-promise-pool';
 import {parse as parseReactDocs} from 'react-docgen';
 
 import dbconfig from '../../dbconfig.json';
@@ -25,6 +27,9 @@ import {
   printActionResult,
   printError,
 } from '../consoleUtil';
+
+
+const PROMISE_POOL_SIZE = os.cpus().length;
 
 async function main(): Promise<*> {
   const nodeFilepath = process.argv[0];
@@ -52,14 +57,23 @@ async function main(): Promise<*> {
     const components = getComponents(directory);
     printActionResult(`Parsed ${components.length} components.`);
 
-    printAction('Compiling components...');
+    printAction(
+      `Compiling components with ${PROMISE_POOL_SIZE} concurrent processes...`
+    );
     const compiledComponents: Array<{
       name: string,
       doc: Object,
       filepath: string,
       compiled: string,
-    }> = await Promise.all(
-      components.map(component => {
+    }> = [];
+
+    const componentsLeft = components.slice(0);
+    const compilePool = new PromisePool(
+      () => {
+        if (componentsLeft.length === 0) {
+          return null;
+        }
+        const component = componentsLeft.shift();
         return compileComponent(
           nodeFilepath,
           directory,
@@ -71,18 +85,32 @@ async function main(): Promise<*> {
             compiled,
           };
         });
-      })
+      },
+      PROMISE_POOL_SIZE,
     );
+    compilePool.addEventListener('fulfilled', event => {
+      const compiledComponent = event.data.result;
+      const relativeFilepath =
+        getComponentRelativeFilepath(directory, compiledComponent.filepath);
+      printActionResult(`Compiled ${relativeFilepath}`);
+      compiledComponents.push(compiledComponent);
+    });
+    compilePool.addEventListener('rejected', event => {
+      printError(`Error during compilation: ${event.data.error}`);
+    });
+    await compilePool.start();
 
-    const totalLOC = compiledComponents.map(
-      component => component.compiled.split('\n').length
-    ).reduce((a, b) => a + b);
-    const totalBytes = compiledComponents.map(
-      component => component.compiled.length
-    ).reduce((a, b) => a + b);
-    printActionResult(
-      `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
-    );
+    if (compiledComponents.length > 0) {
+      const totalLOC = compiledComponents.map(
+        component => component.compiled.split('\n').length
+      ).reduce((a, b) => a + b);
+      const totalBytes = compiledComponents.map(
+        component => component.compiled.length
+      ).reduce((a, b) => a + b);
+      printActionResult(
+        `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
+      );
+    }
 
     printAction('Saving new repo to database...');
     const repoID: string = (await executeSQL(
@@ -92,8 +120,13 @@ async function main(): Promise<*> {
     printActionResult(`Saved as repo #${repoID}.`);
 
     printAction('Saving compiled components to database...');
-    await Promise.all(
-      compiledComponents.map(compiledComponent => {
+    const componentsLeftToSave = compiledComponents.slice(0);
+    const saveComponentPool = new PromisePool(
+      () => {
+        if (componentsLeftToSave.length === 0) {
+          return null;
+        }
+        const compiledComponent = componentsLeftToSave.shift();
         const relativeFilepath =
           getComponentRelativeFilepath(directory, compiledComponent.filepath);
         return executeSQL(
@@ -112,11 +145,36 @@ async function main(): Promise<*> {
               ${relativeFilepath},
               ${compiledComponent.compiled},
               ${JSON.stringify(compiledComponent.doc)}
-             )
+            )
           `,
-        );
-      })
+        ).then(sqlResult => {
+          return {
+            component: compiledComponent,
+            insertID: sqlResult.insertId,
+          };
+        }).catch(err => {
+          throw {
+            component: compiledComponent,
+            error: err,
+          };
+        });
+      },
+      PROMISE_POOL_SIZE,
     );
+    saveComponentPool.addEventListener('fulfilled', event => {
+      const {component, insertID} = event.data.result;
+      const relativeFilepath =
+        getComponentRelativeFilepath(directory, component.filepath);
+      printActionResult(`Saved ${relativeFilepath} as component ID #${insertID}`);
+    });
+    saveComponentPool.addEventListener('rejected', event => {
+      const {component, error} = event.data.error;
+      const relativeFilepath =
+        getComponentRelativeFilepath(directory, component.filepath);
+      printError(`Error while saving ${relativeFilepath}: ${error}`);
+    });
+    await saveComponentPool.start();
+
     printActionResult('Saved.');
   }
   catch (err) {
