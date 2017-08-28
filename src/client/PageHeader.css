@@ -10,6 +10,11 @@
   line-height: 70px;
 }
 
+.PageHeader-homeLink {
+  float: left;
+  line-height: 70px;
+}
+
 .PageHeader-user {
   float: right;
   line-height: 70px;

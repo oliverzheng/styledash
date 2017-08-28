@@ -18,22 +18,13 @@ class PageHeader extends React.Component<PropType> {
     return (
       <div>
         <div className="PageHeader-header">
+          <Link href="/" className="PageHeader-homeLink">
+            Go home
+          </Link>
           <div className="PageHeader-user">
             {this.props.viewer.username}
           </div>
           <h2>Styledash</h2>
-        </div>
-        <div className="PageHeader-menu">
-          <div>
-            <Link href="/">
-              Go home
-            </Link>
-          </div>
-          <div>
-            <Link href="/repository/17/">
-              Go to repo #17
-            </Link>
-          </div>
         </div>
       </div>
     );
