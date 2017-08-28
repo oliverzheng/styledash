@@ -12,6 +12,7 @@ type Repository implements Node {
   id: ID!
   repositoryID: ID!
   name: String!
+  externalCSSURI: String
   components: [Component]!
 }
 

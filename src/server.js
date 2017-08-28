@@ -90,6 +90,14 @@ class Repository {
     return res[0].name;
   }
 
+  async externalCSSURI(): Promise<?string> {
+    const res = await executeSQL(
+      this._conn,
+      SQL`SELECT external_css_url FROM repository WHERE id = ${this._id}`,
+    );
+    return res[0].external_css_url;
+  }
+
   async components(): Promise<Array<Component>> {
     const res = await executeSQL(
       this._conn,

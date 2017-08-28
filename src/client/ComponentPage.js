@@ -7,6 +7,7 @@ import invariant from 'invariant';
 
 import PageHeader from './PageHeader';
 import loadComponentBundle from './loadComponentBundle';
+import Frame from './StaticIFrame';
 import defaultPropValue from '../defaultPropValue';
 
 import {SERVER_ADDRESS} from '../serverConfig';
@@ -80,6 +81,14 @@ class ComponentPage extends React.Component<PropType, StateType> {
           this._getReactDocJSON(),
         ),
       );
+
+      let externalCSSStyle = null;
+      if (component.repository.externalCSSURI) {
+        externalCSSStyle = (
+          <link href={component.repository.externalCSSURI} rel="stylesheet" />
+        );
+      }
+
       example = [
         <p key="example-title">Example:</p>,
         <div key="example-defaultValues">
@@ -88,9 +97,17 @@ class ComponentPage extends React.Component<PropType, StateType> {
             {JSON.stringify(defaultPropValues, null, '  ')}
           </pre>
         </div>,
-        <div key="example-render">
-          <BundledComponent {...defaultPropValues} />
-        </div>
+
+        // This iframe is used to encapsulate the external CSS so it doesn't
+        // bleed onto the rest of the page.
+        // TODO - this only renders static HTML. For interactive JS to execute
+        // inside the iframe, we'd have to pass along JS.
+        <Frame key="example-render" title="example">
+          {externalCSSStyle}
+          <div>
+            <BundledComponent {...defaultPropValues} />
+          </div>
+        </Frame>
       ];
     }
 
@@ -158,6 +175,7 @@ const ComponentPageContainer = Relay.createContainer(
           name
           repository {
             name
+            externalCSSURI
           }
           filepath
           compiledBundleURI
