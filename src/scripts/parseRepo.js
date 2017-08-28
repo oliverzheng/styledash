@@ -6,6 +6,7 @@ import process from 'process';
 import {spawn} from 'child_process';
 import {Readable} from 'stream';
 
+import invariant from 'invariant';
 import webpack from 'webpack';
 import findRoot from 'find-root';
 import SQL from 'sql-template-strings';
@@ -34,6 +35,10 @@ async function main(): Promise<*> {
   if (!hasPackageJSON(directory)) {
     throw new Error('Not a NPM directory.');
   }
+  const packageJSON = getPackageJSON(directory);
+  if (!packageJSON) {
+    throw new Error('package.json is not well formed JSON.');
+  }
   const repoName = process.argv[3];
   if (!repoName) {
     throw new Error('Need to specify a repository name for storage.');
@@ -55,13 +60,17 @@ async function main(): Promise<*> {
       compiled: string,
     }> = await Promise.all(
       components.map(component => {
-        return compileComponent(nodeFilepath, directory, component.filepath)
-          .then(compiled => {
-            return {
-              ...component,
-              compiled,
-            };
-          });
+        return compileComponent(
+          nodeFilepath,
+          directory,
+          component.filepath,
+          packageJSON,
+        ).then(compiled => {
+          return {
+            ...component,
+            compiled,
+          };
+        });
       })
     );
 
@@ -173,9 +182,10 @@ async function compileComponent(
   nodeFilepath: string,
   directory: string,
   filepath: string,
+  packageJSON: Object,
 ): Promise<string> {
   const scriptStr =
-    createComponentWebpackSerializedScript(directory, filepath, false);
+    createComponentWebpackSerializedScript(directory, filepath, packageJSON);
 
   return await launchChildProcess(
     nodeFilepath,
@@ -229,12 +239,13 @@ async function launchChildProcess(
 function createComponentWebpackSerializedScript(
   dir: string,
   componentFilepath: string,
-  useBabel: boolean,
+  packageJSON: Object,
 ): string {
   const serializedFunc = (function(
     webpack,
     MemoryFS,
     webpackConfig,
+    babelOptions,
     componentRelativeFilepath,
   ) {
     const fs = new MemoryFS();
@@ -249,9 +260,7 @@ function createComponentWebpackSerializedScript(
         exclude: /(node_modules)/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: ['env', 'react', 'es2015', 'stage-0'],
-          },
+          options: babelOptions,
         },
       }, {
         test: /\.css$/,
@@ -278,7 +287,7 @@ function createComponentWebpackSerializedScript(
   const webpackDir = path.resolve(nodeModulesDir, 'webpack');
   const memoryFSDir = path.resolve(nodeModulesDir, 'memory-fs');
 
-  const webpackConfig = createWebpackConfig(dir, componentFilepath, useBabel);
+  const webpackConfig = createWebpackConfig(dir, componentFilepath);
 
   // The text below must be ES5 only - what can be run by node.js. Since it's
   // a string, it's not compiled by babel, and is passed as is to the forked
@@ -288,6 +297,7 @@ function createComponentWebpackSerializedScript(
       require('${webpackDir}'),
       require('${memoryFSDir}'),
       ${JSON.stringify(webpackConfig)},
+      ${JSON.stringify(getBabelOptions(dir, packageJSON))},
       '${getComponentRelativeFilepath(dir, componentFilepath)}'
     )
   `;
@@ -296,7 +306,6 @@ function createComponentWebpackSerializedScript(
 function createWebpackConfig(
   dir: string,
   componentFilepath: string,
-  useBabel: boolean,
 ): Object {
   const relativeFilepath = getComponentRelativeFilepath(dir, componentFilepath);
   return {
@@ -362,7 +371,64 @@ function hasPackageJSON(dir: string): boolean {
   return fs.existsSync(packageJSONFilepath);
 }
 
+function getPackageJSON(dir: string): ?Object {
+  invariant(hasPackageJSON(dir), 'Must have package.json');
+  const packageJSONFilepath = path.resolve(dir, 'package.json');
+  try {
+    return JSON.parse(
+      fs.readFileSync(packageJSONFilepath).toString()
+    );
+  } catch (e) {
+    // Invalid json
+    return null;
+  }
+}
+
 function hasBabelRC(dir: string): boolean {
   const babelRCFilepath = path.resolve(dir, '.babelrc');
   return fs.existsSync(babelRCFilepath);
+}
+
+const NPM_PACKAGE_TO_BABEL_PRESETS = {
+  'babel-preset-es2015': 'es2015',
+  'babel-preset-react': 'react',
+  'babel-preset-env': 'env',
+  'babel-preset-flow': 'flow',
+  'babel-preset-stage-0': 'stage-0',
+  'babel-preset-stage-1': 'stage-1',
+};
+
+const NPM_PACKAGE_TO_BABEL_PLUGINS = {
+};
+
+function getBabelOptions(dir: string, packageJSON: Object): ?Object {
+  if (hasBabelRC(dir)) {
+    // Babel will use .babelrc directly
+    return null;
+  }
+
+  const presets = Object.keys(NPM_PACKAGE_TO_BABEL_PRESETS)
+    .filter(
+      npmPackage => packageJSONContainsDependency(packageJSON, npmPackage)
+    )
+    .map(npmPackage => NPM_PACKAGE_TO_BABEL_PRESETS[npmPackage]);
+
+  return {
+    presets,
+  };
+}
+
+function packageJSONContainsDependency(
+  packageJSON: Object,
+  dep: string,
+): boolean {
+  const devDeps = packageJSON.devDependencies;
+  const deps = packageJSON.dependencies;
+  if (devDeps && devDeps[dep]) {
+    return true;
+  }
+  if (deps && deps[dep]) {
+    return true;
+  }
+  return false;
 }
