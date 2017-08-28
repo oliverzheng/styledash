@@ -136,11 +136,12 @@ class ComponentPage extends React.Component<PropType, StateType> {
 
       const typeName = (reactType || flowType).name;
       const defaultValue = defaultPropValue(reactDocProp);
-
-      props[propName] = {
-        typeName,
-        defaultValue,
-      };
+      if (defaultValue !== undefined) {
+        props[propName] = {
+          typeName,
+          defaultValue,
+        };
+      }
     });
 
     return props;

@@ -2,30 +2,35 @@
 
 export default function defaultPropValue(prop: Object): mixed {
   if (prop.type) {
-    return defaultReactPropValue(prop.type);
+    return defaultReactPropValue(prop);
   } else if (prop.flowtype) {
-    return defaultFlowTypeValue(prop.flowtype);
+    return defaultFlowTypeValue(prop);
   } else {
-    return null;
+    return undefined;
   }
 }
 
-function defaultReactPropValue(type: Object): mixed {
-  const simpleValue = defaultValueForSimpleType(type.name);
+function defaultReactPropValue(prop: Object): mixed {
+  if (prop.defaultValue) {
+    // React will use the default value if we give it nothing.
+    return undefined;
+  }
+
+  const simpleValue = defaultValueForSimpleType(prop.type.name);
   if (simpleValue != null) {
     return simpleValue;
   }
 
-  return null;
+  return undefined;
 }
 
-function defaultFlowTypeValue(type: Object): mixed {
-  const simpleValue = defaultValueForSimpleType(type.name);
+function defaultFlowTypeValue(prop: Object): mixed {
+  const simpleValue = defaultValueForSimpleType(prop.flowtype.name);
   if (simpleValue != null) {
     return simpleValue;
   }
 
-  return null;
+  return undefined;
 }
 
 function defaultValueForSimpleType(typeName: string): mixed {
@@ -37,6 +42,6 @@ function defaultValueForSimpleType(typeName: string): mixed {
     case 'bool':
       return false;
     default:
-      return null;
+      return undefined;
   }
 }
