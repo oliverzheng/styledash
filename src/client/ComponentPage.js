@@ -12,6 +12,8 @@ import defaultPropValue from '../defaultPropValue';
 
 import {SERVER_ADDRESS} from '../serverConfig';
 
+import './ComponentPage.css'
+
 type ComponentProps = {
   [propName: string]: {
     typeName: string,
@@ -119,6 +121,10 @@ class ComponentPage extends React.Component<PropType, StateType> {
         </h1>
         <p>Location: {component.filepath}</p>
         {example}
+        <p>Prop types:</p>
+        <pre className="ComponentPage-propTypes">
+          {JSON.stringify(this._getReactDocJSON().props, null, '  ')}
+        </pre>
       </div>
     );
   }
