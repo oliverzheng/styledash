@@ -160,6 +160,22 @@ class Component {
     return res[0].react_doc;
   }
 
+  async overrideReactDoc(): Promise<?string> {
+    const res = await executeSQL(
+      this._conn,
+      SQL`SELECT override_react_doc FROM component WHERE id = ${this._id}`,
+    );
+    return res[0].override_react_doc;
+  }
+
+  async setOverrideReactDoc(override: string): Promise<boolean> {
+    await executeSQL(
+      this._conn,
+      SQL`UPDATE component SET override_react_doc = ${override} WHERE id = ${this._id}`,
+    );
+    return true;
+  }
+
   // Not exposed through graphql
   async compiledBundle(): Promise<string> {
     const res = await executeSQL(
@@ -192,6 +208,7 @@ function resolveNode(conn: Connection, id: string): ?Object {
 }
 
 const root = {
+  // Query
   node: (args, context) => {
     return resolveNode(context.connection, args.id);
   },
@@ -203,6 +220,20 @@ const root = {
   },
   component: (args, context) => {
     return new Component(context.connection, args.componentID);
+  },
+
+  // Mutation
+  overrideComponentReactDoc: (args, context) => {
+    const {componentID, overrideReactDoc} = args;
+    const component = new Component(context.connection, componentID);
+    return component
+      .setOverrideReactDoc(overrideReactDoc)
+      .then(success => {
+        return {
+          success,
+          component,
+        };
+      });
   },
 };
 

@@ -24,6 +24,7 @@ type Component implements Node {
   filepath: String!
   compiledBundleURI: String!
   reactDoc: String!
+  overrideReactDoc: String
 }
 
 type Query {
@@ -31,4 +32,13 @@ type Query {
   node(id: ID!): Node
   repository(repositoryID: ID!): Repository
   component(componentID: ID!): Component
+}
+
+type OverrideComponentReactDocPayload {
+  success: Boolean!
+  component: Component!
+}
+
+type Mutation {
+  overrideComponentReactDoc(componentID: ID!, overrideReactDoc: String!): OverrideComponentReactDocPayload
 }
