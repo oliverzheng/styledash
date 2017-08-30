@@ -34,11 +34,19 @@ type Query {
   component(componentID: ID!): Component
 }
 
+
+input OverrideComponentReactDocInput {
+  clientMutationId: String
+  componentID: ID!
+  overrideReactDoc: String!
+}
+
 type OverrideComponentReactDocPayload {
+  clientMutationId: String
   success: Boolean!
   component: Component!
 }
 
 type Mutation {
-  overrideComponentReactDoc(componentID: ID!, overrideReactDoc: String!): OverrideComponentReactDocPayload
+  overrideComponentReactDoc(input: OverrideComponentReactDocInput!): OverrideComponentReactDocPayload
 }

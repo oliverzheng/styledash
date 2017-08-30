@@ -10,6 +10,8 @@ import loadComponentBundle from './loadComponentBundle';
 import Frame from './StaticIFrame';
 import defaultPropValue from '../defaultPropValue';
 
+import OverrideComponentReactDocMutation from './mutations/OverrideComponentReactDocMutation';
+
 import {SERVER_ADDRESS} from '../serverConfig';
 
 import './ComponentPage.css'
@@ -32,17 +34,21 @@ type PropType = {
     filepath: string,
     compiledBundleURI: string,
     reactDoc: string,
+    overrideReactDoc: ?string,
   },
   viewer: Object,
+  relay: Object,
 };
 
 type StateType = {
   bundledComponent: ?Class<React.Component<*>>,
+  overrideReactDocModified: boolean,
 };
 
 class ComponentPage extends React.Component<PropType, StateType> {
   state = {
     bundledComponent: null,
+    overrideReactDocModified: false,
   };
 
   componentDidMount(): void {
@@ -125,7 +131,39 @@ class ComponentPage extends React.Component<PropType, StateType> {
         <pre className="ComponentPage-propTypes">
           {JSON.stringify(this._getReactDocJSON().props, null, '  ')}
         </pre>
+        <p>Override Prop types:</p>
+        <textarea
+          className="ComponentPage-overrideReactDoc"
+          defaultValue={this.props.component.overrideReactDoc}
+          ref="overrideReactDocTextarea"
+          onChange={this._onOverrideReactDocTextareaChange}
+        />
+        <br />
+        <button
+          onClick={this._onOverrideReactDocButtonClick}
+          disabled={!this.state.overrideReactDocModified}>
+          Save
+        </button>
       </div>
+    );
+  }
+
+  _onOverrideReactDocTextareaChange = () => {
+    this.setState({
+      overrideReactDocModified: true,
+    });
+  }
+
+  _onOverrideReactDocButtonClick = () => {
+    this.setState({
+      overrideReactDocModified: false,
+    });
+
+    this.props.relay.commitUpdate(
+      new OverrideComponentReactDocMutation({
+        component: this.props.component,
+        overrideReactDoc: this.refs.overrideReactDocTextarea.value
+      }),
     );
   }
 
@@ -177,6 +215,7 @@ const ComponentPageContainer = Relay.createContainer(
     fragments: {
       component: () => Relay.QL`
         fragment on Component {
+          ${OverrideComponentReactDocMutation.getFragment('component')}
           componentID
           name
           repository {
@@ -186,6 +225,7 @@ const ComponentPageContainer = Relay.createContainer(
           filepath
           compiledBundleURI
           reactDoc
+          overrideReactDoc
         }
       `,
       viewer: () => Relay.QL`

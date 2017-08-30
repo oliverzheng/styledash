@@ -224,12 +224,17 @@ const root = {
 
   // Mutation
   overrideComponentReactDoc: (args, context) => {
-    const {componentID, overrideReactDoc} = args;
+    const {
+      componentID,
+      overrideReactDoc,
+      clientMutationId,
+    } = args.input;
     const component = new Component(context.connection, componentID);
     return component
       .setOverrideReactDoc(overrideReactDoc)
       .then(success => {
         return {
+          clientMutationId,
           success,
           component,
         };

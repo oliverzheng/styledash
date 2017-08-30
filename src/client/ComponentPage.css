@@ -6,3 +6,11 @@
   margin-left: 20px;
   margin-right: 20px;
 }
+
+.ComponentPage-overrideReactDoc {
+  height: 200px;
+  border: 1px solid #CCC;
+  width: 80%;
+  margin-left: 20px;
+  margin-right: 20px;
+}
