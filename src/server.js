@@ -24,6 +24,7 @@ import {
   executeSQL,
   cleanupConnection,
 } from './storage/mysql';
+import EntUser from './entity/EntUser';
 import EntRepository from './entity/EntRepository';
 import EntComponent from './entity/EntComponent';
 import {
@@ -89,6 +90,9 @@ const root = {
   },
   viewer: (args, context) => {
     return new Viewer(context.vc);
+  },
+  user: async (args, context) => {
+    return await EntUser.genNullable(context.vc, args.userID);
   },
   repository: async (args, context) => {
     return await EntRepository.genNullable(context.vc, args.repositoryID);

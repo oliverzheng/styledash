@@ -239,22 +239,41 @@ export default class BaseEnt {
     return res.insertId.toString();
   }
 
+  static async _genColumnValues(
+    vc: ViewerContext,
+    columnNames: Array<string>,
+    indexColumnValue: string,
+    indexColumnName: string = 'id',
+  ): Promise<?{[columnName: string]: mixed}> {
+    const {tableName} = this._getEntConfig();
+
+    const sql = SQL`SELECT `;
+    columnNames.forEach((columnName, i) => {
+      if (i !== 0) {
+        sql.append(SQL`,`);
+      }
+      sql.append(columnName);
+    });
+    sql
+      .append(SQL` FROM `)
+      .append(tableName)
+      .append(SQL` WHERE `)
+      .append(indexColumnName)
+      .append(SQL` = ${indexColumnValue}`);
+    const res = await executeSQL(vc.getDatabaseConnection(), sql);
+    if (res.length === 0) {
+      return null;
+    }
+    return res[0];
+  }
+
   async _genExtendedColumnValue(columnName: string): Promise<mixed> {
-    const {tableName} = this.constructor._getEntConfig();
-    const res = await executeSQL(
-      this.getViewerContext().getDatabaseConnection(),
-      SQL`SELECT `
-        .append(columnName)
-        .append(SQL` FROM `)
-        .append(tableName)
-        .append(SQL` WHERE id = ${this.getID()}`)
-    );
-    invariant(
-      res.length > 0,
-      'Object of type %s and ID %s no longer exists',
-      this.constructor.getEntType(),
+    const values = await this.constructor._genColumnValues(
+      this.getViewerContext(),
+      [columnName],
       this.getID(),
     );
-    return res[0][columnName];
+    invariant(values, 'Object has been deleted in the db');
+    return values[columnName];
   }
 }
