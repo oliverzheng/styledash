@@ -292,6 +292,7 @@ async function main() {
     });
   }
   catch (err) {
+    printError(err);
     cleanupConnection(conn);
   }
 }
