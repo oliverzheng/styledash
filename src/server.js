@@ -62,6 +62,10 @@ class Viewer {
   }
 }
 
+// TODO this is currently broken. Need
+// https://github.com/graphql/graphql-js/pull/947
+// ... then why is this here? Has it never worked? Doesn't Relay need this?
+// If it does end up working, make the enumeration of types automatic.
 async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
   const conn = vc.getDatabaseConnection();
   const separatorIndex = id.indexOf(':');
