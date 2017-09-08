@@ -17,12 +17,17 @@ import nullthrows from 'nullthrows';
 import username from 'username';
 
 import dbconfig from '../dbconfig.json';
+import ViewerContext from './data/vc';
 import {
   type Connection,
   connectToMySQL,
   executeSQL,
   cleanupConnection,
 } from './data/mysql';
+import {
+  EntRepository,
+  EntComponent,
+} from './data/models';
 import {
   printAction,
   printActionResult,
@@ -35,10 +40,10 @@ const schema = buildSchema(
 );
 
 class Viewer {
-  _conn: Connection;
+  _vc: ViewerContext;
 
-  constructor(conn: Connection) {
-    this._conn = conn;
+  constructor(vc: ViewerContext) {
+    this._vc = vc;
   }
 
   id(): string {
@@ -50,158 +55,26 @@ class Viewer {
     return await username();
   }
 
-  async repositories(): Promise<Array<Repository>> {
-    return await Repository.getAllRepositories(this._conn);
+  async repositories(): Promise<Array<EntRepository>> {
+    // TODO need users to do this
+    const repo = await EntRepository.genEnforce(this._vc, '44');
+    return [repo];
   }
 }
 
-class Repository {
-  _conn: Connection;
-  _id: string;
-
-  static async getAllRepositories(
-    conn: Connection,
-  ): Promise<Array<Repository>> {
-    const res = await executeSQL(
-      conn,
-      SQL`SELECT id FROM repository`,
-    );
-    return res.map(row => new Repository(conn, row.id));
-  }
-
-  constructor(conn: Connection, id: string) {
-    this._conn = conn;
-    this._id = id;
-  }
-
-  id(): string {
-    return `repository:${this._id}`;
-  }
-
-  repositoryID(): string {
-    return this._id;
-  }
-
-  async name(): Promise<string> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT name FROM repository WHERE id = ${this._id}`,
-    );
-    return res[0].name;
-  }
-
-  async externalCSSURI(): Promise<?string> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT external_css_url FROM repository WHERE id = ${this._id}`,
-    );
-    return res[0].external_css_url;
-  }
-
-  async components(): Promise<Array<Component>> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT id FROM component WHERE repository_id = ${this._id}`,
-    );
-    return res.map(row => new Component(this._conn, row.id));
-  }
-}
-
-class Component {
-  _conn: Connection;
-  _id: string;
-
-  constructor(conn: Connection, id: string) {
-    this._conn = conn;
-    this._id = id;
-  }
-
-  id(): string {
-    return `component:${this._id}`;
-  }
-
-  componentID(): string {
-    return this._id;
-  }
-
-  async name(): Promise<string> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT name FROM component WHERE id = ${this._id}`,
-    );
-    return res[0].name;
-  }
-
-  async repository(): Promise<Repository> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT repository_id FROM component WHERE id = ${this._id}`,
-    );
-    return new Repository(this._conn, res[0].repository_id);
-  }
-
-  async filepath(): Promise<string> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT filepath FROM component WHERE id = ${this._id}`,
-    );
-    return res[0].filepath;
-  }
-
-  compiledBundleURI(): string {
-    return `/component/${this._id}/bundle.js`;
-  }
-
-  async reactDoc(): Promise<string> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT react_doc FROM component WHERE id = ${this._id}`,
-    );
-    return res[0].react_doc;
-  }
-
-  async overrideReactDoc(): Promise<?string> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT override_react_doc FROM component WHERE id = ${this._id}`,
-    );
-    return res[0].override_react_doc;
-  }
-
-  async setOverrideReactDoc(override: string): Promise<boolean> {
-    await executeSQL(
-      this._conn,
-      SQL`UPDATE component SET override_react_doc = ${override} WHERE id = ${this._id}`,
-    );
-    return true;
-  }
-
-  // Not exposed through graphql
-  async compiledBundle(): Promise<string> {
-    const res = await executeSQL(
-      this._conn,
-      SQL`SELECT compiled_bundle FROM component WHERE id = ${this._id}`,
-    );
-    // TODO Figure out how db-based objects work in the app
-    if (res.length === 0) {
-      throw new Error(`Non-existent component with ID ${this._id}`);
-    }
-    return res[0].compiled_bundle;
-  }
-}
-
-function resolveNode(conn: Connection, id: string): ?Object {
+async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
+  const conn = vc.getDatabaseConnection();
   const separatorIndex = id.indexOf(':');
   const type = id.substr(0, separatorIndex);
   const objID = id.substr(separatorIndex + 1);
 
   switch (type) {
     case 'viewer':
-      return new Viewer(conn);
+      return new Viewer(vc);
     case 'repository':
-      return new Repository(conn, objID);
+      return await EntRepository.genNullable(vc, objID);
     case 'component':
-      return new Component(conn, objID);
+      return await EntComponent.genNullable(vc, objID);
   }
 
   return null;
@@ -209,36 +82,34 @@ function resolveNode(conn: Connection, id: string): ?Object {
 
 const root = {
   // Query
-  node: (args, context) => {
-    return resolveNode(context.connection, args.id);
+  node: async (args, context) => {
+    return await resolveNode(context.vc, args.id);
   },
   viewer: (args, context) => {
-    return new Viewer(context.connection);
+    return new Viewer(context.vc);
   },
-  repository: (args, context) => {
-    return new Repository(context.connection, args.repositoryID);
+  repository: async (args, context) => {
+    return await EntRepository.genNullable(context.vc, args.repositoryID);
   },
-  component: (args, context) => {
-    return new Component(context.connection, args.componentID);
+  component: async (args, context) => {
+    return await EntComponent.genNullable(context.vc, args.componentID);
   },
 
   // Mutation
-  overrideComponentReactDoc: (args, context) => {
+  overrideComponentReactDoc: async (args, context) => {
     const {
       componentID,
       overrideReactDoc,
       clientMutationId,
     } = args.input;
-    const component = new Component(context.connection, componentID);
-    return component
-      .setOverrideReactDoc(overrideReactDoc)
-      .then(success => {
-        return {
-          clientMutationId,
-          success,
-          component,
-        };
-      });
+
+    const component = await EntComponent.genEnforce(context.vc, componentID);
+    const success = await component.genSetOverrideReactDoc(overrideReactDoc);
+    return {
+      clientMutationId,
+      success,
+      component,
+    };
   },
 };
 
@@ -249,6 +120,7 @@ async function main() {
   printActionResult('Connected.');
 
   try {
+    const vc = new ViewerContext(conn, '');
     const app = express();
 
     // TODO - react is hot-served via webpack on a different port right now
@@ -265,24 +137,25 @@ async function main() {
       res.send('derp');
     });
 
-    app.get('/component/:componentID/bundle.js', (req, res) => {
-      const component = new Component(conn, req.params.componentID);
-      component.compiledBundle()
-        .then(bundle => {
-          res.type('application/javascript').send(bundle);
-        })
-        .catch(err => {
-          res.status(404).send('Not found');
-        });
+    app.get('/component/:componentID/bundle.js', async (req, res) => {
+      const component = await EntComponent.genNullable(vc, req.params.componentID);
+      if (!component) {
+        res.status(404).send('Not found');
+        return;
+      }
+      const bundle = await component.genCompiledBundle();
+      res.type('application/javascript').send(bundle);
     });
 
     const graphQLHandlerOpts = {
       schema: schema,
       rootValue: root,
       context: {
-        connection: conn,
+        // TODO generate this from logins
+        vc: vc,
       },
     };
+    // TODO Make this conditional based on who's logged in
     app.get('/graphql', graphqlHTTP({...graphQLHandlerOpts, graphiql: true}));
     app.post('/graphql', graphqlHTTP({...graphQLHandlerOpts, graphiql: false}));
 
