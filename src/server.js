@@ -17,17 +17,15 @@ import nullthrows from 'nullthrows';
 import username from 'username';
 
 import dbconfig from '../dbconfig.json';
-import ViewerContext from './data/vc';
+import ViewerContext from './core/vc';
 import {
   type Connection,
   connectToMySQL,
   executeSQL,
   cleanupConnection,
-} from './data/mysql';
-import {
-  EntRepository,
-  EntComponent,
-} from './data/models';
+} from './storage/mysql';
+import EntRepository from './entity/EntRepository';
+import EntComponent from './entity/EntComponent';
 import {
   printAction,
   printActionResult,
@@ -36,7 +34,7 @@ import {
 import {SERVER_PORT} from './serverConfig';
 
 const schema = buildSchema(
-  fs.readFileSync(path.resolve(__dirname, './data/schema.graphql')).toString()
+  fs.readFileSync(path.resolve(__dirname, './graphql/schema.graphql')).toString()
 );
 
 class Viewer {

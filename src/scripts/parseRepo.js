@@ -21,7 +21,7 @@ import {
   connectToMySQL,
   executeSQL,
   cleanupConnection,
-} from '../data/mysql';
+} from '../storage/mysql';
 import {
   printAction,
   printActionResult,

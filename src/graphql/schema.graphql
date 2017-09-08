@@ -8,6 +8,12 @@ type Viewer implements Node {
   repositories: [Repository]!
 }
 
+type User implements Node {
+  id: ID!
+  userID: ID!
+  email: String!
+}
+
 type Repository implements Node {
   id: ID!
   repositoryID: ID!
@@ -30,6 +36,7 @@ type Component implements Node {
 type Query {
   viewer: Viewer
   node(id: ID!): Node
+  user(userID: ID!): User
   repository(repositoryID: ID!): Repository
   component(componentID: ID!): Component
 }

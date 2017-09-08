@@ -2,7 +2,7 @@
 
 import type {
   Connection,
-} from './mysql';
+} from '../storage/mysql'; // TODO this is weird to have core/ depend on storage/
 
 export default class ViewerContext {
   _conn: Connection;

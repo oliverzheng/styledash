@@ -3,11 +3,10 @@
 import invariant from 'invariant';
 import SQL from 'sql-template-strings';
 
-import ViewerContext from './vc';
-import {executeSQL} from './mysql';
+import ViewerContext from '../core/vc';
+import {executeSQL} from '../storage/mysql';
 
-
-type EntConfig = {
+export type EntConfig = {
   tableName: string,
   defaultColumnNames: Array<string>,
   extendedColumnNames: Array<string>,
@@ -16,7 +15,7 @@ type EntConfig = {
   typeName: string,
 };
 
-export class BaseEnt {
+export default class BaseEnt {
   // Child needs to override
   static _getEntConfig(): EntConfig {
     invariant(false, 'NYI');
@@ -141,7 +140,7 @@ export class BaseEnt {
     return obj;
   }
 
-  static async genMutate(
+  static async _genMutate(
     vc: ViewerContext,
     id: string,
     data: {[columnName: string]: mixed},
@@ -193,6 +192,53 @@ export class BaseEnt {
     return true;
   }
 
+  // Returns the new obj's ID
+  static async _genCreate(
+    vc: ViewerContext,
+    data: {[columnName: string]: mixed},
+  ): Promise<string> {
+    const {
+      tableName,
+      defaultColumnNames,
+      extendedColumnNames,
+    } = this._getEntConfig();
+
+    const validMutationColumns = {};
+    defaultColumnNames.forEach(c => validMutationColumns[c] = true);
+    extendedColumnNames.forEach(c => validMutationColumns[c] = true);
+
+    Object.keys(data).forEach(c => {
+      invariant(
+        validMutationColumns[c],
+        'Creation data for type %s is not valid for column %s',
+        this.getEntType(),
+        c,
+      );
+    });
+
+    const sql = SQL`INSERT INTO `
+      .append(tableName)
+      .append(SQL` (`);
+    Object.keys(data).forEach((column, i) => {
+      if (i !== 0) {
+        sql.append(SQL`,`);
+      }
+      sql.append(column)
+    });
+    sql.append(SQL`) VALUES (`);
+    Object.keys(data).forEach((column, i) => {
+      if (i !== 0) {
+        sql.append(SQL`,`);
+      }
+      const value = data[column];
+      sql.append(SQL`${value}`);
+    });
+    sql.append(SQL`)`);
+
+    const res = await executeSQL(vc.getDatabaseConnection(), sql);
+    return res.insertId.toString();
+  }
+
   async _genExtendedColumnValue(columnName: string): Promise<mixed> {
     const {tableName} = this.constructor._getEntConfig();
     const res = await executeSQL(
@@ -211,137 +257,4 @@ export class BaseEnt {
     );
     return res[0][columnName];
   }
-}
-
-export class EntRepository extends BaseEnt {
-  static _getEntConfig(): EntConfig {
-    return {
-      tableName: 'repository',
-      defaultColumnNames: [
-        'id',
-        'name',
-        'external_css_url',
-      ],
-      extendedColumnNames: [
-      ],
-      immutableColumnNames: [
-        'id',
-      ],
-      typeName: 'repository',
-    };
-  }
-
-  getName(): string {
-    return this._getStringData('name');
-  }
-
-  getExternalCSSUrl(): string {
-    return this._getStringData('external_css_url');
-  }
-
-  async genComponents(): Promise<Array<EntComponent>> {
-    return await EntComponent.genWhere(
-      this.getViewerContext(),
-      'repository_id',
-      this.getID(),
-    );
-  }
-
-  /* TODO (graphql resolver) */
-  name() { return this.getName(); }
-  repositoryID() { return this.getID(); }
-  externalCSSUrl() { return this.getExternalCSSUrl(); }
-  components() { return this.genComponents(); }
-}
-
-export class EntComponent extends BaseEnt {
-  static _getEntConfig(): EntConfig {
-    return {
-      tableName: 'component',
-      defaultColumnNames: [
-        'id',
-        'name',
-        'repository_id',
-        'filepath',
-      ],
-      extendedColumnNames: [
-        'compiled_bundle',
-        'react_doc',
-        'override_react_doc',
-      ],
-      immutableColumnNames: [
-        'id',
-        'repository_id',
-      ],
-      typeName: 'component',
-    };
-  }
-
-  getName(): string {
-    return this._getStringData('name');
-  }
-
-  getRepositoryID(): string {
-    return this._getIDData('repository_id');
-  }
-
-  getFilepath(): string {
-    return this._getStringData('filepath');
-  }
-
-  async genRepository(): Promise<EntRepository> {
-    return await EntRepository.genEnforce(
-      this.getViewerContext(),
-      this.getRepositoryID(),
-    );
-  }
-
-  getCompiledBundleURI(): string {
-    return `/component/${this.getID()}/bundle.js`;
-  }
-
-  async genReactDoc(): Promise<string> {
-    const doc = await this._genExtendedColumnValue('react_doc');
-    invariant(typeof doc === 'string', 'Must be a string');
-    return doc;
-  }
-
-  async genOverrideReactDoc(): Promise<?string> {
-    const doc = await this._genExtendedColumnValue('override_react_doc');
-    if (doc == null) {
-      return doc;
-    }
-    invariant(typeof doc === 'string', 'Must be a string');
-    return doc;
-  }
-
-  async genCompiledBundle(): Promise<string> {
-    const bundle = await this._genExtendedColumnValue('compiled_bundle');
-    invariant(typeof bundle === 'string', 'Must be a string');
-    return bundle;
-  }
-
-  // Mutations
-
-  async genSetOverrideReactDoc(override: string): Promise<boolean> {
-    const res = await this.constructor.genMutate(
-      this.getViewerContext(),
-      this.getID(),
-      {override_react_doc: override},
-    );
-
-    // TODO pull this into the mutator once we have object caching
-    this._data['override_react_doc'] = override;
-
-    return res;
-  }
-
-  /* TODO (graphql resolver) */
-  name() { return this.getName(); }
-  componentID() { return this.getID(); }
-  filepath() { return this.getFilepath(); }
-  repository() { return this.genRepository(); }
-  compiledBundleURI() { return this.getCompiledBundleURI(); }
-  reactDoc() { return this.genReactDoc(); }
-  overrideReactDoc() { return this.genOverrideReactDoc(); }
 }
