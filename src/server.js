@@ -1,22 +1,15 @@
 /** @flow */
 
-import fs from 'fs';
-import path from 'path';
-
 import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import {buildSchema} from 'graphql';
-import graphqlHTTP from 'express-graphql';
 
 import dbconfig from '../dbconfig.json';
-import ViewerContext from './entity/vc';
 import EntComponent from './entity/EntComponent';
 import {
   connectToMySQL,
   cleanupConnection,
-  type Connection,
 } from './storage/mysql';
 import {
   printAction,
@@ -24,7 +17,7 @@ import {
   printError,
 } from './consoleUtil';
 import {SERVER_PORT, SERVER_COOKIE_SECRET} from './serverConfig';
-import graphqlRoot from './server/graphqlRoot';
+import {graphqlAPI, graphiql} from './server/graphql';
 import {
   initAuth,
   login,
@@ -34,9 +27,6 @@ import {
   requireAuth,
 } from './server/authentication';
 
-const schema = buildSchema(
-  fs.readFileSync(path.resolve(__dirname, './server/schema.graphql')).toString()
-);
 
 async function main() {
   printAction('Connecting to MySQL...');
@@ -44,8 +34,8 @@ async function main() {
   printActionResult('Connected.');
 
   try {
+    // Setup
     const app = express();
-
     app.use(morgan('dev'));
     app.use(cookieParser(SERVER_COOKIE_SECRET));
     app.use(bodyParser.json());
@@ -70,10 +60,10 @@ async function main() {
     app.post('/api/logout', logout());
     app.get('/api/isLoggedIn', isLoggedIn());
 
+    // Temp
     app.get('/', (req, res) => {
       res.send('derp ' + req.vc.getUserID());
     });
-
     app.get('/login', (req, res) => {
       if (res.user) {
         res.send('logged in');
@@ -93,6 +83,7 @@ async function main() {
       }
     });
 
+    // Business logic
     app.get('/component/:componentID/bundle.js', async (req, res) => {
       const component =
         await EntComponent.genNullable(req.vc, req.params.componentID);
@@ -104,20 +95,11 @@ async function main() {
       res.type('application/javascript').send(bundle);
     });
 
-    const graphQLHandlerOpts = {
-      schema: schema,
-      rootValue: graphqlRoot,
-    };
+    // GraphQL
     app.post(
       '/graphql',
       requireAuth((req, res) => res.send('Unauthenticated', 401)),
-      graphqlHTTP((req, res) => ({
-        ...graphQLHandlerOpts,
-        context: {
-          vc: req.vc,
-        },
-        graphiql: false,
-      })),
+      graphqlAPI(),
     );
     app.get(
       '/graphql',
@@ -129,13 +111,7 @@ async function main() {
           res.redirect('/');
         }
       },
-      graphqlHTTP((req, res) => ({
-        ...graphQLHandlerOpts,
-        context: {
-          vc: req.vc,
-        },
-        graphiql: true,
-      })),
+      graphiql(),
     );
 
     printAction(`Setting up listener on port ${SERVER_PORT}...`);

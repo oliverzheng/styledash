@@ -1,10 +1,19 @@
 /** @flow */
 
+import fs from 'fs';
+import path from 'path';
+import {buildSchema} from 'graphql';
+import graphqlHTTP from 'express-graphql';
+
 import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
 import EntRepository from '../entity/EntRepository';
 import EntComponent from '../entity/EntComponent';
 import Viewer from './Viewer';
+
+const schema = buildSchema(
+  fs.readFileSync(path.resolve(__dirname, './schema.graphql')).toString()
+);
 
 // TODO this is currently broken. Need
 // https://github.com/graphql/graphql-js/pull/947
@@ -77,4 +86,27 @@ const root = {
   },
 };
 
-export default root;
+const graphQLHandlerOpts = {
+  schema: schema,
+  rootValue: root,
+};
+
+export function graphqlAPI() {
+  return graphqlHTTP((req, res) => ({
+    ...graphQLHandlerOpts,
+    context: {
+      vc: req.vc,
+    },
+    graphiql: false,
+  }));
+}
+
+export function graphiql() {
+  return graphqlHTTP((req, res) => ({
+    ...graphQLHandlerOpts,
+    context: {
+      vc: req.vc,
+    },
+    graphiql: true,
+  }));
+}
