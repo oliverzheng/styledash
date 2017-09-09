@@ -11,6 +11,7 @@ import {buildSchema} from 'graphql';
 import graphqlHTTP from 'express-graphql';
 import passport from 'passport';
 import {Strategy as LocalStrategy} from 'passport-local';
+import CustomStrategy from 'passport-custom';
 
 import dbconfig from '../dbconfig.json';
 import ViewerContext from './entity/vc';
@@ -18,6 +19,7 @@ import EntComponent from './entity/EntComponent';
 import {
   connectToMySQL,
   cleanupConnection,
+  type Connection,
 } from './storage/mysql';
 import {
   printAction,
@@ -51,19 +53,52 @@ async function main() {
           // no user
           return done(null, false, { message: 'No user' });
         } else {
-          return done(null, {userID: 1337});
+          return done(null, new ViewerContext(conn, '1337'));
         }
       },
     ));
+    passport.use('cookie', new CustomStrategy(
+      (req, callback) => {
+        const userID = getCookieUserIDFromRequest(req);
+        const vc = new ViewerContext(conn, userID);
+        callback(null, vc);
+      },
+    ));
 
-    const vc = new ViewerContext(conn, '');
+    function setCookieUserIDOnResponse(res: Object, userID: ?string) {
+      if (userID != null) {
+        res.cookie(
+          'login',
+          { userID: userID },
+          {
+            maxAge: 365 * 24 * 60 * 60 * 1000,
+            signed: true,
+            sameSite: false, // TODO
+          },
+        );
+      } else {
+        res.clearCookie('login');
+      }
+    }
+    function getCookieUserIDFromRequest(req: Object): ?string {
+      const loginCookie = req.signedCookies.login;
+      if (!loginCookie) {
+        return null;
+      }
+      const userID = loginCookie.userID;
+      if (typeof userID !== 'string') {
+        return null;
+      }
+      return userID;
+    }
+
     const app = express();
 
     app.use(morgan('dev'));
     app.use(cookieParser(SERVER_COOKIE_SECRET));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(passport.initialize());
+    app.use(passport.initialize({ userProperty: 'vc' }));
 
     // TODO - react is hot-served via webpack on a different port right now
     app.use((req, res, next) => {
@@ -76,17 +111,55 @@ async function main() {
       next();
     });
 
-    // Extract logged in user
-    app.use((req, res, next) => {
-      const loginCookie = req.signedCookies.login;
-      if (loginCookie) {
-        req.loggedInUserID = loginCookie.userID;
+
+    // Auth
+
+    // Exposing authentication. Only /api/login gets special auth handler;
+    // everyone else gets it from the cookie.
+    const LOGIN_PATH = '/api/login';
+    app.post(
+      LOGIN_PATH,
+      passport.authenticate('local', { session: false }),
+      (req, res) => {
+        const {vc} = req;
+        if (vc.isAuthenticated()) {
+          setCookieUserIDOnResponse(res, vc.getUserID());
+        }
+        res.json({
+          isLoggedIn: vc.isAuthenticated(),
+        });
+      },
+    );
+    app.all('*', (req, res, next) => {
+      if (req.url === LOGIN_PATH && req.method === 'POST') {
+        next();
+      } else {
+        passport.authenticate('cookie', (err, vc, info) => {
+          if (err) {
+            next(err);
+          }
+          req.logIn(vc, { session: false }, err => next(err));
+        })(req, res, next);
       }
-      next();
+    });
+    app.post('/api/logout', (req, res) => {
+      setCookieUserIDOnResponse(res, null);
+
+      req.logout(); // this deletes req.vc. let's set it back.
+      req.vc = new ViewerContext(conn, null);
+
+      res.json({
+        isLoggedIn: req.vc.isAuthenticated(),
+      });
+    });
+    app.get('/api/isLoggedIn', (req, res) => {
+      res.json({
+        isLoggedIn: req.vc.isAuthenticated(),
+      });
     });
 
     app.get('/', (req, res) => {
-      res.send('derp ' + req.loggedInUserID);
+      res.send('derp ' + req.vc.getUserID());
     });
 
     app.get('/login', (req, res) => {
@@ -107,36 +180,10 @@ async function main() {
         `);
       }
     });
-    app.post(
-      '/login',
-      passport.authenticate(
-        'local',
-        {
-          session: false,
-          failureRedirect: '/login',
-        },
-      ),
-      (req, res) => {
-        res.cookie(
-          'login',
-          { userID: req.user.userID },
-          {
-            maxAge: 365 * 24 * 60 * 60 * 1000,
-            signed: true,
-            sameSite: false,
-          },
-        );
-        res.redirect('/');
-      },
-    );
-
-    app.get('/logout', (req, res) => {
-      res.clearCookie('login');
-      res.redirect('/');
-    });
 
     app.get('/component/:componentID/bundle.js', async (req, res) => {
-      const component = await EntComponent.genNullable(vc, req.params.componentID);
+      const component =
+        await EntComponent.genNullable(req.vc, req.params.componentID);
       if (!component) {
         res.status(404).send('Not found');
         return;
@@ -148,14 +195,31 @@ async function main() {
     const graphQLHandlerOpts = {
       schema: schema,
       rootValue: graphqlRoot,
-      context: {
-        // TODO generate this from logins
-        vc: vc,
-      },
     };
-    // TODO Make this conditional based on who's logged in
-    app.get('/graphql', graphqlHTTP({...graphQLHandlerOpts, graphiql: true}));
-    app.post('/graphql', graphqlHTTP({...graphQLHandlerOpts, graphiql: false}));
+    app.post('/graphql', graphqlHTTP((req, res) => ({
+      ...graphQLHandlerOpts,
+      context: {
+        vc: req.vc,
+      },
+      graphiql: false,
+    })));
+    app.get(
+      '/graphql',
+      (req, res, next) => {
+        if (req.vc.isAuthenticated() && req.vc.isDev()) {
+          next();
+        } else {
+          res.redirect('/');
+        }
+      },
+      graphqlHTTP((req, res) => ({
+        ...graphQLHandlerOpts,
+        context: {
+          vc: req.vc,
+        },
+        graphiql: true,
+      })),
+    );
 
     printAction(`Setting up listener on port ${SERVER_PORT}...`);
     app.listen(SERVER_PORT, () => {

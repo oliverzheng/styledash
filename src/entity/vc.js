@@ -26,4 +26,9 @@ export default class ViewerContext {
   getDatabaseConnection(): Connection {
     return this._conn;
   }
+
+  isDev(): boolean {
+    // TODO make is dev environment
+    return true;
+  }
 }
