@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 
-import dbconfig from '../dbconfig.json';
+import dbconfig from '../dbconfig.json'; // TODO use env
 import EntComponent from './entity/EntComponent';
 import {
   connectToMySQL,
@@ -16,7 +16,7 @@ import {
   printActionResult,
   printError,
 } from './consoleUtil';
-import {SERVER_PORT, SERVER_COOKIE_SECRET} from './serverConfig';
+import {SERVER_PORT} from './serverConfig';
 import {graphqlAPI, graphiql} from './server/graphql';
 import {
   initAuth,
@@ -37,7 +37,7 @@ async function main() {
     // Setup
     const app = express();
     app.use(morgan('dev'));
-    app.use(cookieParser(SERVER_COOKIE_SECRET));
+    app.use(cookieParser(dbconfig.cookieSecret));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(initAuth(conn));
