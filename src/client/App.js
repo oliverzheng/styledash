@@ -21,7 +21,14 @@ type PropType = {
 export default class App extends React.Component<PropType> {
   componentWillMount(): void {
     Relay.injectNetworkLayer(
-      new Relay.DefaultNetworkLayer(this.props.graphQLURI),
+      new Relay.DefaultNetworkLayer(
+        this.props.graphQLURI,
+        {
+          // TODO change this to same-origin when we aren't on react hotloading
+          // anymore.
+          credentials: 'include',
+        },
+      ),
     );
   }
 
