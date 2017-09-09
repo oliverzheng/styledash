@@ -9,9 +9,6 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import {buildSchema} from 'graphql';
 import graphqlHTTP from 'express-graphql';
-import passport from 'passport';
-import {Strategy as LocalStrategy} from 'passport-local';
-import CustomStrategy from 'passport-custom';
 
 import dbconfig from '../dbconfig.json';
 import ViewerContext from './entity/vc';
@@ -28,6 +25,14 @@ import {
 } from './consoleUtil';
 import {SERVER_PORT, SERVER_COOKIE_SECRET} from './serverConfig';
 import graphqlRoot from './server/graphqlRoot';
+import {
+  initAuth,
+  login,
+  authenticate,
+  logout,
+  isLoggedIn,
+  requireAuth,
+} from './server/authentication';
 
 const schema = buildSchema(
   fs.readFileSync(path.resolve(__dirname, './server/schema.graphql')).toString()
@@ -39,66 +44,13 @@ async function main() {
   printActionResult('Connected.');
 
   try {
-    passport.use(new LocalStrategy(
-      {
-        usernameField: 'email',
-        passwordField: 'password',
-      },
-      (email, password, done) => {
-        // TODO
-        if (false) {
-          // error
-          return done({err: true});
-        } else if (false) {
-          // no user
-          return done(null, false, { message: 'No user' });
-        } else {
-          return done(null, new ViewerContext(conn, '1337'));
-        }
-      },
-    ));
-    passport.use('cookie', new CustomStrategy(
-      (req, callback) => {
-        const userID = getCookieUserIDFromRequest(req);
-        const vc = new ViewerContext(conn, userID);
-        callback(null, vc);
-      },
-    ));
-
-    function setCookieUserIDOnResponse(res: Object, userID: ?string) {
-      if (userID != null) {
-        res.cookie(
-          'login',
-          { userID: userID },
-          {
-            maxAge: 365 * 24 * 60 * 60 * 1000,
-            signed: true,
-            sameSite: false, // TODO
-          },
-        );
-      } else {
-        res.clearCookie('login');
-      }
-    }
-    function getCookieUserIDFromRequest(req: Object): ?string {
-      const loginCookie = req.signedCookies.login;
-      if (!loginCookie) {
-        return null;
-      }
-      const userID = loginCookie.userID;
-      if (typeof userID !== 'string') {
-        return null;
-      }
-      return userID;
-    }
-
     const app = express();
 
     app.use(morgan('dev'));
     app.use(cookieParser(SERVER_COOKIE_SECRET));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(passport.initialize({ userProperty: 'vc' }));
+    app.use(initAuth(conn));
 
     // TODO - react is hot-served via webpack on a different port right now
     app.use((req, res, next) => {
@@ -111,52 +63,12 @@ async function main() {
       next();
     });
 
-
     // Auth
-
-    // Exposing authentication. Only /api/login gets special auth handler;
-    // everyone else gets it from the cookie.
     const LOGIN_PATH = '/api/login';
-    app.post(
-      LOGIN_PATH,
-      passport.authenticate('local', { session: false }),
-      (req, res) => {
-        const {vc} = req;
-        if (vc.isAuthenticated()) {
-          setCookieUserIDOnResponse(res, vc.getUserID());
-        }
-        res.json({
-          isLoggedIn: vc.isAuthenticated(),
-        });
-      },
-    );
-    app.all('*', (req, res, next) => {
-      if (req.url === LOGIN_PATH && req.method === 'POST') {
-        next();
-      } else {
-        passport.authenticate('cookie', (err, vc, info) => {
-          if (err) {
-            next(err);
-          }
-          req.logIn(vc, { session: false }, err => next(err));
-        })(req, res, next);
-      }
-    });
-    app.post('/api/logout', (req, res) => {
-      setCookieUserIDOnResponse(res, null);
-
-      req.logout(); // this deletes req.vc. let's set it back.
-      req.vc = new ViewerContext(conn, null);
-
-      res.json({
-        isLoggedIn: req.vc.isAuthenticated(),
-      });
-    });
-    app.get('/api/isLoggedIn', (req, res) => {
-      res.json({
-        isLoggedIn: req.vc.isAuthenticated(),
-      });
-    });
+    app.post(LOGIN_PATH, login());
+    app.all('*', authenticate({ loginPath: LOGIN_PATH, loginMethod: 'GET' }));
+    app.post('/api/logout', logout());
+    app.get('/api/isLoggedIn', isLoggedIn());
 
     app.get('/', (req, res) => {
       res.send('derp ' + req.vc.getUserID());
@@ -196,17 +108,22 @@ async function main() {
       schema: schema,
       rootValue: graphqlRoot,
     };
-    app.post('/graphql', graphqlHTTP((req, res) => ({
-      ...graphQLHandlerOpts,
-      context: {
-        vc: req.vc,
-      },
-      graphiql: false,
-    })));
+    app.post(
+      '/graphql',
+      requireAuth((req, res) => res.send('Unauthenticated', 401)),
+      graphqlHTTP((req, res) => ({
+        ...graphQLHandlerOpts,
+        context: {
+          vc: req.vc,
+        },
+        graphiql: false,
+      })),
+    );
     app.get(
       '/graphql',
+      requireAuth((req, res) => res.send('Unauthenticated', 401)),
       (req, res, next) => {
-        if (req.vc.isAuthenticated() && req.vc.isDev()) {
+        if (req.vc.isDev()) {
           next();
         } else {
           res.redirect('/');
