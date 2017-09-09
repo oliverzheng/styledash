@@ -16,7 +16,12 @@ import {
   printActionResult,
   printError,
 } from './consoleUtil';
-import {SERVER_PORT} from './serverConfig';
+import {
+  SERVER_PORT,
+  SERVER_LOGIN_PATH,
+  SERVER_LOGOUT_PATH,
+  SERVER_IS_LOGGED_IN_PATH,
+} from './serverConfig';
 import {graphqlAPI, graphiql} from './server/graphql';
 import {
   initAuth,
@@ -54,11 +59,10 @@ async function main() {
     });
 
     // Auth
-    const LOGIN_PATH = '/api/login';
-    app.post(LOGIN_PATH, login());
-    app.all('*', authenticate({ loginPath: LOGIN_PATH, loginMethod: 'GET' }));
-    app.post('/api/logout', logout());
-    app.get('/api/isLoggedIn', isLoggedIn());
+    app.post(SERVER_LOGIN_PATH, login());
+    app.all('*', authenticate({ loginPath: SERVER_LOGIN_PATH, loginMethod: 'POST' }));
+    app.post(SERVER_LOGOUT_PATH, logout());
+    app.get(SERVER_IS_LOGGED_IN_PATH, isLoggedIn());
 
     // Temp
     app.get('/', (req, res) => {

@@ -78,7 +78,11 @@ export function login() {
           setCookieUserIDOnResponse(res, vc.getUserID());
         }
         res.json({
-          isLoggedIn: vc.isAuthenticated(),
+          // The current login attempt may replace another existing login.
+          // Failure to login does not replace an existing login though.
+          loginSuccess: vc.isAuthenticated(),
+          isLoggedIn:
+            vc.isAuthenticated() || getCookieUserIDFromRequest(req) != null,
         });
       });
     })(req, res, next);

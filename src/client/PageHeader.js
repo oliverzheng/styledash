@@ -23,6 +23,8 @@ class PageHeader extends React.Component<PropType> {
           </Link>
           <div className="PageHeader-user">
             {this.props.viewer.username}
+            {' '}
+            <Link href="/logout">Logout</Link>
           </div>
           <h2>Styledash</h2>
         </div>
