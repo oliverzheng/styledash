@@ -3,7 +3,7 @@
 import invariant from 'invariant';
 import SQL from 'sql-template-strings';
 
-import ViewerContext from '../core/vc';
+import ViewerContext from './vc';
 import {executeSQL} from '../storage/mysql';
 
 export type EntConfig = {

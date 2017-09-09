@@ -4,7 +4,7 @@ import invariant from 'invariant';
 import bcrypt from 'bcryptjs';
 import SQL from 'sql-template-strings';
 
-import ViewerContext from '../core/vc';
+import ViewerContext from './vc';
 import BaseEnt, { type EntConfig } from './BaseEnt';
 
 export default class EntUser extends BaseEnt {
@@ -73,7 +73,7 @@ export default class EntUser extends BaseEnt {
   }
 
   /* TODO (graphql resolver) */
-  userID() { return this.getUserID(); }
+  userID() { return this.getID(); }
   email() { return this.getEmail(); }
 }
 

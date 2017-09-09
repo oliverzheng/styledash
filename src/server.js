@@ -17,7 +17,7 @@ import nullthrows from 'nullthrows';
 import username from 'username';
 
 import dbconfig from '../dbconfig.json';
-import ViewerContext from './core/vc';
+import ViewerContext from './entity/vc';
 import {
   type Connection,
   connectToMySQL,
