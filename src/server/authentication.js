@@ -6,6 +6,7 @@ import CustomStrategy from 'passport-custom';
 
 import type {Connection} from '../storage/mysql';
 import ViewerContext from '../entity/vc';
+import EntUser from '../entity/EntUser';
 
 function setCookieUserIDOnResponse(res: Object, userID: ?string) {
   if (userID != null) {
@@ -41,16 +42,27 @@ export function initAuth(conn: Connection) {
       usernameField: 'email',
       passwordField: 'password',
     },
-    (email, password, done) => {
-      // TODO
-      if (false) {
-        // error
-        return done({err: true});
-      } else if (false) {
-        // no user
-        return done(null, false, { message: 'No user' });
-      } else {
-        return done(null, new ViewerContext(conn, '1337'));
+    async (email, password, done) => {
+      try {
+        const userID = await EntUser.genVerifyLogin(
+          new ViewerContext(conn, null),
+          email,
+          password,
+        );
+        if (userID) {
+          return done(null, new ViewerContext(conn, userID));
+        } else {
+          return done(
+            null,
+            new ViewerContext(conn, null),
+            // This is passed to the client
+            {
+              type: 'invalidCredentials',
+            },
+          );
+        }
+      } catch (err) {
+        return done(err);
       }
     },
   ));
@@ -81,6 +93,7 @@ export function login() {
           // The current login attempt may replace another existing login.
           // Failure to login does not replace an existing login though.
           loginSuccess: vc.isAuthenticated(),
+          loginError: info,
           isLoggedIn:
             vc.isAuthenticated() || getCookieUserIDFromRequest(req) != null,
         });

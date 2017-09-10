@@ -70,7 +70,13 @@ export async function genIsLoggedIn(): Promise<boolean> {
 export async function genLogIn(
   email: string,
   password: string,
-): Promise<boolean> {
+): Promise<{
+  loginSuccess: boolean,
+  loginError: ?{
+    type: 'invalidCredentials',
+  },
+  isLoggedIn: boolean,
+}> {
   const res = await window.fetch(
     SERVER_LOGIN_ADDRESS,
     {
@@ -90,7 +96,23 @@ export async function genLogIn(
 
   // Failing login does not invalidate an existing login
   setAuthStoreLogin(json.isLoggedIn);
-  return json.loginSuccess;
+
+  const jsonLoginError = json.loginError;
+  let loginError = null;
+  if (jsonLoginError) {
+    const {type} = jsonLoginError;
+    if (type && type === 'invalidCredentials') {
+      loginError = {
+        type: 'invalidCredentials',
+      };
+    }
+  }
+
+  return {
+    loginSuccess: json.loginSuccess,
+    loginError: loginError,
+    isLoggedIn: json.isLoggedIn,
+  };
 }
 
 export async function genLogOut(): Promise<boolean> {

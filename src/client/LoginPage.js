@@ -14,11 +14,15 @@ type StateType = {
   login: ?{
     isLoggedIn: boolean,
   },
+  loginError: ?string,
+  isLoggingIn: boolean,
 };
 
 export default class LoginPage extends React.Component<*, StateType> {
   state = {
     login: null,
+    loginError: null,
+    isLoggingIn: false,
   };
 
   componentWillMount() {
@@ -40,35 +44,71 @@ export default class LoginPage extends React.Component<*, StateType> {
   }
 
   render() {
-    const {login} = this.state;
+    const {login, loginError} = this.state;
     if (!login) {
       return <div />;
     }
 
     let status = null;
     let link = null;
+    let loginForm = null;
     if (login.isLoggedIn) {
       status = 'Logged in';
       link = <Link href="/logout">Logout</Link>;
     } else {
       status = 'Not logged in';
-      link = <button onClick={this._login}>Login</button>;
+      loginForm = (
+        <form onSubmit={this._login}>
+          <p>Email: <input type="text" ref="email" /></p>
+          <p>Password: <input type="password" ref="password" /></p>
+          <input
+            type="submit"
+            value="login"
+            disabled={this.state.isLoggingIn}
+          />
+          <p>{loginError}</p>
+        </form>
+      );
     }
 
     return (
       <div>
-        {status}
+        <p>
+          {status}
+          {' '}
+          {link}
+        </p>
         <p>
           <Link href="/">Home</Link>
         </p>
-        <p>
-          {link}
-        </p>
+        {loginForm}
       </div>
     );
   }
 
-  _login() {
-    genLogIn('emai', 'pass');
+  _login = async (e: SyntheticEvent<*>) => {
+    e.preventDefault();
+
+    this.setState({
+      loginError: null,
+      isLoggingIn: true,
+    });
+
+    const {loginSuccess, loginError} = await genLogIn(
+      this.refs.email.value,
+      this.refs.password.value,
+    );
+
+    // Only set the state if login failed. If it succeeded, the main app will
+    // redirect.
+    if (!loginSuccess) {
+      this.setState({
+        isLoggingIn: false,
+        loginError:
+          loginError
+            ? loginError.type
+            : 'Unknown error while logging in',
+      });
+    }
   }
 }
