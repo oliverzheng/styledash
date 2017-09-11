@@ -4,6 +4,7 @@ import React from 'react';
 import Relay from 'react-relay/classic';
 
 import invariant from 'invariant';
+import nullthrows from 'nullthrows';
 
 import PageHeader from './PageHeader';
 import loadComponentBundle from './loadComponentBundle';
@@ -25,7 +26,7 @@ type ComponentProps = {
 };
 
 type PropType = {
-  component: {
+  component: ?{
     componentID: string,
     name: string,
     repository: {
@@ -52,14 +53,23 @@ class ComponentPage extends React.Component<PropType, StateType> {
   };
 
   componentDidMount(): void {
-    this._loadComponentBundle(this.props.component.compiledBundleURI);
+    const {component} = this.props;
+    if (component) {
+      this._loadComponentBundle(component.compiledBundleURI);
+    }
   }
 
   componentWillReceiveProps(nextProps: PropType): void {
+    const {component: nextComponent} = nextProps;
+    const {component: curComponent} = this.props;
+    if (!nextComponent || !curComponent) {
+      return;
+    }
+
     if (
-      nextProps.component.compiledBundleURI !== this.props.component.compiledBundleURI
+      nextComponent.compiledBundleURI !== curComponent.compiledBundleURI
     ) {
-      this._loadComponentBundle(nextProps.component.compiledBundleURI);
+      this._loadComponentBundle(nextComponent.compiledBundleURI);
     }
   }
 
@@ -77,8 +87,11 @@ class ComponentPage extends React.Component<PropType, StateType> {
     }
   }
 
-  render(): React$Element<*> {
+  render(): ?React$Element<*> {
     const {component} = this.props;
+    if (!component) {
+      return null;
+    }
 
     const BundledComponent = this.state.bundledComponent;
     let example = null;
@@ -134,7 +147,7 @@ class ComponentPage extends React.Component<PropType, StateType> {
         <p>Override Prop types:</p>
         <textarea
           className="ComponentPage-overrideReactDoc"
-          defaultValue={this.props.component.overrideReactDoc}
+          defaultValue={component.overrideReactDoc}
           ref="overrideReactDocTextarea"
           onChange={this._onOverrideReactDocTextareaChange}
         />
@@ -178,7 +191,7 @@ class ComponentPage extends React.Component<PropType, StateType> {
   }
 
   _getReactDocJSON(): Object /* TODO */{
-    return JSON.parse(this.props.component.reactDoc);
+    return JSON.parse(nullthrows(this.props.component).reactDoc);
   }
 
   _getComponentProps(reactDocJSON: Object): ComponentProps {

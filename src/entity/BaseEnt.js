@@ -6,18 +6,30 @@ import SQL from 'sql-template-strings';
 import ViewerContext from './vc';
 import {executeSQL} from '../storage/mysql';
 
-export type EntConfig = {
+export type EntConfig<EntType> = {
   tableName: string,
   defaultColumnNames: Array<string>,
   extendedColumnNames: Array<string>,
   immutableColumnNames: Array<string>,
   // used across API boundaries, and thus possibly persistence. Don't change it.
   typeName: string,
+  privacy: PrivacyType<EntType>,
+};
+
+export type PrivacyType<EntType> = {
+  genCanViewerSee(obj: EntType): Promise<boolean>,
+  genCanViewerMutate(obj: EntType): Promise<boolean>,
+  // TODO use delete in mutators
+  genCanViewerDelete(obj: EntType): Promise<boolean>,
+  genCanViewerCreate(
+    vc: ViewerContext,
+    data: {[columnName: string]: mixed},
+  ): Promise<boolean>,
 };
 
 export default class BaseEnt {
   // Child needs to override
-  static _getEntConfig(): EntConfig {
+  static _getEntConfig(): EntConfig<this> {
     invariant(false, 'NYI');
   }
 
@@ -97,31 +109,56 @@ export default class BaseEnt {
     columnName: string,
     columnValue: mixed,
   ): Promise<Array<this>> {
+    return await this.genWhereMulti(vc, {[columnName]: columnValue});
+  }
+
+  static async genWhereMulti(
+    vc: ViewerContext,
+    where: {[columnName: string]: mixed/*columnValues*/},
+  ): Promise<Array<this>> {
     const {
       defaultColumnNames,
       tableName,
+      privacy,
     } = this._getEntConfig();
 
     // Must have the column be in the default, so that when it's fetched, it'll
     // be in the ent's data. Not sure why that property would be useful, but it
     // seems like it'd be good.
-    invariant(
-      defaultColumnNames.indexOf(columnName) !== -1,
-      'Must have %s as a default column',
-      columnName,
+    Object.keys(where).forEach(columnName =>
+      invariant(
+        defaultColumnNames.indexOf(columnName) !== -1,
+        'Must have %s as a default column',
+        columnName,
+      )
     );
 
-    const res = await executeSQL(
-      vc.getDatabaseConnection(),
-      SQL`SELECT `
-        .append(defaultColumnNames.join(', '))
-        .append(SQL` FROM `)
-        .append(tableName)
-        .append(SQL` WHERE `)
+    const sql = SQL`SELECT `
+      .append(defaultColumnNames.join(', '))
+      .append(SQL` FROM `)
+      .append(tableName)
+      .append(SQL` WHERE `);
+
+    Object.keys(where).forEach((columnName, i) => {
+      if (i !== 0) {
+        sql.append(SQL` AND `);
+      }
+      sql
         .append(columnName)
-        .append(SQL`= ${columnValue}`)
+        .append(SQL`= ${where[columnName]}`);
+    });
+
+    const res = await executeSQL(vc.getDatabaseConnection(), sql);
+    const entsWithoutPrivacy = res.map(row => new this(vc, row));
+    const entsWithPrivacy = await Promise.all(
+      entsWithoutPrivacy.map(
+        async (ent) => {
+          const canSee = await privacy.genCanViewerSee(ent);
+          return canSee ? ent : null;
+        },
+      ),
     );
-    return res.map(row => new this(vc, row));
+    return entsWithPrivacy.filter(ent => ent);
   }
 
   static async genNullable(vc: ViewerContext, id: string): Promise<?this> {
@@ -140,9 +177,7 @@ export default class BaseEnt {
     return obj;
   }
 
-  static async _genMutate(
-    vc: ViewerContext,
-    id: string,
+  async _genMutate(
     data: {[columnName: string]: mixed},
   ): Promise<boolean> {
     const {
@@ -150,7 +185,13 @@ export default class BaseEnt {
       defaultColumnNames,
       extendedColumnNames,
       immutableColumnNames,
-    } = this._getEntConfig();
+      privacy,
+    } = this.constructor._getEntConfig();
+
+    invariant(
+      await privacy.genCanViewerMutate(this),
+      'Viewer cannot mutate obj',
+    );
 
     const validMutationColumns = {};
     defaultColumnNames.forEach(c => {
@@ -168,8 +209,8 @@ export default class BaseEnt {
       invariant(
         validMutationColumns[c],
         'Mutation data for type %s id %s is not valid for column %s',
-        this.getEntType(),
-        id,
+        this.constructor.getEntType(),
+        this.getID(),
         c,
       );
     });
@@ -186,9 +227,12 @@ export default class BaseEnt {
         .append(column)
         .append(SQL` = ${value} `);
     });
-    sql.append(SQL` WHERE id = ${id}`);
+    sql.append(SQL` WHERE id = ${this.getID()}`);
 
-    const res = await executeSQL(vc.getDatabaseConnection(), sql);
+    const res = await executeSQL(
+      this.getViewerContext().getDatabaseConnection(),
+      sql,
+    );
     return true;
   }
 
@@ -201,7 +245,13 @@ export default class BaseEnt {
       tableName,
       defaultColumnNames,
       extendedColumnNames,
+      privacy,
     } = this._getEntConfig();
+
+    invariant(
+      await privacy.genCanViewerCreate(vc, data),
+      'Viewer cannot create obj',
+    );
 
     const validMutationColumns = {};
     defaultColumnNames.forEach(c => validMutationColumns[c] = true);

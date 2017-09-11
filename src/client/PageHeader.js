@@ -9,7 +9,9 @@ import './PageHeader.css';
 
 type PropType = {
   viewer: {
-    username: string,
+    user: {
+      fullName: string,
+    },
   },
 };
 
@@ -22,7 +24,7 @@ class PageHeader extends React.Component<PropType> {
             Go home
           </Link>
           <div className="PageHeader-user">
-            {this.props.viewer.username}
+            {this.props.viewer.user.fullName}
             {' '}
             <Link href="/logout">Logout</Link>
           </div>
@@ -39,7 +41,9 @@ export default Relay.createContainer(
     fragments: {
       viewer: () => Relay.QL`
         fragment on Viewer {
-          username
+          user {
+            fullName
+          }
         }
       `,
     },

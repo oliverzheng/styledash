@@ -1,9 +1,10 @@
 /** @flow */
 
-import username from 'username';
+import nullthrows from 'nullthrows';
 
 import ViewerContext from '../entity/vc';
 import EntRepository from '../entity/EntRepository';
+import EntUser from '../entity/EntUser';
 
 export default class Viewer {
   _vc: ViewerContext;
@@ -13,17 +14,17 @@ export default class Viewer {
   }
 
   id(): string {
-    // TODO
-    return 'viewer:some_user_id';
+    return 'viewer';
   }
 
-  async username(): Promise<string> {
-    return await username();
+  async genUser(): Promise<EntUser> {
+    return nullthrows(await this._vc.genUser());
   }
 
   async repositories(): Promise<Array<EntRepository>> {
-    // TODO need users to do this
-    const repo = await EntRepository.genEnforce(this._vc, '44');
-    return [repo];
+    return await EntRepository.genForViewer(this._vc);
   }
+
+  /* TODO (graphql resolver) */
+  user() { return this.genUser(); }
 }

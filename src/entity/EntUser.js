@@ -5,14 +5,41 @@ import bcrypt from 'bcryptjs';
 import SQL from 'sql-template-strings';
 
 import ViewerContext from './vc';
-import BaseEnt, { type EntConfig } from './BaseEnt';
+import BaseEnt, {
+  type EntConfig,
+  type PrivacyType,
+} from './BaseEnt';
+
+const userPrivacy: PrivacyType<EntUser> = {
+  async genCanViewerSee(obj: EntUser): Promise<boolean> {
+    // TODO This is janky for a few reasons:
+    // There should be a concept of organizations, so it's not possible for
+    // a user of one org to see the user of another org.
+    // "See" here means all fields on an object. Password isn't exposed, but it
+    // could be and the privacy would leak. There would need to be field-level
+    // restrictions.
+    return true;
+  },
+  async genCanViewerMutate(obj: EntUser): Promise<boolean> {
+    return obj.getID() === obj.getViewerContext().getUserID();
+  },
+  async genCanViewerDelete(obj: EntUser): Promise<boolean> {
+    return obj.getID() === obj.getViewerContext().getUserID();
+  },
+  async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
+    // TODO - need some way to set context for user registration
+    return false;
+  },
+};
 
 export default class EntUser extends BaseEnt {
-  static _getEntConfig(): EntConfig {
+  static _getEntConfig(): EntConfig<this> {
     return {
       tableName: 'user',
       defaultColumnNames: [
         'id',
+        'first_name',
+        'last_name',
         'email',
         'password',
       ],
@@ -22,6 +49,7 @@ export default class EntUser extends BaseEnt {
         'id',
       ],
       typeName: 'user',
+      privacy: userPrivacy,
     };
   }
 
@@ -68,12 +96,27 @@ export default class EntUser extends BaseEnt {
     }
   }
 
+  getFirstName(): string {
+    return this._getStringData('first_name');
+  }
+
+  getLastName(): string {
+    return this._getStringData('last_name');
+  }
+
+  getFullName(): string {
+    return `${this.getFirstName()} ${this.getLastName()}`;
+  }
+
   getEmail(): string {
     return this._getStringData('email');
   }
 
   /* TODO (graphql resolver) */
   userID() { return this.getID(); }
+  firstName() { return this.getFirstName(); }
+  lastName() { return this.getLastName(); }
+  fullName() { return this.getFullName(); }
   email() { return this.getEmail(); }
 }
 

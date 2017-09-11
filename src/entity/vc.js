@@ -1,8 +1,11 @@
 /** @flow */
 
+import nullthrows from 'nullthrows';
+
 import type {
   Connection,
 } from '../storage/mysql';
+import EntUser from './EntUser';
 
 export default class ViewerContext {
   _conn: Connection;
@@ -19,8 +22,16 @@ export default class ViewerContext {
     return this._userID != null;
   }
 
-  getUserID(): ?string {
-    return this._userID;
+  // Requires isAuthenticated to be true
+  getUserID(): string {
+    return nullthrows(this._userID);
+  }
+
+  async genUser(): Promise<?EntUser> {
+    if (!this.isAuthenticated()) {
+      return null;
+    }
+    return await EntUser.genEnforce(this, this.getUserID());
   }
 
   getDatabaseConnection(): Connection {

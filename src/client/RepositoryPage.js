@@ -7,7 +7,7 @@ import PageHeader from './PageHeader';
 import Link from './Link';
 
 type PropType = {
-  repository: {
+  repository: ?{
     name: string,
     components: Array<{
       componentID: string,
@@ -18,8 +18,13 @@ type PropType = {
 };
 
 class RepositoryPage extends React.Component<PropType> {
-  render(): React$Element<*> {
+  render(): ?React$Element<*> {
     const {repository} = this.props;
+    if (!repository) {
+      // TODO 404 page. Use React error boundaries
+      return null;
+    }
+
     return (
       <div>
         <PageHeader viewer={this.props.viewer} />

@@ -2,11 +2,43 @@
 
 import invariant from 'invariant';
 
-import BaseEnt, { type EntConfig } from './BaseEnt';
+import ViewerContext from './vc';
+import BaseEnt, {
+  type EntConfig,
+  type PrivacyType,
+} from './BaseEnt';
 import EntRepository from './EntRepository';
+import EntRepositoryPermission from './EntRepositoryPermission';
+
+const componentPrivacy: PrivacyType<EntComponent> = {
+  async genCanViewerSee(obj: EntComponent): Promise<boolean> {
+    return await EntRepositoryPermission.genCanViewerReadWrite(
+      obj.getViewerContext(),
+      obj.getRepositoryID(),
+    );
+  },
+
+  async genCanViewerMutate(obj: EntComponent): Promise<boolean> {
+    return await EntRepositoryPermission.genCanViewerReadWrite(
+      obj.getViewerContext(),
+      obj.getRepositoryID(),
+    );
+  },
+
+  async genCanViewerDelete(obj: EntComponent): Promise<boolean> {
+    // Let's say no for now...?
+    return false;
+  },
+
+  async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
+    // TODO Only scripts/background processes can create it. Need to open that
+    // up here.
+    return false;
+  },
+};
 
 export default class EntComponent extends BaseEnt {
-  static _getEntConfig(): EntConfig {
+  static _getEntConfig(): EntConfig<this> {
     return {
       tableName: 'component',
       defaultColumnNames: [
@@ -25,6 +57,7 @@ export default class EntComponent extends BaseEnt {
         'repository_id',
       ],
       typeName: 'component',
+      privacy: componentPrivacy,
     };
   }
 
@@ -75,9 +108,7 @@ export default class EntComponent extends BaseEnt {
   // Mutations
 
   async genSetOverrideReactDoc(override: string): Promise<boolean> {
-    const res = await this.constructor._genMutate(
-      this.getViewerContext(),
-      this.getID(),
+    const res = await this._genMutate(
       {override_react_doc: override},
     );
 

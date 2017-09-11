@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import {buildSchema} from 'graphql';
 import graphqlHTTP from 'express-graphql';
+import nullthrows from 'nullthrows';
 
 import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
@@ -22,16 +23,22 @@ const schema = buildSchema(
 async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
   const conn = vc.getDatabaseConnection();
   const separatorIndex = id.indexOf(':');
-  const type = id.substr(0, separatorIndex);
-  const objID = id.substr(separatorIndex + 1);
+  let type: string;
+  let objID: ?string = null
+  if (separatorIndex !== -1) {
+    type = id.substr(0, separatorIndex);
+    objID = id.substr(separatorIndex + 1);
+  } else {
+    type = id;
+  }
 
   switch (type) {
     case 'viewer':
       return new Viewer(vc);
     case 'repository':
-      return await EntRepository.genNullable(vc, objID);
+      return await EntRepository.genNullable(vc, nullthrows(objID));
     case 'component':
-      return await EntComponent.genNullable(vc, objID);
+      return await EntComponent.genNullable(vc, nullthrows(objID));
   }
 
   return null;

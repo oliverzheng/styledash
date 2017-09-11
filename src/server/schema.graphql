@@ -4,13 +4,16 @@ interface Node {
 
 type Viewer implements Node {
   id: ID!
-  username: String!
+  user: User!
   repositories: [Repository]!
 }
 
 type User implements Node {
   id: ID!
   userID: ID!
+  firstName: String!
+  lastName: String!
+  fullName: String!
   email: String!
 }
 
