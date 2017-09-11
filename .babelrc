@@ -8,7 +8,7 @@
   ],
   "plugins": [
     "transform-object-rest-spread",
-    ["relay", {"schema": "src/data/schema.graphql"}],
+    ["relay", {"schema": "src/server/schema.graphql"}],
     ["transform-runtime", {
       "polyfill": false,
       "regenerator": true
