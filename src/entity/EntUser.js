@@ -9,6 +9,7 @@ import BaseEnt, {
   type EntConfig,
   type PrivacyType,
 } from './BaseEnt';
+import {isPasswordValid} from '../clientserver/authentication';
 
 const userPrivacy: PrivacyType<EntUser> = {
   async genCanViewerSee(obj: EntUser): Promise<boolean> {
@@ -21,14 +22,31 @@ const userPrivacy: PrivacyType<EntUser> = {
     return true;
   },
   async genCanViewerMutate(obj: EntUser): Promise<boolean> {
+    // TODO make sure new password is valid
     return obj.getID() === obj.getViewerContext().getUserID();
   },
   async genCanViewerDelete(obj: EntUser): Promise<boolean> {
     return obj.getID() === obj.getViewerContext().getUserID();
   },
-  async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
-    // TODO - need some way to set context for user registration
-    return false;
+  async genCanViewerCreate(
+    vc: ViewerContext,
+    data: {[columnName: string]: mixed},
+  ): Promise<boolean> {
+    // Logged in users can't create users. There isn't really any business logic
+    // that prevents them from doing so, but it gets weird when the resulting
+    // user has a VC of the current user.
+    if (vc.isAuthenticated()) {
+      return false;
+    }
+
+    const email = data['email'];
+    invariant(typeof email === 'string', 'Email must be a string');
+
+    if (await EntUser.genIsEmailAlreadyInUse(vc, email)) {
+      return false;
+    }
+
+    return true;
   },
 };
 
@@ -57,16 +75,37 @@ export default class EntUser extends BaseEnt {
     vc: ViewerContext,
     email: string,
     password: string,
+    firstName: string,
+    lastName: string,
   ): Promise<EntUser> {
+    // This can't be verified in the privacy, cause the password is already
+    // hashed by then.
+    invariant(isPasswordValid(password), 'Invalid password');
+
     const hash = bcrypt.hashSync(password, 10);
     const userID = await this._genCreate(
       vc,
       {
         email,
         password: hash,
+        first_name: firstName,
+        last_name: lastName,
       },
     );
     return await this.genEnforce(vc, userID);
+  }
+
+  static async genIsEmailAlreadyInUse(
+    vc: ViewerContext,
+    email: string,
+  ): Promise<boolean> {
+    const row = await this._genColumnValues(
+      vc,
+      ['id'],
+      email,
+      'email',
+    );
+    return row != null;
   }
 
   // Returns a user ID if successful. Null otherwise.

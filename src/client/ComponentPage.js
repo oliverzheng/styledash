@@ -13,7 +13,7 @@ import defaultPropValue from '../defaultPropValue';
 
 import OverrideComponentReactDocMutation from './mutations/OverrideComponentReactDocMutation';
 
-import {SERVER_ADDRESS} from '../serverConfig';
+import {SERVER_ADDRESS} from '../clientserver/serverConfig';
 
 import './ComponentPage.css'
 

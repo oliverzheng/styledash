@@ -8,7 +8,11 @@ import {
   SERVER_LOGIN_ADDRESS,
   SERVER_LOGOUT_ADDRESS,
   SERVER_IS_LOGGED_IN_ADDRESS,
-} from '../serverConfig';
+  SERVER_REGISTER_ADDRESS,
+} from '../clientserver/serverConfig';
+import {
+  type RegisterErrorType,
+} from '../clientserver/authentication';
 
 let authStore: ?{isLoggedIn: boolean} = null;
 
@@ -127,4 +131,42 @@ export async function genLogOut(): Promise<boolean> {
   const json = await res.json();
   setAuthStoreLogin(json.isLoggedIn);
   return json.isLoggedIn;
+}
+
+export async function genRegister(
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string,
+): Promise<{
+  registerSuccess: boolean,
+  registerError: ?{
+    type: RegisterErrorType,
+  },
+  isLoggedIn: boolean,
+}> {
+  const res = await window.fetch(
+    SERVER_REGISTER_ADDRESS,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        firstName,
+        lastName,
+      }),
+      // TODO
+      credentials: 'include',
+    },
+  );
+  const json = await res.json();
+
+  return {
+    registerSuccess: json.registerSuccess,
+    registerError: json.registerError,
+    isLoggedIn: json.isLoggedIn,
+  };
 }

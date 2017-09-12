@@ -7,6 +7,13 @@ import CustomStrategy from 'passport-custom';
 import type {Connection} from '../storage/mysql';
 import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
+import {
+  isEmailValid,
+  isPasswordValid,
+  isFirstNameValid,
+  isLastNameValid,
+  type RegisterErrorType,
+} from '../clientserver/authentication';
 
 function setCookieUserIDOnResponse(res: Object, userID: ?string) {
   if (userID != null) {
@@ -37,6 +44,8 @@ function getCookieUserIDFromRequest(req: Object): ?string {
 }
 
 export function initAuth(conn: Connection) {
+  const anonymousVC = new ViewerContext(conn, null);
+
   passport.use(new LocalStrategy(
     {
       usernameField: 'email',
@@ -45,7 +54,7 @@ export function initAuth(conn: Connection) {
     async (email, password, done) => {
       try {
         const userID = await EntUser.genVerifyLogin(
-          new ViewerContext(conn, null),
+          anonymousVC,
           email,
           password,
         );
@@ -54,7 +63,7 @@ export function initAuth(conn: Connection) {
         } else {
           return done(
             null,
-            new ViewerContext(conn, null),
+            anonymousVC,
             // This is passed to the client
             {
               type: 'invalidCredentials',
@@ -86,16 +95,19 @@ export function login() {
         next(err);
       }
       req.logIn(vc, { session: false }, err => {
-        if (vc.isAuthenticated()) {
+        // Passport doesn't even call the strategy unless both email & password
+        // are non null, so vc may be null here.
+        const isAuthenticated = vc && vc.isAuthenticated();
+        if (isAuthenticated) {
           setCookieUserIDOnResponse(res, vc.getUserID());
         }
         res.json({
           // The current login attempt may replace another existing login.
           // Failure to login does not replace an existing login though.
-          loginSuccess: vc.isAuthenticated(),
+          loginSuccess: isAuthenticated,
           loginError: info,
           isLoggedIn:
-            vc.isAuthenticated() || getCookieUserIDFromRequest(req) != null,
+            isAuthenticated || getCookieUserIDFromRequest(req) != null,
         });
       });
     })(req, res, next);
@@ -153,5 +165,57 @@ export function requireAuth(unauthCallback: (Object, Object, Function) => any) {
     } else {
       unauthCallback(req, res, next);
     }
+  };
+}
+
+
+export function register() {
+  return async (req: Object, res: Object) => {
+    const {vc} = req;
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+    } = req.method === 'GET' ? req.query : req.body;
+
+    let errorType: ?RegisterErrorType;
+
+    if (vc.isAuthenticated()) {
+      errorType = 'alreadyLoggedIn';
+    } else if (!email || !isEmailValid(email)) {
+      errorType = 'invalidEmail';
+    } else if (!password || !isPasswordValid(password)) {
+      errorType = 'invalidPassword';
+    } else if (!firstName || !isFirstNameValid(firstName)) {
+      errorType = 'invalidFirstName';
+    } else if (!lastName || !isLastNameValid(lastName)) {
+      errorType = 'invalidLastName';
+    } else if (await EntUser.genIsEmailAlreadyInUse(vc, email)) {
+      errorType = 'emailAlreadyInUse';
+    }
+
+    let user = null;
+    let error = null;
+    if (!errorType) {
+      user = await EntUser.genCreate(
+        vc,
+        email,
+        password,
+        firstName,
+        lastName,
+      );
+    } else {
+      error = {
+        type: errorType,
+      };
+    }
+
+    res.json({
+      registerSuccess: user != null,
+      registerError: error,
+      // We don't change the login status when registering.
+      isLoggedIn: vc.isAuthenticated(),
+    });
   };
 }

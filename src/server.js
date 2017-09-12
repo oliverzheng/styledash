@@ -21,7 +21,8 @@ import {
   SERVER_LOGIN_PATH,
   SERVER_LOGOUT_PATH,
   SERVER_IS_LOGGED_IN_PATH,
-} from './serverConfig';
+  SERVER_REGISTER_PATH,
+} from './clientserver/serverConfig';
 import {graphqlAPI, graphiql} from './server/graphql';
 import {
   initAuth,
@@ -30,6 +31,7 @@ import {
   logout,
   isLoggedIn,
   requireAuth,
+  register,
 } from './server/authentication';
 
 
@@ -63,6 +65,7 @@ async function main() {
     app.all('*', authenticate({ loginPath: SERVER_LOGIN_PATH, loginMethod: 'POST' }));
     app.post(SERVER_LOGOUT_PATH, logout());
     app.get(SERVER_IS_LOGGED_IN_PATH, isLoggedIn());
+    app.post(SERVER_REGISTER_PATH, register());
 
     // Temp
     app.get('/', (req, res) => {

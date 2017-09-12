@@ -11,7 +11,7 @@ import {
 import useRelay from 'react-router-relay';
 import window from 'global/window';
 
-import {SERVER_GRAPHQL_ADDRESS} from '../serverConfig';
+import {SERVER_GRAPHQL_ADDRESS} from '../clientserver/serverConfig';
 import {
   genIsLoggedIn,
   genLogOut,
