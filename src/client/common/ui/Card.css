@@ -1,0 +1,6 @@
+.Card-root {
+  border: 1px solid #CACACA;
+  border-radius: 4px;
+  padding: 15px;
+  box-sizing: border-box;
+}

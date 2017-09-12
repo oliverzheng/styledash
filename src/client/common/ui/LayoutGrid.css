@@ -1,0 +1,10 @@
+.LayoutGrid-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.LayoutGrid-cell-gutterFixed {
+  flex-basis: 0;
+  flex-grow: 1;
+}

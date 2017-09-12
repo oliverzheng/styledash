@@ -1,0 +1,11 @@
+.LinkCard-root:hover .LinkCard-card {
+  border-color: #919191;
+}
+
+.LinkCard-root:hover .LinkCard-linkText-darken {
+  color: #333;
+}
+
+.LinkCard-root:hover .LinkCard-linkText-underline {
+  border-bottom: 1px solid #CCC;
+}

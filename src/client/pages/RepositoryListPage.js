@@ -6,7 +6,9 @@ import Relay from 'react-relay/classic';
 import PageHeader from './ui/PageHeader';
 import FixedPageContainer from './ui/FixedPageContainer';
 import PageTitle from './ui/PageTitle';
-import Link from '../common/ui/Link';
+import RepositoryListGridWithData from '../repositoryList/RepositoryListGridWithData';
+
+import '../common/ui/Spacing.css';
 
 type PropType = {
   viewer: {
@@ -24,20 +26,10 @@ class RepositoryListPage extends React.Component<PropType> {
       <div>
         <PageHeader />
         <FixedPageContainer>
-          <PageTitle>
+          <PageTitle className="Spacing-margin-bottom-28">
             Repositories
           </PageTitle>
-          <ul>
-            {
-              viewer.repositories.map(repo =>
-                <li key={repo.repositoryID}>
-                  <Link href={`/repository/${repo.repositoryID}/`}>
-                    {repo.name}
-                  </Link>
-                </li>
-              )
-            }
-          </ul>
+          <RepositoryListGridWithData viewer={viewer} />
         </FixedPageContainer>
       </div>
     );
@@ -50,10 +42,7 @@ const RepositoryListPageContainer = Relay.createContainer(
     fragments: {
       viewer: () => Relay.QL`
         fragment on Viewer {
-          repositories {
-            repositoryID
-            name
-          }
+          ${RepositoryListGridWithData.getFragment('viewer')}
         }
       `,
     },
