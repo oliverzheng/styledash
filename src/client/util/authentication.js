@@ -9,10 +9,10 @@ import {
   SERVER_LOGOUT_ADDRESS,
   SERVER_IS_LOGGED_IN_ADDRESS,
   SERVER_REGISTER_ADDRESS,
-} from '../clientserver/serverConfig';
+} from '../../clientserver/serverConfig';
 import {
   type RegisterErrorType,
-} from '../clientserver/authentication';
+} from '../../clientserver/authentication';
 
 let authStore: ?{isLoggedIn: boolean} = null;
 

@@ -3,9 +3,9 @@
 import React from 'react';
 import Relay from 'react-relay/classic';
 
-import Link from './Link';
+import Link from '../common/ui/Link';
 
-import './PageHeader.css';
+import './PageHeaderWithData.css';
 
 type PropType = {
   viewer: {
@@ -15,7 +15,7 @@ type PropType = {
   },
 };
 
-class PageHeader extends React.Component<PropType> {
+class PageHeaderWithData extends React.Component<PropType> {
   render(): React$Element<*> {
     return (
       <div>
@@ -36,7 +36,7 @@ class PageHeader extends React.Component<PropType> {
 }
 
 export default Relay.createContainer(
-  PageHeader,
+  PageHeaderWithData,
   {
     fragments: {
       viewer: () => Relay.QL`

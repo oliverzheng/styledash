@@ -3,8 +3,8 @@
 import React from 'react';
 import Relay from 'react-relay/classic';
 
-import PageHeader from './PageHeader';
-import Link from './Link';
+import PageHeader from './PageHeaderWithData';
+import Link from '../common/ui/Link';
 
 type PropType = {
   repository: ?{

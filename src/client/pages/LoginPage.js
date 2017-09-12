@@ -2,14 +2,14 @@
 
 import React from 'react';
 
-import Link from './Link';
+import Link from '../common/ui/Link';
 import {
   genIsLoggedIn,
   genLogIn,
   genRegister,
   addLoginStatusChangeListener,
   removeLoginStatusChangeListener,
-} from './authentication';
+} from '../util/authentication';
 
 type StateType = {
   login: ?{

@@ -6,14 +6,14 @@ import Relay from 'react-relay/classic';
 import invariant from 'invariant';
 import nullthrows from 'nullthrows';
 
-import PageHeader from './PageHeader';
-import loadComponentBundle from './loadComponentBundle';
-import Frame from './StaticIFrame';
-import defaultPropValue from '../defaultPropValue';
+import PageHeader from './PageHeaderWithData';
+import loadComponentBundle from '../util/loadComponentBundle';
+import Frame from '../component/StaticIFrame';
+import defaultPropValue from '../../defaultPropValue';
 
-import OverrideComponentReactDocMutation from './mutations/OverrideComponentReactDocMutation';
+import OverrideComponentReactDocMutation from '../component/mutations/OverrideComponentReactDocMutation';
 
-import {SERVER_ADDRESS} from '../clientserver/serverConfig';
+import {SERVER_ADDRESS} from '../../clientserver/serverConfig';
 
 import './ComponentPage.css'
 

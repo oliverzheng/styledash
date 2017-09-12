@@ -17,12 +17,12 @@ import {
   genLogOut,
   addLoginStatusChangeListener,
   removeLoginStatusChangeListener,
-} from './authentication';
+} from './util/authentication';
 
-import HomePage from './HomePage';
-import LoginPage from './LoginPage';
-import RepositoryPage from './RepositoryPage';
-import ComponentPage from './ComponentPage';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RepositoryPage from './pages/RepositoryPage';
+import ComponentPage from './pages/ComponentPage';
 
 export default class App extends React.Component<*> {
   componentWillMount(): void {
