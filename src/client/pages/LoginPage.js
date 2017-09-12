@@ -3,6 +3,7 @@
 import React from 'react';
 
 import Link from '../common/ui/Link';
+import PageHeader from './ui/PageHeader';
 import {
   genIsLoggedIn,
   genLogIn,
@@ -95,13 +96,11 @@ export default class LoginPage extends React.Component<*, StateType> {
 
     return (
       <div>
+        <PageHeader />
         <p>
           {status}
           {' '}
           {link}
-        </p>
-        <p>
-          <Link href="/">Home</Link>
         </p>
         <hr />
         <p>Login</p>

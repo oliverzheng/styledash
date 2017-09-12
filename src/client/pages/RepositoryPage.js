@@ -3,7 +3,7 @@
 import React from 'react';
 import Relay from 'react-relay/classic';
 
-import PageHeader from './PageHeaderWithData';
+import PageHeader from './ui/PageHeader';
 import Link from '../common/ui/Link';
 
 type PropType = {
@@ -14,7 +14,6 @@ type PropType = {
       name: string,
     }>,
   },
-  viewer: Object,
 };
 
 class RepositoryPage extends React.Component<PropType> {
@@ -27,7 +26,7 @@ class RepositoryPage extends React.Component<PropType> {
 
     return (
       <div>
-        <PageHeader viewer={this.props.viewer} />
+        <PageHeader />
         <p>repository name: {repository.name}</p>
         <p>Components:</p>
         <ul>
@@ -59,21 +58,11 @@ const RepositoryPageContainer = Relay.createContainer(
           }
         }
       `,
-      viewer: () => Relay.QL`
-        fragment on Viewer {
-          ${PageHeader.getFragment('viewer')}
-        }
-      `,
     },
   },
 );
 
 RepositoryPageContainer.queries = {
-  viewer: () => Relay.QL`
-    query {
-      viewer
-    }
-  `,
   repository: () => Relay.QL`
     query {
       repository(repositoryID: $repositoryID)

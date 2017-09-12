@@ -6,7 +6,7 @@ import Relay from 'react-relay/classic';
 import invariant from 'invariant';
 import nullthrows from 'nullthrows';
 
-import PageHeader from './PageHeaderWithData';
+import PageHeader from './ui/PageHeader';
 import loadComponentBundle from '../util/loadComponentBundle';
 import Frame from '../component/StaticIFrame';
 import defaultPropValue from '../../defaultPropValue';
@@ -37,7 +37,6 @@ type PropType = {
     reactDoc: string,
     overrideReactDoc: ?string,
   },
-  viewer: Object,
   relay: Object,
 };
 
@@ -134,7 +133,7 @@ class ComponentPage extends React.Component<PropType, StateType> {
 
     return (
       <div>
-        <PageHeader viewer={this.props.viewer} />
+        <PageHeader />
         <h1>
           {component.repository.name} > {component.name}
         </h1>
@@ -241,21 +240,11 @@ const ComponentPageContainer = Relay.createContainer(
           overrideReactDoc
         }
       `,
-      viewer: () => Relay.QL`
-        fragment on Viewer {
-          ${PageHeader.getFragment('viewer')}
-        }
-      `,
     },
   },
 );
 
 ComponentPageContainer.queries = {
-  viewer: () => Relay.QL`
-    query {
-      viewer
-    }
-  `,
   component: () => Relay.QL`
     query {
       component(componentID: $componentID)

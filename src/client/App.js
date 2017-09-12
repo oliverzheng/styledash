@@ -19,7 +19,7 @@ import {
   removeLoginStatusChangeListener,
 } from './util/authentication';
 
-import HomePage from './pages/HomePage';
+import RepositoryListPage from './pages/RepositoryListPage';
 import LoginPage from './pages/LoginPage';
 import RepositoryPage from './pages/RepositoryPage';
 import ComponentPage from './pages/ComponentPage';
@@ -81,8 +81,8 @@ export default class App extends React.Component<*> {
         environment={Relay.Store}>
         <Route
           path="/"
-          component={HomePage}
-          queries={HomePage.queries}
+          component={RepositoryListPage}
+          queries={RepositoryListPage.queries}
           onEnter={this._requireAuth}
         />
         <Route
