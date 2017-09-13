@@ -3,6 +3,7 @@
 import React from 'react';
 import pluralize from 'pluralize';
 import relativeDate from 'relative-date';
+import classnames from 'classnames';
 
 import SectionHeader from '../../common/ui/SectionHeader';
 import LinkCard from '../../common/ui/LinkCard';
@@ -20,6 +21,7 @@ type PropType = {
   id: string,
   componentsCount: number,
   lastUpdatedTimestamp: number,
+  className?: ?string,
 };
 
 export default class RepositoryListCard extends React.Component<PropType> {
@@ -29,9 +31,12 @@ export default class RepositoryListCard extends React.Component<PropType> {
       name,
       componentsCount,
       lastUpdatedTimestamp,
+      className,
     } = this.props;
     return (
-      <LinkCard href={`/repository/${id}`} className="RepositoryListCard-card">
+      <LinkCard
+        href={`/repository/${id}`}
+        className={classnames('RepositoryListCard-card', className)}>
         <CardSection fillHeight={true}>
           <SectionHeader className="Spacing-margin-bottom-8">
             <LinkText>
