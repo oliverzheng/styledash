@@ -9,8 +9,7 @@ import SectionHeader from '../../common/ui/SectionHeader';
 import LinkCard from '../../common/ui/LinkCard';
 import {CardSection} from '../../common/ui/Card';
 import SubText from '../../common/ui/SubText';
-
-import '../../common/ui/Spacing.css';
+import Spacing from '../../common/ui/Spacing';
 
 import './RepositoryListCard.css';
 
@@ -38,7 +37,7 @@ export default class RepositoryListCard extends React.Component<PropType> {
         href={`/repository/${id}`}
         className={classnames('RepositoryListCard-card', className)}>
         <CardSection fillHeight={true}>
-          <SectionHeader className="Spacing-margin-bottom-8">
+          <SectionHeader className={Spacing.margin.bottom.n8}>
             <LinkText>
               {name}
             </LinkText>

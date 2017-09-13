@@ -4,8 +4,7 @@ import React from 'react';
 
 import LayoutGrid from '../../common/ui/LayoutGrid';
 import RepositoryListCard from './RepositoryListCard';
-
-import '../../common/ui/Spacing.css';
+import Spacing from '../../common/ui/Spacing';
 
 type PropType = {
   repositories: Array<{
@@ -30,7 +29,7 @@ export default class RepositoryListGrid extends React.Component<PropType> {
         {
           repositories.map(repo =>
             <RepositoryListCard
-              className="Spacing-margin-bottom-24"
+              className={Spacing.margin.bottom.n24}
               {...repo}
               key={repo.id}
             />

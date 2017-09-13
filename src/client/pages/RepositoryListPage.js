@@ -7,8 +7,7 @@ import PageHeader from './ui/PageHeader';
 import FixedWidthPageContainer from './ui/FixedWidthPageContainer';
 import PageTitle from './ui/PageTitle';
 import RepositoryListGridWithData from '../repositoryList/RepositoryListGridWithData';
-
-import '../common/ui/Spacing.css';
+import Spacing from '../common/ui/Spacing';
 
 type PropType = {
   viewer: {
@@ -26,7 +25,7 @@ class RepositoryListPage extends React.Component<PropType> {
       <div>
         <PageHeader />
         <FixedWidthPageContainer>
-          <PageTitle className="Spacing-margin-bottom-28">
+          <PageTitle className={Spacing.margin.bottom.n28}>
             Repositories
           </PageTitle>
           <RepositoryListGridWithData viewer={viewer} />
