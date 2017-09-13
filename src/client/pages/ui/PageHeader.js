@@ -8,6 +8,7 @@ import {
   addLoginStatusChangeListener,
   removeLoginStatusChangeListener,
 } from '../../util/authentication';
+import FullWidthPageContainer from './FullWidthPageContainer';
 
 import './PageHeader.css';
 
@@ -60,7 +61,7 @@ export default class PageHeader extends React.Component<*, StateType> {
     }
 
     return (
-      <div className="PageHeader-root">
+      <FullWidthPageContainer className="PageHeader-root">
         <div className="PageHeader-links">
           {links}
         </div>
@@ -69,7 +70,7 @@ export default class PageHeader extends React.Component<*, StateType> {
             Styledash
           </Link>
         </h1>
-      </div>
+      </FullWidthPageContainer>
     );
   }
 }

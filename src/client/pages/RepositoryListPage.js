@@ -4,7 +4,7 @@ import React from 'react';
 import Relay from 'react-relay/classic';
 
 import PageHeader from './ui/PageHeader';
-import FixedPageContainer from './ui/FixedPageContainer';
+import FixedWidthPageContainer from './ui/FixedWidthPageContainer';
 import PageTitle from './ui/PageTitle';
 import RepositoryListGridWithData from '../repositoryList/RepositoryListGridWithData';
 
@@ -25,12 +25,12 @@ class RepositoryListPage extends React.Component<PropType> {
     return (
       <div>
         <PageHeader />
-        <FixedPageContainer>
+        <FixedWidthPageContainer>
           <PageTitle className="Spacing-margin-bottom-28">
             Repositories
           </PageTitle>
           <RepositoryListGridWithData viewer={viewer} />
-        </FixedPageContainer>
+        </FixedWidthPageContainer>
       </div>
     );
   }
