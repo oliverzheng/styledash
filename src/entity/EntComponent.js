@@ -1,6 +1,7 @@
 /** @flow */
 
 import invariant from 'invariant';
+import SQL from 'sql-template-strings';
 
 import ViewerContext from './vc';
 import BaseEnt, {
@@ -116,6 +117,21 @@ export default class EntComponent extends BaseEnt {
     this._data['override_react_doc'] = override;
 
     return res;
+  }
+
+  // Static helpers
+
+  static async genComponentsCountForRepository(
+    vc: ViewerContext,
+    repositoryID: string,
+  ): Promise<number> {
+    const count = await this.genAggregateSQLWithoutPrivacy(
+      vc,
+      SQL`count(1)`,
+      { repository_id: repositoryID },
+    );
+    invariant(typeof count === 'number', 'Must be a number');
+    return count;
   }
 
   /* TODO (graphql resolver) */

@@ -67,11 +67,11 @@ export default class LinkCard extends React.Component<PropType> {
     } = this.props;
     return (
       <Link
-        className={classnames('LinkCard-root', className)}
+        className="LinkCard-root"
         onHover={{darken: false, underline: false}}
         href={href}
         {...rest}>
-        <Card className="LinkCard-card">
+        <Card className={classnames('LinkCard-card', className)}>
           {children}
         </Card>
       </Link>

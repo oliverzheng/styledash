@@ -14,6 +14,8 @@ class RepositoryListGridWithData extends React.Component<*> {
           repositories.map(r => ({
             name: r.name,
             id: r.repositoryID,
+            componentsCount: r.componentsCount,
+            lastUpdatedTimestamp: r.lastUpdatedTimestamp,
           }))
         }
       />
@@ -30,6 +32,8 @@ const RepositoryListGridWithDataContainer = Relay.createContainer(
           repositories {
             repositoryID
             name
+            componentsCount
+            lastUpdatedTimestamp
           }
         }
       `,

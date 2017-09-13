@@ -9,6 +9,8 @@ type PropType = {
   repositories: Array<{
     name: string,
     id: string,
+    componentsCount: number,
+    lastUpdatedTimestamp: number,
   }>,
 };
 

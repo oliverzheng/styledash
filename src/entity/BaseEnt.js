@@ -1,7 +1,7 @@
 /** @flow */
 
 import invariant from 'invariant';
-import SQL from 'sql-template-strings';
+import SQL, {SQLStatement} from 'sql-template-strings';
 
 import ViewerContext from './vc';
 import {executeSQL} from '../storage/mysql';
@@ -122,31 +122,13 @@ export default class BaseEnt {
       privacy,
     } = this._getEntConfig();
 
-    // Must have the column be in the default, so that when it's fetched, it'll
-    // be in the ent's data. Not sure why that property would be useful, but it
-    // seems like it'd be good.
-    Object.keys(where).forEach(columnName =>
-      invariant(
-        defaultColumnNames.indexOf(columnName) !== -1,
-        'Must have %s as a default column',
-        columnName,
-      )
-    );
-
     const sql = SQL`SELECT `
       .append(defaultColumnNames.join(', '))
       .append(SQL` FROM `)
       .append(tableName)
       .append(SQL` WHERE `);
 
-    Object.keys(where).forEach((columnName, i) => {
-      if (i !== 0) {
-        sql.append(SQL` AND `);
-      }
-      sql
-        .append(columnName)
-        .append(SQL`= ${where[columnName]}`);
-    });
+    this._addWhereToSQL(sql, where);
 
     const res = await executeSQL(vc.getDatabaseConnection(), sql);
     const entsWithoutPrivacy = res.map(row => new this(vc, row));
@@ -159,6 +141,52 @@ export default class BaseEnt {
       ),
     );
     return entsWithPrivacy.filter(ent => ent);
+  }
+
+  static async genAggregateSQLWithoutPrivacy(
+    vc: ViewerContext,
+    aggregation: SQLStatement,
+    where: {[columnName: string]: mixed/*columnValues*/},
+  ): Promise<mixed> {
+    const {tableName} = this._getEntConfig();
+
+    // Must have the column be in the default, so that when it's fetched, it'll
+    // be in the ent's data. Not sure why that property would be useful, but it
+    // seems like it'd be good.
+    const sql = SQL`SELECT `
+      .append(aggregation)
+      .append(SQL` as aggregate FROM `)
+      .append(tableName)
+      .append(SQL` WHERE `);
+
+    this._addWhereToSQL(sql, where);
+
+    const res = await executeSQL(vc.getDatabaseConnection(), sql);
+    return res[0].aggregate;
+  }
+
+  static _addWhereToSQL(
+    sql: SQLStatement,
+    where: {[columnName: string]: mixed/*columnValues*/},
+  ): void {
+    const {defaultColumnNames} = this._getEntConfig();
+
+    Object.keys(where).forEach(columnName =>
+      invariant(
+        defaultColumnNames.indexOf(columnName) !== -1,
+        'Must have %s as a default column',
+        columnName,
+      )
+    );
+
+    Object.keys(where).forEach((columnName, i) => {
+      if (i !== 0) {
+        sql.append(SQL` AND `);
+      }
+      sql
+        .append(columnName)
+        .append(SQL`= ${where[columnName]}`);
+    });
   }
 
   static async genNullable(vc: ViewerContext, id: string): Promise<?this> {

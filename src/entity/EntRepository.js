@@ -44,6 +44,7 @@ export default class EntRepository extends BaseEnt {
         'id',
         'name',
         'external_css_url',
+        'last_updated_timestamp',
       ],
       extendedColumnNames: [
       ],
@@ -75,6 +76,18 @@ export default class EntRepository extends BaseEnt {
     return this._getStringData('external_css_url');
   }
 
+  getLastUpdatedTimestamp(): number {
+    return this._getNumberData('last_updated_timestamp');
+  }
+
+  // TODO at some point, make entquery
+  async genComponentsCount(): Promise<number> {
+    return await EntComponent.genComponentsCountForRepository(
+      this.getViewerContext(),
+      this.getID(),
+    );
+  }
+
   async genComponents(): Promise<Array<EntComponent>> {
     return await EntComponent.genWhere(
       this.getViewerContext(),
@@ -87,5 +100,7 @@ export default class EntRepository extends BaseEnt {
   name() { return this.getName(); }
   repositoryID() { return this.getID(); }
   externalCSSUrl() { return this.getExternalCSSUrl(); }
+  componentsCount() { return this.genComponentsCount(); }
   components() { return this.genComponents(); }
+  lastUpdatedTimestamp() { return this.getLastUpdatedTimestamp(); }
 }
