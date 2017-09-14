@@ -4,9 +4,8 @@ import React from 'react';
 import classnames from 'classnames';
 import nullthrows from 'nullthrows';
 
-import PageHeader from './PageHeader';
 import SectionHeader from '../../common/ui/SectionHeader';
-import FullWidthPageContainer from './FullWidthPageContainer';
+import FixedWidthPageContainer from './FixedWidthPageContainer';
 import PageTitle from './PageTitle';
 import Spacing from '../../common/ui/Spacing';
 import ElementScrollPositionTracker from '../../common/ui/ElementScrollPositionTracker';
@@ -168,18 +167,15 @@ export default class PageWithMenu extends React.Component<PropType> {
     );
 
     return (
-      <div className="PageWithMenu-root">
-        <PageHeader />
-        <FullWidthPageContainer className="PageWithMenu-root">
-          <PageTitle className={Spacing.margin.bottom.n20}>
-            {pageTitle}
-          </PageTitle>
-          {menu}
-          <div className="PageWithMenu-content">
-            {content}
-          </div>
-        </FullWidthPageContainer>
-      </div>
+      <FixedWidthPageContainer className="PageWithMenu-root">
+        <PageTitle className={Spacing.margin.bottom.n20}>
+          {pageTitle}
+        </PageTitle>
+        {menu}
+        <div className="PageWithMenu-content">
+          {content}
+        </div>
+      </FixedWidthPageContainer>
     );
   }
 }
