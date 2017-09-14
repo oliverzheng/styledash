@@ -38,7 +38,8 @@ export default class MenuScrollHighlighter extends React.Component<PropType, Sta
     // any of these, in priority:
     //
     // - If the scroll position is at the absolute bottom, then the bottom-most
-    //   element, if it's still on the screen.
+    //   element, if it's still on the screen and the scroll position isn't at
+    //   the absolute top.
     // - The top-most element whose top is in the first half of the viewport.
     // - The bottom-most element whose top is above the viewport.
     //
@@ -72,7 +73,11 @@ export default class MenuScrollHighlighter extends React.Component<PropType, Sta
 
     const isScrolledToBottom = (pageLength - pageScrollTop) <= viewportHeight;
     const lastPosition = sortedPositions[sortedPositions.length - 1];
-    if (isScrolledToBottom && lastPosition.position.top >= 0) {
+    if (
+      isScrolledToBottom &&
+      lastPosition.position.top >= 0 &&
+      pageScrollTop > 0
+    ) {
       highlightedKey = lastPosition.key;
 
     } else {

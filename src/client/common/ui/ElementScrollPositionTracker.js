@@ -1,8 +1,10 @@
 /** @flow */
 
+import ReactDOM from 'react-dom';
 import window from 'global/window';
 import invariant from 'invariant';
 import throttle from 'throttle-debounce/throttle';
+import nullthrows from 'nullthrows';
 
 // Relative to viewport
 export type ScrollPosition = {
@@ -14,30 +16,34 @@ export type ScrollPositionsListener =
   (positions: {[key: string]: ScrollPosition}) => any;
 
 export default class ElementScrollPositionTracker {
-  _elements: {[key: string]: HTMLElement} = {};
+  _elements: {[key: string]: React$Component<*>} = {};
   _listeners: Array<ScrollPositionsListener> = [];
 
   constructor() {
     window.addEventListener(
       'scroll',
-      throttle(250, this._onScroll),
+      throttle(150, this._onScroll),
     );
     // TODO add resize listener too
   }
 
   destroy(): void {
+    this._elements = {};
+    this._listeners = [];
     window.removeEventListener('scroll', this._onScroll);
   }
 
-  addElementsToTrack(elements: {[key: string]: HTMLElement}): void {
+  addElementsToTrack(elements: {[key: string]: React$Component<*>}): void {
     Object.keys(elements).forEach(key => {
       this._elements[key] = elements[key];
     });
     this._tellListeners(this._listeners);
   }
 
-  removeElementsFromTracking(elements: {[key: string]: HTMLElement}): void {
-    Object.keys(elements).forEach(key => {
+  removeElementsFromTracking(
+    elementKeys: Array<string>,
+  ): void {
+    elementKeys.forEach(key => {
       delete this._elements[key];
     });
     this._tellListeners(this._listeners);
@@ -50,8 +56,9 @@ export default class ElementScrollPositionTracker {
 
   removeListener(listener: ScrollPositionsListener): void {
     const idx = this._listeners.indexOf(listener);
-    invariant(idx !== -1, 'Listener not found');
-    this._listeners.splice(idx, 1);
+    if (idx !== -1) {
+      this._listeners.splice(idx, 1);
+    }
   }
 
   _onScroll = () => {
@@ -61,7 +68,8 @@ export default class ElementScrollPositionTracker {
   _tellListeners(listeners: Array<ScrollPositionsListener>): void {
     const positions = {};
     Object.keys(this._elements).forEach(key => {
-      const el = this._elements[key];
+      const el = nullthrows(ReactDOM.findDOMNode(this._elements[key]));
+      invariant(el instanceof HTMLElement, 'Must be a DOM node');
       const {top, left} = el.getBoundingClientRect();
       positions[key] = {top, left};
     });

@@ -1,0 +1,12 @@
+.PageWithMenu-root {
+  min-height: 100%;
+}
+
+.PageWithMenu-menu {
+  width: 230px;
+  position: fixed;
+}
+
+.PageWithMenu-content {
+  margin-left: 270px;
+}

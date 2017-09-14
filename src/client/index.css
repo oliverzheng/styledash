@@ -6,4 +6,5 @@ html, body {
   font-family: 'PT Sans', sans-serif;
   background: #FCFCFC;
   color: #696969;
+  min-height: 100%;
 }
