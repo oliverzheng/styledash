@@ -115,7 +115,8 @@ async function main(): Promise<*> {
     printAction('Saving new repo to database...');
     const repoID: string = (await executeSQL(
       mysqlConnection,
-      SQL`INSERT INTO repository (name) VALUES (${repoName})`
+      SQL`INSERT INTO repository (name, last_updated_timestamp)
+          VALUES (${repoName}, UNIX_TIMESTAMP())`
     )).insertId;
     printActionResult(`Saved as repo #${repoID}.`);
 
