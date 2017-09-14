@@ -17,7 +17,7 @@ import './PageWithMenu.css';
 
 export type Section = {
   title: string,
-  children: React$Element<*>,
+  children: ?React$Element<*>,
   subSections?: ?Array<Section>,
 };
 
@@ -123,7 +123,7 @@ export default class PageWithMenu extends React.Component<PropType> {
         )}>
         {section.title}
       </SectionHeader>,
-      React.cloneElement(section.children, { key }),
+      section.children && React.cloneElement(section.children, { key }),
     ];
     if (section.subSections) {
       const childrenContent = section.subSections.map(
@@ -171,7 +171,7 @@ export default class PageWithMenu extends React.Component<PropType> {
       <div className="PageWithMenu-root">
         <PageHeader />
         <FullWidthPageContainer className="PageWithMenu-root">
-          <PageTitle className={Spacing.margin.bottom.n28}>
+          <PageTitle className={Spacing.margin.bottom.n20}>
             {pageTitle}
           </PageTitle>
           {menu}
