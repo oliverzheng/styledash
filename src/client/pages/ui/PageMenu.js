@@ -7,8 +7,8 @@ import './PageMenu.css';
 
 export type ItemPropType = {
   text: string,
-  href: string,
   highlighted?: boolean,
+  onClick?: () => any,
   children?: ?React$Node,
 };
 
@@ -18,13 +18,23 @@ export class PageMenuItem extends React.Component<ItemPropType> {
   };
 
   render(): React$Element<*> {
-    const {text, href, highlighted, children} = this.props;
+    const {text, highlighted, children} = this.props;
+    const href = '#'; // es-lint complains about this if it was inline.
     return (
       <li className={classnames({ 'PageMenu-highlighted': highlighted })}>
-        <a href={href}>{text}</a>
+        <a href={href} onClick={this._onClick}>{text}</a>
         {children}
       </li>
     );
+  }
+
+  _onClick = (e: SyntheticEvent<*>) => {
+    e.preventDefault();
+
+    const {onClick} = this.props;
+    if (onClick) {
+      onClick();
+    }
   }
 }
 

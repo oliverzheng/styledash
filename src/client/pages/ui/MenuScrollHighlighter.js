@@ -3,9 +3,11 @@
 import React from 'react';
 import window from 'global/window';
 import document from 'global/document';
+import invariant from 'invariant';
 
 import ElementScrollPositionTracker, {
   type ScrollPosition,
+  type ScrollPositions,
 } from '../../common/ui/ElementScrollPositionTracker';
 
 type PropType = {
@@ -16,6 +18,13 @@ type PropType = {
 type StateType = {
   highlightedKey: ?string,
 };
+
+type SortedPositions = Array<{
+  key: string,
+  position: ScrollPosition,
+}>;
+
+const VIEWPORT_TOP_SECTION = 0.3;
 
 export default class MenuScrollHighlighter extends React.Component<PropType, StateType> {
   state = {
@@ -30,7 +39,74 @@ export default class MenuScrollHighlighter extends React.Component<PropType, Sta
     this.props.tracker.removeListener(this._positionsListener);
   }
 
-  _positionsListener = (positions: {[key: string]: ScrollPosition}) => {
+  scrollTo(key: string): void {
+    const positions = this.props.tracker.getPositions();
+    const currentPosition = positions[key];
+    // We could ignore this, but I'd rather find the bug that causes this
+    invariant(currentPosition != null, 'Cannot find current position');
+
+    const sortedPositions = this._getSortedPositions(positions);
+    // For scrolling, we only want to scroll if the element is not already
+    // highlighted.
+    if (this._getHighlightedKey(sortedPositions) === key) {
+      return;
+    }
+
+    // We only want to scroll a minimal amount. If we need to scroll down (the
+    // element is below where it needs to be), then set its top to just make the
+    // bottom of the viewport cutoff; if we need to scroll up (the element is
+    // above), set its top to 0.
+    if (currentPosition.top < 0) {
+      // Align to top of the page
+      currentPosition.element.scrollIntoView(true);
+    } else {
+      // Find the one before this one
+      let previousPosition: ?ScrollPosition = null;
+      sortedPositions.forEach((position, i) => {
+        if (i === 0) {
+          return;
+        }
+        if (position.key === key) {
+          previousPosition = sortedPositions[i - 1].position;
+        }
+      });
+
+      let scrollDistanceToHidePrevious = 0;
+      if (previousPosition) {
+        scrollDistanceToHidePrevious =
+          previousPosition.top + previousPosition.height;
+      }
+
+      const viewportHeightCutoff = window.innerHeight * VIEWPORT_TOP_SECTION;
+      const scrollOffset = Math.max(
+        currentPosition.top - viewportHeightCutoff,
+        scrollDistanceToHidePrevious,
+      );
+      window.scrollBy(0, scrollOffset);
+    }
+  }
+
+  _positionsListener = (positions: ScrollPositions) => {
+    const highlightedKey =
+      this._getHighlightedKey(this._getSortedPositions(positions));
+    this.setState({ highlightedKey });
+  }
+
+  _getSortedPositions(
+    positions: ScrollPositions,
+  ): SortedPositions {
+    const sortedPositions = [];
+    Object.keys(positions).forEach(key =>
+      sortedPositions.push({
+        key,
+        position: positions[key],
+      })
+    );
+    sortedPositions.sort((a, b) => a.position.top - b.position.top);
+    return sortedPositions;
+  }
+
+  _getHighlightedKey(sortedPositions: SortedPositions): ?string {
     // It is assumed that all elements being tracked are vertically stacked with
     // no gaps. I.e. the top of one elem is the bottom of the previous.
 
@@ -52,17 +128,8 @@ export default class MenuScrollHighlighter extends React.Component<PropType, Sta
     //   scroll position the 2nd-last element won't reach 1/2 the viewport, then
     //   it'll be impossible for it to be highlighted.
 
-    const sortedPositions = [];
-    Object.keys(positions).forEach(key =>
-      sortedPositions.push({
-        key,
-        position: positions[key],
-      })
-    );
-    sortedPositions.sort((a, b) => a.position.top - b.position.top);
     if (sortedPositions.length === 0) {
-      this.setState({ highlightedKey: null });
-      return;
+      return null;
     }
 
     let highlightedKey = null;
@@ -81,7 +148,8 @@ export default class MenuScrollHighlighter extends React.Component<PropType, Sta
       highlightedKey = lastPosition.key;
 
     } else {
-      const VIEWPORT_TOP_SECTION = 0.3;
+      // TODO make use of the element's height so when a heading disappears
+      // completely, only then change the highlight.
       const viewportHeightCutoff = viewportHeight * VIEWPORT_TOP_SECTION;
       const keysWithinTopOfViewport = sortedPositions.filter(
         p =>
@@ -100,7 +168,7 @@ export default class MenuScrollHighlighter extends React.Component<PropType, Sta
       }
     }
 
-    this.setState({ highlightedKey });
+    return highlightedKey;
   }
 
   render(): React$Node {

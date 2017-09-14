@@ -10,10 +10,15 @@ import nullthrows from 'nullthrows';
 export type ScrollPosition = {
   top: number,
   left: number,
+  height: number,
+  width: number,
+  element: HTMLElement,
 };
 
+export type ScrollPositions = {[key: string]: ScrollPosition};
+
 export type ScrollPositionsListener =
-  (positions: {[key: string]: ScrollPosition}) => any;
+  (positions: ScrollPositions) => any;
 
 export default class ElementScrollPositionTracker {
   _elements: {[key: string]: React$Component<*>} = {};
@@ -40,6 +45,10 @@ export default class ElementScrollPositionTracker {
     this._tellListeners(this._listeners);
   }
 
+  removeAllElementsFromTracking(): void {
+    this._elements = {};
+  }
+
   removeElementsFromTracking(
     elementKeys: Array<string>,
   ): void {
@@ -61,18 +70,28 @@ export default class ElementScrollPositionTracker {
     }
   }
 
-  _onScroll = () => {
-    this._tellListeners(this._listeners);
-  }
-
-  _tellListeners(listeners: Array<ScrollPositionsListener>): void {
+  getPositions(): ScrollPositions {
     const positions = {};
     Object.keys(this._elements).forEach(key => {
       const el = nullthrows(ReactDOM.findDOMNode(this._elements[key]));
       invariant(el instanceof HTMLElement, 'Must be a DOM node');
       const {top, left} = el.getBoundingClientRect();
-      positions[key] = {top, left};
+      positions[key] = {
+        top,
+        left,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+        element: el,
+      };
     });
-    listeners.forEach(listener => listener(positions));
+    return positions;
+  }
+
+  _onScroll = () => {
+    this._tellListeners(this._listeners);
+  }
+
+  _tellListeners(listeners: Array<ScrollPositionsListener>): void {
+    listeners.forEach(listener => listener(this.getPositions()));
   }
 }

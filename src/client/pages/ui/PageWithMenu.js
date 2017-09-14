@@ -28,6 +28,8 @@ type PropType = {
 
 export default class PageWithMenu extends React.Component<PropType> {
   _scrollTracker: ?ElementScrollPositionTracker;
+  _headers: {[key: string]: React$Component<*>} = {};
+  _menuHighlighter: ?MenuScrollHighlighter;
 
   componentWillMount() {
     this._scrollTracker = new ElementScrollPositionTracker();
@@ -42,11 +44,8 @@ export default class PageWithMenu extends React.Component<PropType> {
   }
 
   _registerRefsToTracker() {
-    const elements = {};
-    Object.keys(this.refs).forEach(refKey => {
-      elements[refKey] = this.refs[refKey];
-    });
-    nullthrows(this._scrollTracker).addElementsToTrack(elements);
+    nullthrows(this._scrollTracker).removeAllElementsFromTracking();
+    nullthrows(this._scrollTracker).addElementsToTrack(this._headers);
   }
 
   componentWillReceiveNewProps(nextProps: PropType) {
@@ -88,11 +87,23 @@ export default class PageWithMenu extends React.Component<PropType> {
       <PageMenuItem
         key={key}
         text={title}
-        href="#"
+        onClick={() => this._scrollTo(key)}
         highlighted={key === highlightedHeaderRefKey}>
         {children}
       </PageMenuItem>
     );
+  }
+
+  _scrollTo(key: string) {
+    nullthrows(this._menuHighlighter).scrollTo(key);
+  }
+
+  _setHeaderRef = (key: string, ref: ?React$Component<*>) => {
+    if (ref) {
+      this._headers[key] = ref;
+    } else {
+      delete this._headers[key];
+    }
   }
 
   _renderSectionContent(
@@ -103,7 +114,7 @@ export default class PageWithMenu extends React.Component<PropType> {
     let content = [
       <SectionHeader
         key={key + '-header'}
-        ref={key}
+        ref={ref => this._setHeaderRef(key, ref)}
         className={classnames(
           Spacing.margin.bottom.n28,
           {
@@ -128,11 +139,16 @@ export default class PageWithMenu extends React.Component<PropType> {
     return content;
   }
 
+  _setMenuHighlighter = (highlighter: ?MenuScrollHighlighter) => {
+    this._menuHighlighter = highlighter;
+  }
+
   render(): React$Element<*> {
     const {pageTitle, sections} = this.props;
 
     const menu = (
       <MenuScrollHighlighter
+        ref={this._setMenuHighlighter}
         tracker={nullthrows(this._scrollTracker)}
         render={highlightedKey =>
           <PageMenu className="PageWithMenu-menu">
