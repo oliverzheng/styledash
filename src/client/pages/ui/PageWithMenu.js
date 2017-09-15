@@ -17,7 +17,8 @@ import PageMenu, { PageMenuItem } from './PageMenu';
 import './PageWithMenu.css';
 
 export type Section = {
-  title: string,
+  menuTitle: string,
+  sectionTitle: React$Node,
   children: ?React$Element<*>,
   subSections?: ?Array<Section>,
 };
@@ -67,7 +68,7 @@ export default class PageWithMenu extends React.Component<PropType> {
     section: Section,
     highlightedHeaderRefKey: ?string,
   ): React$Node {
-    const {title, subSections} = section;
+    const {menuTitle, subSections} = section;
     let children = null;
     if (subSections && subSections.length > 0) {
       children = (
@@ -87,7 +88,7 @@ export default class PageWithMenu extends React.Component<PropType> {
     return (
       <PageMenuItem
         key={key}
-        text={title}
+        text={menuTitle}
         onClick={() => this._scrollTo(key)}
         highlighted={key === highlightedHeaderRefKey}>
         {children}
@@ -122,7 +123,7 @@ export default class PageWithMenu extends React.Component<PropType> {
             [Spacing.margin.top.n28]: marginBefore,
           },
         )}>
-        {section.title}
+        {section.sectionTitle}
       </SectionHeader>,
       section.children && React.cloneElement(section.children, { key }),
     ];

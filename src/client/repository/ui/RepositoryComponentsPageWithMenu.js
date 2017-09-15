@@ -2,12 +2,16 @@
 
 import React from 'react';
 import nullthrows from 'nullthrows';
+import classnames from 'classnames';
 
 import groupPaths, { type PathGroup } from '../../util/groupPaths';
 
 import PageWithMenu, { type Section } from '../../pages/ui/PageWithMenu';
+import TextColor from '../../common/ui/TextColor';
 import RepositoryComponentsGrid from './RepositoryComponentsGrid';
 import { type RepositoryComponentsCardProps } from './RepositoryComponentsCard';
+
+import './RepositoryComponentsPageWithMenu.css';
 
 type PropType = {
   repository: {
@@ -34,7 +38,7 @@ export default class RepositoryComponentsPageWithMenu extends React.Component<Pr
     let sections = [];
     if (componentsGroupChildren) {
       sections = Object.keys(componentsGroupChildren).map(path =>
-        this._componentGroupToSection(path, componentsGroupChildren[path])
+        this._componentGroupToSection(path, path, componentsGroupChildren[path])
       );
     }
 
@@ -48,7 +52,8 @@ export default class RepositoryComponentsPageWithMenu extends React.Component<Pr
   }
 
   _componentGroupToSection(
-    header: string,
+    relativePath: string,
+    fullPath: string,
     group: PathGroup<RepositoryComponentsCardProps>,
   ): Section {
     let componentsRender: ?React$Element<*> = null;
@@ -68,12 +73,17 @@ export default class RepositoryComponentsPageWithMenu extends React.Component<Pr
           .filter(childPath => !nullthrows(children[childPath]).content)
           .map(
             childPath =>
-              this._componentGroupToSection(childPath, children[childPath])
+              this._componentGroupToSection(
+                childPath,
+                fullPath + '/' + childPath,
+                children[childPath],
+              )
           );
     }
 
     return {
-      title: header,
+      menuTitle: relativePath,
+      sectionTitle: this._renderSectionTitle(fullPath),
       children: componentsRender,
       subSections: subSections,
     };
@@ -85,5 +95,27 @@ export default class RepositoryComponentsPageWithMenu extends React.Component<Pr
     return (
       <RepositoryComponentsGrid components={components} />
     );
+  }
+
+  _renderSectionTitle(fullPath: string): React$Node {
+    const pieces = [];
+    fullPath.split('/').forEach((s, i) => {
+      if (i !== 0) {
+        pieces.push(
+          <span
+            key={i}
+            className={
+              classnames(
+                TextColor.reallyLight,
+                'RepositoryComponentsPageWithMenu-sectionHeader',
+              )
+            }>
+            /
+          </span>
+        );
+      }
+      pieces.push(s);
+    });
+    return pieces;
   }
 }
