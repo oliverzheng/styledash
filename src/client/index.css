@@ -4,6 +4,7 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: 'PT Sans', sans-serif;
+  font-size: 16px;
   background: #FCFCFC;
   color: #696969;
   min-height: 100%;

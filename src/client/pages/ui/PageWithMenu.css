@@ -1,5 +1,7 @@
 .PageWithMenu-root {
   min-height: 100%;
+  box-sizing: border-box;
+  padding-bottom: 30px;
 }
 
 .PageWithMenu-menu {

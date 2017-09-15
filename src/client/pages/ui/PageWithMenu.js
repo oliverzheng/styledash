@@ -5,7 +5,9 @@ import classnames from 'classnames';
 import nullthrows from 'nullthrows';
 
 import SectionHeader from '../../common/ui/SectionHeader';
-import FixedWidthPageContainer from './FixedWidthPageContainer';
+import FixedWidthPageContainer, {
+  type FixedWidthPageContainerProps,
+} from './FixedWidthPageContainer';
 import PageTitle from './PageTitle';
 import Spacing from '../../common/ui/Spacing';
 import ElementScrollPositionTracker from '../../common/ui/ElementScrollPositionTracker';
@@ -20,7 +22,7 @@ export type Section = {
   subSections?: ?Array<Section>,
 };
 
-type PropType = {
+type PropType = FixedWidthPageContainerProps & {
   pageTitle: string,
   sections: Array<Section>,
 };
@@ -143,7 +145,7 @@ export default class PageWithMenu extends React.Component<PropType> {
   }
 
   render(): React$Element<*> {
-    const {pageTitle, sections} = this.props;
+    const {pageTitle, sections, ...restProps} = this.props;
 
     const menu = (
       <MenuScrollHighlighter
@@ -167,7 +169,7 @@ export default class PageWithMenu extends React.Component<PropType> {
     );
 
     return (
-      <FixedWidthPageContainer className="PageWithMenu-root">
+      <FixedWidthPageContainer className="PageWithMenu-root" {...restProps}>
         <PageTitle className={Spacing.margin.bottom.n20}>
           {pageTitle}
         </PageTitle>

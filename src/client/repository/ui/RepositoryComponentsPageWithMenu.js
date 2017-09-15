@@ -42,6 +42,7 @@ export default class RepositoryComponentsPageWithMenu extends React.Component<Pr
       <PageWithMenu
         pageTitle={repository.name}
         sections={sections}
+        wide={true}
       />
     );
   }

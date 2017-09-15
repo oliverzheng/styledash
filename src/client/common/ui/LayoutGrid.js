@@ -26,7 +26,8 @@ export default class LayoutGrid extends React.Component<PropType> {
     const lastChunk = chunks[chunks.length - 1];
 
     // Fill the last row so it's complete
-    for (let i = 0; i < (columnCount - lastChunk.length); i++) {
+    const lastChunkCount = lastChunk.length;
+    for (let i = 0; i < (columnCount - lastChunkCount); i++) {
       lastChunk.push(null);
     }
 

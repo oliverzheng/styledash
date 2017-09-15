@@ -32,6 +32,21 @@ export class CardSection extends React.Component<CardSectionPropType> {
   }
 }
 
+export class CardFooterSection extends React.Component<*> {
+  render(): React$Element<*> {
+    return (
+      <div
+        className={classnames(
+          'Card-section',
+          'Card-section-footer',
+          this.props.className,
+        )}>
+        {this.props.children}
+      </div>
+    );
+  }
+}
+
 export default class Card extends React.Component<*> {
   render(): React$Element<*> {
     let {children} = this.props;
@@ -39,7 +54,8 @@ export default class Card extends React.Component<*> {
     let hasCardSection = null;
     React.Children.forEach(children, child => {
       const isChildCardSection =
-        typeof child === 'object' && child.type === CardSection;
+        typeof child === 'object' &&
+        (child.type === CardSection || child.type === CardFooterSection);
 
       if (hasCardSection == null) {
         hasCardSection = isChildCardSection;

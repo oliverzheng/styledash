@@ -15,3 +15,10 @@
   flex-grow: 1;
   overflow: hidden;
 }
+
+.Card-section-footer {
+  padding-top: 15px;
+  margin: 0 -15px -15px -15px;
+  padding: 10px 15px;
+  border-top: 1px solid #CACACA;
+}

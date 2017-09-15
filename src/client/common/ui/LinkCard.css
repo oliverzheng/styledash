@@ -1,5 +1,8 @@
-.LinkCard-root:hover .LinkCard-card {
-  border-color: #919191;
+.LinkCard-root:hover .LinkCard-card,
+/* TODO shouldn't use other component's classnames without making it explicitly
+ * usable somehow */
+.LinkCard-root:hover .Card-section-footer {
+  border-color: #B1B1B1;
 }
 
 .LinkCard-root:hover .LinkCard-linkText-darken {
