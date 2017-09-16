@@ -13,3 +13,5 @@ export const SERVER_IS_LOGGED_IN_PATH = '/api/isLoggedIn';
 export const SERVER_IS_LOGGED_IN_ADDRESS = `${SERVER_ADDRESS}${SERVER_IS_LOGGED_IN_PATH}`;
 export const SERVER_REGISTER_PATH = '/api/register';
 export const SERVER_REGISTER_ADDRESS = `${SERVER_ADDRESS}${SERVER_REGISTER_PATH}`;
+
+export const CLIENT_COMPONENT_RENDER_PATH = '/componentRenderIFrame';

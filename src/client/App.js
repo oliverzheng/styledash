@@ -24,7 +24,12 @@ import LoginPage from './pages/LoginPage';
 import RepositoryPage from './pages/RepositoryPage';
 import ComponentPage from './pages/ComponentPage';
 
+import './App.css';
+
 export default class App extends React.Component<*> {
+
+  static htmlBodyClassName = 'App-htmlBody';
+
   componentWillMount(): void {
     Relay.injectNetworkLayer(
       new Relay.DefaultNetworkLayer(

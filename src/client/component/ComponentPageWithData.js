@@ -13,6 +13,7 @@ type PropType = {
     name: string,
     repository: {
       name: string,
+      externalCSSURI: ?string,
     },
     filepath: string,
     compiledBundleURI: string,

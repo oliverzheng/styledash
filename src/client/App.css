@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css?family=PT+Sans');
+
+.App-htmlBody {
+  font-family: 'PT Sans', sans-serif;
+  font-size: 16px;
+  /* Makes Chrome font rendering look like in Sketch */
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+
+  background: #FCFCFC;
+  color: #696969;
+}

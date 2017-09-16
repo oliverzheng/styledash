@@ -1,16 +1,5 @@
-@import url('https://fonts.googleapis.com/css?family=PT+Sans');
-
 html, body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-
-  font-family: 'PT Sans', sans-serif;
-  font-size: 16px;
-  /* Makes Chrome font rendering look like in Sketch */
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-
-  background: #FCFCFC;
-  color: #696969;
 }
