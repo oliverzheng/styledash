@@ -83,6 +83,7 @@ export default class App extends React.Component<*> {
       <Router
         history={browserHistory}
         render={applyRouterMiddleware(useRelay)}
+        onUpdate={this._onUpdate}
         environment={Relay.Store}>
         <Route
           path="/"
@@ -113,6 +114,15 @@ export default class App extends React.Component<*> {
         />
       </Router>
     );
+  }
+
+  _onUpdate() {
+    // React-router doesn't scroll to top on page navigations. :|
+    // `this` is actually the router for this callback
+    const {action} = (this: any).state.location;
+    if (action !== 'POP') {
+      window.scrollTo(0, 0);
+    }
   }
 
   async _requireAuth(_: Object, replace: Function, callback: Function) {
