@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
+
+.cm-s-code-editor.CodeMirror {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 14px;
+  background: 0;
+  border: 1px solid #CCC;
+  color: #696969;
+  line-height: 22px;
+}
+
+.cm-s-code-editor .CodeMirror-cursor {
+  border-color: #696969;
+}

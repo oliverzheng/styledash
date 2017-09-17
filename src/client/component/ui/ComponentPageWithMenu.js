@@ -8,6 +8,7 @@ import nullthrows from 'nullthrows';
 import ComponentRenderIFrame from './ComponentRenderIFrame';
 import defaultPropValue from '../../../defaultPropValue';
 import PageWithMenu from '../../pages/ui/PageWithMenu';
+import CodeEditor from './CodeEditor';
 
 import './ComponentPageWithMenu.css'
 
@@ -68,6 +69,7 @@ export default class ComponentPageWithMenu extends React.Component<PropType, Sta
           title="example"
           onReady={this._onIFrameReady}
         />
+        <CodeEditor />
         <p>Example:</p>
         <div key="example-defaultValues">
           <p>Default props:</p>
