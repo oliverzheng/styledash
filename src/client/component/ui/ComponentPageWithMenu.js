@@ -69,7 +69,7 @@ export default class ComponentPageWithMenu extends React.Component<PropType, Sta
           title="example"
           onReady={this._onIFrameReady}
         />
-        <CodeEditor />
+        <CodeEditor onCodeChange={(transformedCode) => console.log(transformedCode)} />
         <p>Example:</p>
         <div key="example-defaultValues">
           <p>Default props:</p>
