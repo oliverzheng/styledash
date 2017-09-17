@@ -3,19 +3,14 @@
 import React from 'react';
 import nullthrows from 'nullthrows';
 
-import ComponentRenderer from './ComponentRenderer';
+import ComponentRenderer, {type ComponentRendererProps} from './ComponentRenderer';
 import {IFrameChannel} from './IFrameChannel';
 import {type Message} from './IFrameChannelMessage';
 
 import './ComponentRenderIFrameApp.css';
 
-type RenderComponentType = {
-  compiledBundleURI: string,
-  externalCSSURI: ?string,
-};
-
 type StateType = {
-  renderComponent: ?RenderComponentType,
+  rendererProps: ?ComponentRendererProps,
 };
 
 export default class ComponentRenderIFrameApp extends React.Component<*, StateType> {
@@ -23,7 +18,7 @@ export default class ComponentRenderIFrameApp extends React.Component<*, StateTy
   static htmlBodyClassName = 'ComponentRenderIFrameApp-htmlBody';
 
   state = {
-    renderComponent: null,
+    rendererProps: null,
   };
   _channel: ?IFrameChannel;
 
@@ -37,9 +32,10 @@ export default class ComponentRenderIFrameApp extends React.Component<*, StateTy
   _onChannelMessage = (message: Message) => {
     if (message.type === 'renderComponent') {
       this.setState({
-        renderComponent: {
-          compiledBundleURI: message.compiledBundleURI,
-          externalCSSURI: message.externalCSSURI,
+        rendererProps: {
+          transformedCode: message.transformedCode,
+          component: message.component,
+          repository: message.repository,
         },
       });
     }
@@ -52,18 +48,13 @@ export default class ComponentRenderIFrameApp extends React.Component<*, StateTy
   }
 
   render() {
-    const {renderComponent} = this.state;
-    if (renderComponent) {
-      return this._renderRenderer(renderComponent);
+    const {rendererProps} = this.state;
+    if (!rendererProps) {
+      return null;
     }
-    return <div>hello world</div>;
-  }
-
-  _renderRenderer(renderComponent: RenderComponentType) {
     return (
       <ComponentRenderer 
-        compiledBundleURI={renderComponent.compiledBundleURI}
-        externalCSSURI={renderComponent.externalCSSURI}
+        {...rendererProps}
       />
     );
   }

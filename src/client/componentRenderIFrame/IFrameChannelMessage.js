@@ -7,8 +7,14 @@ export type Message = {
   message: string,
 } | {
   type: 'renderComponent',
-  compiledBundleURI: string,
-  externalCSSURI: ?string,
+  transformedCode: string,
+  component: {
+    name: string,
+    compiledBundleURI: string,
+  },
+  repository: {
+    externalCSSURI: ?string,
+  },
 };
 
 export type MessageWrapper = {

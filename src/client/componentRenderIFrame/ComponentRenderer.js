@@ -3,31 +3,38 @@
 import React from 'react';
 
 import loadComponentBundle from '../util/loadComponentBundle';
+import getRenderElement from './getRenderElement';
 
 import {SERVER_ADDRESS} from '../../clientserver/serverConfig';
 
-type PropType = {
-  compiledBundleURI: string,
-  externalCSSURI: ?string,
+export type ComponentRendererProps = {
+  transformedCode: string,
+  component: {
+    name: string,
+    compiledBundleURI: string,
+  },
+  repository: {
+    externalCSSURI: ?string,
+  },
 };
 
 type StateType = {
   bundledComponent: ?Class<React.Component<*>>,
 };
 
-export default class ComponentRenderer extends React.Component<PropType, StateType> {
+export default class ComponentRenderer extends React.Component<ComponentRendererProps, StateType> {
   state = {
     bundledComponent: null,
   };
 
   componentDidMount(): void {
-    this._loadComponentBundle(this.props.compiledBundleURI);
+    this._loadComponentBundle(this.props.component.compiledBundleURI);
   }
 
-  componentWillReceiveProps(nextProps: PropType): void {
-    const {compiledBundleURI} = nextProps;
+  componentWillReceiveProps(nextProps: ComponentRendererProps): void {
+    const {compiledBundleURI} = nextProps.component;
     if (
-      compiledBundleURI !== this.props.compiledBundleURI
+      compiledBundleURI !== this.props.component.compiledBundleURI
     ) {
       this._loadComponentBundle(compiledBundleURI);
     }
@@ -42,22 +49,24 @@ export default class ComponentRenderer extends React.Component<PropType, StateTy
   }
 
   render(): ?React$Element<*> {
-    const BundledComponent = this.state.bundledComponent;
-    if (!BundledComponent) {
+    const bundledComponent = this.state.bundledComponent;
+    if (!bundledComponent) {
       return null;
     }
 
+    const {transformedCode, component, repository} = this.props;
+
     let externalCSSStyle = null;
-    if (this.props.externalCSSURI) {
+    if (repository.externalCSSURI) {
       externalCSSStyle = (
-        <link href={this.props.externalCSSURI} rel="stylesheet" />
+        <link href={repository.externalCSSURI} rel="stylesheet" />
       );
     }
 
     return (
       <div>
         {externalCSSStyle}
-        <BundledComponent />
+        {getRenderElement(component.name, bundledComponent, transformedCode)}
       </div>
     );
   }

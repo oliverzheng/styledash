@@ -5,10 +5,9 @@ import React from 'react';
 import invariant from 'invariant';
 import nullthrows from 'nullthrows';
 
-import ComponentRenderIFrame from './ComponentRenderIFrame';
+import ComponentExample from './ComponentExample';
 import defaultPropValue from '../../../defaultPropValue';
 import PageWithMenu from '../../pages/ui/PageWithMenu';
-import CodeEditor from './CodeEditor';
 
 import './ComponentPageWithMenu.css'
 
@@ -45,14 +44,6 @@ export default class ComponentPageWithMenu extends React.Component<PropType, Sta
     overrideReactDocModified: false,
   };
 
-  _onIFrameReady = (iframe: ComponentRenderIFrame) => {
-    iframe.sendMessage({
-      type: 'renderComponent',
-      compiledBundleURI: this.props.component.compiledBundleURI,
-      externalCSSURI: this.props.component.repository.externalCSSURI,
-    });
-  }
-
   render(): ?React$Element<*> {
     const {component} = this.props;
 
@@ -64,12 +55,16 @@ export default class ComponentPageWithMenu extends React.Component<PropType, Sta
 
     const stuff = (
       <div>
-        <ComponentRenderIFrame
-          ref="iframe"
-          title="example"
-          onReady={this._onIFrameReady}
+        <ComponentExample
+          exampleID="example"
+          component={{
+            name: component.name,
+            compiledBundleURI: component.compiledBundleURI,
+          }}
+          repository={{
+            externalCSSURI: component.repository.externalCSSURI,
+          }}
         />
-        <CodeEditor onCodeChange={(transformedCode) => console.log(transformedCode)} />
         <p>Example:</p>
         <div key="example-defaultValues">
           <p>Default props:</p>
