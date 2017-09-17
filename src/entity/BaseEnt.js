@@ -83,6 +83,13 @@ export default class BaseEnt {
     return data;
   }
 
+  _getNullableStringData(columnName: string): ?string {
+    if (this._getData(columnName) == null) {
+      return null;
+    }
+    return this._getStringData(columnName);
+  }
+
   _getNumberData(columnName: string): number {
     const data = this._getData(columnName);
     invariant(

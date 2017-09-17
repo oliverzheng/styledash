@@ -72,8 +72,8 @@ export default class EntRepository extends BaseEnt {
     return this._getStringData('name');
   }
 
-  getExternalCSSUrl(): string {
-    return this._getStringData('external_css_url');
+  getExternalCSSUrl(): ?string {
+    return this._getNullableStringData('external_css_url');
   }
 
   getLastUpdatedTimestamp(): number {
@@ -99,7 +99,7 @@ export default class EntRepository extends BaseEnt {
   /* TODO (graphql resolver) */
   name() { return this.getName(); }
   repositoryID() { return this.getID(); }
-  externalCSSUrl() { return this.getExternalCSSUrl(); }
+  externalCSSURI() { return this.getExternalCSSUrl(); }
   componentsCount() { return this.genComponentsCount(); }
   components() { return this.genComponents(); }
   lastUpdatedTimestamp() { return this.getLastUpdatedTimestamp(); }
