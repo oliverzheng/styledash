@@ -8,7 +8,7 @@ export default function getRenderElement(
   componentName: string,
   component: Class<React.Component<*>>,
   transformedCode: string,
-) {
+): React$Node {
   // Make this in the global scope so eval can get it
   invariant(
     !global.hasOwnProperty(componentName),
@@ -17,11 +17,14 @@ export default function getRenderElement(
   global[componentName] = component;
   global['React'] = React;
 
-  // eslint-disable-next-line no-eval
-  const element = eval(transformedCode);
-
-  // Reset it
-  delete global[componentName];
+  let element;
+  try {
+    // eslint-disable-next-line no-eval
+    element = eval(transformedCode);
+  } finally {
+    // Reset it
+    delete global[componentName];
+  }
 
   return element;
 }
