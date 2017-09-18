@@ -10,6 +10,7 @@ import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
 import EntRepository from '../entity/EntRepository';
 import EntComponent from '../entity/EntComponent';
+import EntExample from '../entity/EntExample';
 import Viewer from './Viewer';
 
 const schema = buildSchema(
@@ -39,6 +40,8 @@ async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
       return await EntRepository.genNullable(vc, nullthrows(objID));
     case 'component':
       return await EntComponent.genNullable(vc, nullthrows(objID));
+    case 'example':
+      return await EntExample.genNullable(vc, nullthrows(objID));
   }
 
   return null;
@@ -64,6 +67,9 @@ const root = {
   },
   component: async (args: {componentID: string}, context: Context) => {
     return await EntComponent.genNullable(context.vc, args.componentID);
+  },
+  example: async (args: {exampleID: string}, context: Context) => {
+    return await EntExample.genNullable(context.vc, args.exampleID);
   },
 
   // Mutation

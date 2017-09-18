@@ -27,6 +27,32 @@ export type PrivacyType<EntType> = {
   ): Promise<boolean>,
 };
 
+export function genDeferCanSeePrivacyTo<EntType: BaseEnt>(
+  obj: EntType,
+): Promise<boolean> {
+  return obj.constructor._getEntConfig().privacy.genCanViewerSee(obj);
+}
+
+export function genDeferCanMutatePrivacyTo<EntType: BaseEnt>(
+  obj: EntType,
+): Promise<boolean> {
+  return obj.constructor._getEntConfig().privacy.genCanViewerMutate(obj);
+}
+
+export function genDeferCanDeletePrivacyTo<EntType: BaseEnt>(
+  obj: EntType,
+): Promise<boolean> {
+  return obj.constructor._getEntConfig().privacy.genCanViewerDelete(obj);
+}
+
+export function genDeferCanCreatePrivacyTo<EntType: BaseEnt>(
+  vc: ViewerContext,
+  obj: EntType,
+  data: {[columnName: string]: mixed},
+): Promise<boolean> {
+  return obj.constructor._getEntConfig().privacy.genCanViewerCreate(vc, data);
+}
+
 export default class BaseEnt {
   // Child needs to override
   static _getEntConfig(): EntConfig<this> {

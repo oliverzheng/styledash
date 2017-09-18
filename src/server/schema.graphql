@@ -37,6 +37,15 @@ type Component implements Node {
   compiledBundleURI: String!
   reactDoc: String!
   overrideReactDoc: String
+  examples: [Example]!
+}
+
+type Example implements Node {
+  id: ID!
+  exampleID: ID!
+  name: String!
+  component: Component!
+  code: String!
 }
 
 type Query {
@@ -45,6 +54,7 @@ type Query {
   user(userID: ID!): User
   repository(repositoryID: ID!): Repository
   component(componentID: ID!): Component
+  example(exampleID: ID!): Example
 }
 
 

@@ -10,6 +10,7 @@ import BaseEnt, {
 } from './BaseEnt';
 import EntRepository from './EntRepository';
 import EntRepositoryPermission from './EntRepositoryPermission';
+import EntExample from './EntExample';
 
 const componentPrivacy: PrivacyType<EntComponent> = {
   async genCanViewerSee(obj: EntComponent): Promise<boolean> {
@@ -106,6 +107,10 @@ export default class EntComponent extends BaseEnt {
     return bundle;
   }
 
+  async genExamples(): Promise<Array<EntExample>> {
+    return await EntExample.genExamplesForComponent(this);
+  }
+
   // Mutations
 
   async genSetOverrideReactDoc(override: string): Promise<boolean> {
@@ -142,4 +147,5 @@ export default class EntComponent extends BaseEnt {
   compiledBundleURI() { return this.getCompiledBundleURI(); }
   reactDoc() { return this.genReactDoc(); }
   overrideReactDoc() { return this.genOverrideReactDoc(); }
+  examples() { return this.genExamples(); }
 }
