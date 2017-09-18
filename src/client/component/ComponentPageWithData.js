@@ -3,10 +3,9 @@
 import React from 'react';
 import Relay from 'react-relay/classic';
 
-import ComponentPageWithMenu from './ui/ComponentPageWithMenu';
+import PageWithMenu from '../pages/ui/PageWithMenu';
 import ComponentExampleWithData from './ComponentExampleWithData';
-
-import OverrideComponentReactDocMutation from './mutations/OverrideComponentReactDocMutation';
+import ComponentProps from './ui/ComponentProps';
 
 type PropType = {
   component: ?{
@@ -33,27 +32,34 @@ class ComponentPageWithData extends React.Component<PropType> {
       return null;
     }
 
-    return (
-      <div>
-        {
-          component.examples.map(example =>
-            <ComponentExampleWithData example={example} />
-          )
-        }
-        <ComponentPageWithMenu
-          component={component}
-          updateComponentOverrideReactDoc={this._updateComponentOverrideReactDoc}
-        />
-      </div>
-    );
-  }
+    const sections = [];
 
-  _updateComponentOverrideReactDoc = (override: string) => {
-    this.props.relay.commitUpdate(
-      new OverrideComponentReactDocMutation({
-        component: this.props.component,
-        overrideReactDoc: override,
-      }),
+    sections.push(
+      ...component.examples.map(example => ({
+        menuTitle: example.name,
+        sectionTitle: example.name,
+        children: (
+          <ComponentExampleWithData example={example} />
+        ),
+      }))
+    );
+
+    sections.push({
+      menuTitle: 'Props',
+      sectionTitle: 'Component Props',
+      children: (
+        <ComponentProps
+          reactDoc={component.reactDoc}
+        />
+      ),
+    });
+
+    return (
+      <PageWithMenu
+        pageTitle={component.name}
+        sections={sections}
+        wide={true}
+      />
     );
   }
 }
@@ -64,7 +70,6 @@ const ComponentPageWithDataContainer = Relay.createContainer(
     fragments: {
       component: () => Relay.QL`
         fragment on Component {
-          ${OverrideComponentReactDocMutation.getFragment('component')}
           componentID
           name
           repository {
@@ -76,6 +81,7 @@ const ComponentPageWithDataContainer = Relay.createContainer(
           reactDoc
           overrideReactDoc
           examples {
+            name
             ${ComponentExampleWithData.getFragment('example')}
           }
         }
