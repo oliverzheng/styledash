@@ -8,6 +8,7 @@ import './Card.css';
 
 type CardSectionPropType = {
   fillHeight?: boolean,
+  noPadding?: boolean,
   className?: ?string,
   children: React$Node,
 };
@@ -16,6 +17,7 @@ type CardSectionPropType = {
 export class CardSection extends React.Component<CardSectionPropType> {
   static defaultProps = {
     fillHeight: false,
+    noPadding: false,
   };
 
   render(): React$Element<*> {
@@ -24,7 +26,10 @@ export class CardSection extends React.Component<CardSectionPropType> {
         className={classnames(
           'Card-section',
           this.props.className,
-          { 'Card-section-fillHeight': this.props.fillHeight },
+          {
+            'Card-section-fillHeight': this.props.fillHeight,
+            'Card-section-noPadding': this.props.noPadding,
+          },
         )}>
         {this.props.children}
       </div>

@@ -5,6 +5,9 @@ import nullthrows from 'nullthrows';
 
 import ComponentRenderIFrame from './ComponentRenderIFrame';
 import CodeEditor from './CodeEditor';
+import Card, { CardSection, CardFooterSection } from '../../common/ui/Card';
+
+import './ComponentExample.css';
 
 type PropType = {
   exampleID: string,
@@ -32,18 +35,22 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
 
   render(): React$Node {
     return (
-      <div>
-        <ComponentRenderIFrame
-          ref={c => this._iframe = c}
-          title={this.props.exampleID}
-          onReady={this._onIFrameReady}
-        />
-        <CodeEditor
-          initialCode={this.props.initialCode}
-          onCodeTransform={this._onCodeTransform}
-          onCodeChange={this._onCodeChange}
-        />
-      </div>
+      <Card>
+        <CardSection noPadding={true} className="ComponentExample-render">
+          <ComponentRenderIFrame
+            ref={c => this._iframe = c}
+            title={this.props.exampleID}
+            onReady={this._onIFrameReady}
+          />
+        </CardSection>
+        <CardFooterSection>
+          <CodeEditor
+            initialCode={this.props.initialCode}
+            onCodeTransform={this._onCodeTransform}
+            onCodeChange={this._onCodeChange}
+          />
+        </CardFooterSection>
+      </Card>
     );
   }
 

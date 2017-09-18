@@ -5,6 +5,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .Card-section {
@@ -21,4 +22,17 @@
   margin: 0 -15px -15px -15px;
   padding: 10px 15px;
   border-top: 1px solid #CACACA;
+}
+
+.Card-section-noPadding:first-child {
+  margin-top: -15px;
+}
+
+.Card-section-noPadding {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.Card-section-noPadding:last-child {
+  margin-bottom: -15px;
 }
