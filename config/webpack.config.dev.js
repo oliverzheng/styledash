@@ -142,6 +142,11 @@ module.exports = {
               name: 'static/media/[name].[hash:8].[ext]',
             },
           },
+          {
+            test: /\.svg$/,
+            exclude: /(node_modules)/,
+            loaders: ['react-svg-inline-loader'],
+          },
           // Process JS with Babel.
           {
             test: /\.(js|jsx)$/,

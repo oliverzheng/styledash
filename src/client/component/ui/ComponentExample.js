@@ -6,6 +6,7 @@ import nullthrows from 'nullthrows';
 import ComponentRenderIFrame from './ComponentRenderIFrame';
 import CodeEditor from './CodeEditor';
 import Card, { CardSection, CardFooterSection } from '../../common/ui/Card';
+import Icon from '../../common/ui/Icon';
 
 import './ComponentExample.css';
 
@@ -44,6 +45,7 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
           />
         </CardSection>
         <CardFooterSection>
+          <Icon glyph="save" />
           <CodeEditor
             initialCode={this.props.initialCode}
             onCodeTransform={this._onCodeTransform}

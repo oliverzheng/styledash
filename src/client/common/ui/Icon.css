@@ -1,0 +1,20 @@
+.Icon {
+  display: inline-block;
+}
+
+.Icon-size-18 > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.Icon-color-normal > svg {
+  fill: #696969;
+}
+
+.Icon-color-light > svg {
+  fill: #919191;
+}
+
+.Icon-color-reallyLight > svg {
+  fill: #CACACA;
+}
