@@ -9,7 +9,7 @@ import save from '../icons/save.svg';
 
 import './Icon.css';
 
-type GlyphType =
+export type GlyphType =
   'save';
 
 type IconSize = 18;
@@ -18,6 +18,8 @@ type PropType = {
   glyph: GlyphType,
   size: IconSize,
   color: Color,
+
+  className?: ?string,
 };
 
 export default class Icon extends React.Component<PropType> {
@@ -33,7 +35,12 @@ export default class Icon extends React.Component<PropType> {
       // CSS masks which would be required to change colors.
       <Glyph
         className={
-          classnames('Icon', this._getSizeClass(), this._getColorClass())
+          classnames(
+            'Icon',
+            this._getSizeClass(),
+            this._getColorClass(),
+            this.props.className,
+          )
         }
       />
     );

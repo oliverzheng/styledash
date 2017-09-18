@@ -1,0 +1,47 @@
+.Button-root {
+  display: inline-block;
+  background: 0;
+  border: 1px solid #CACACA;
+  border-radius: 4px;
+  margin: 0;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 1px 9px 0px 9px;
+  line-height: 29px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.Button-root:hover {
+  border-color: #B1B1B1;
+  color: #333;
+}
+
+.Button-root:active {
+  background: #F6F6F6;
+}
+
+.Button-root .Button-icon {
+  margin-right: 6px;
+  position: relative;
+  top: 4px;
+  line-height: 0;
+}
+
+.Button-root:hover .Button-icon > svg {
+  fill: #696969;
+}
+
+.Button-root.Button-disabled,
+.Button-root:hover.Button-disabled {
+  cursor: not-allowed;
+  border-color: #CACACA;
+  color: #CACACA;
+}
+.Button-root.Button-disabled .Button-icon > svg,
+.Button-root:hover.Button-disabled .Button-icon > svg {
+  fill: #CACACA;
+}
+.Button-root:active.Button-disabled {
+  background: 0;
+}
