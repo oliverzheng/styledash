@@ -10,6 +10,8 @@ import parseCode from '../util/parseCode';
 import './CodeEditor.css';
 
 type PropType = {
+  initialCode: string,
+  onCodeTransform: (transformedCode: string) => any,
   onCodeChange: (transformedCode: ?string) => any,
 };
 
@@ -18,9 +20,13 @@ type StateType = {
 };
 
 export default class CodeEditor extends React.Component<PropType, StateType> {
-  state = {
-    code: '',
-  };
+  constructor(props: PropType) {
+    super(props);
+
+    this.state = {
+      code: props.initialCode,
+    };
+  }
 
   componentDidMount() {
     this._parseCode();
@@ -32,13 +38,16 @@ export default class CodeEditor extends React.Component<PropType, StateType> {
 
   _parseCode(): void {
     const {code} = this.state;
-    const {onCodeChange} = this.props;
+    const {onCodeChange, onCodeTransform} = this.props;
 
     let transformedCode = null;
     const parseResult = parseCode(code);
     if (typeof parseResult.transformedCode === 'string') {
       transformedCode = parseResult.transformedCode;
+
+      onCodeTransform(transformedCode);
     }
+
     onCodeChange(transformedCode);
   }
 

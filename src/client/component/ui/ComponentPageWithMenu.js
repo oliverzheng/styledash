@@ -57,6 +57,7 @@ export default class ComponentPageWithMenu extends React.Component<PropType, Sta
       <div>
         <ComponentExample
           exampleID="example"
+          initialCode=""
           component={{
             name: component.name,
             compiledBundleURI: component.compiledBundleURI,

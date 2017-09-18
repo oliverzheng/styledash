@@ -8,6 +8,7 @@ import CodeEditor from './CodeEditor';
 
 type PropType = {
   exampleID: string,
+  initialCode: string,
   component: {
     name: string,
     compiledBundleURI: string,
@@ -26,6 +27,8 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
     hasCodeChangedSinceTransform: false,
   };
   _iframe: ?ComponentRenderIFrame;
+  _iframeReady: boolean = false;
+  _transformedCodeBeforeIFrameReady: ?string = null;
 
   render(): React$Node {
     return (
@@ -35,31 +38,44 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
           title={this.props.exampleID}
           onReady={this._onIFrameReady}
         />
-        <CodeEditor onCodeChange={this._onCodeChange} />
+        <CodeEditor
+          initialCode={this.props.initialCode}
+          onCodeTransform={this._onCodeTransform}
+          onCodeChange={this._onCodeChange}
+        />
       </div>
     );
   }
 
-  _onCodeChange = (transformedCode: ?string) => {
-    if (transformedCode != null) {
-      this._renderToIFrame(transformedCode);
-    }
+  _onCodeTransform = (transformedCode: string) => {
+    this._renderToIFrame(transformedCode);
+  }
 
+  _onCodeChange = (transformedCode: ?string) => {
     this.setState({
       hasCodeChangedSinceTransform: transformedCode == null,
     });
   }
 
   _onIFrameReady = (iframe: ComponentRenderIFrame) => {
-    // initial render
+    this._iframeReady = true;
+
+    if (this._transformedCodeBeforeIFrameReady) {
+      this._renderToIFrame(this._transformedCodeBeforeIFrameReady);
+      this._transformedCodeBeforeIFrameReady = null;
+    }
   }
 
   _renderToIFrame(transformedCode: string) {
-    nullthrows(this._iframe).sendMessage({
-      type: 'renderComponent',
-      transformedCode,
-      component: this.props.component,
-      repository: this.props.repository,
-    });
+    if (this._iframeReady) {
+      nullthrows(this._iframe).sendMessage({
+        type: 'renderComponent',
+        transformedCode,
+        component: this.props.component,
+        repository: this.props.repository,
+      });
+    } else {
+      this._transformedCodeBeforeIFrameReady = transformedCode;
+    }
   }
 }

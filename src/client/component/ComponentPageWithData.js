@@ -4,6 +4,7 @@ import React from 'react';
 import Relay from 'react-relay/classic';
 
 import ComponentPageWithMenu from './ui/ComponentPageWithMenu';
+import ComponentExampleWithData from './ComponentExampleWithData';
 
 import OverrideComponentReactDocMutation from './mutations/OverrideComponentReactDocMutation';
 
@@ -19,6 +20,7 @@ type PropType = {
     compiledBundleURI: string,
     reactDoc: string,
     overrideReactDoc: ?string,
+    examples: Array<Object>,
   },
   relay: Object,
 };
@@ -32,10 +34,17 @@ class ComponentPageWithData extends React.Component<PropType> {
     }
 
     return (
-      <ComponentPageWithMenu
-        component={component}
-        updateComponentOverrideReactDoc={this._updateComponentOverrideReactDoc}
-      />
+      <div>
+        {
+          component.examples.map(example =>
+            <ComponentExampleWithData example={example} />
+          )
+        }
+        <ComponentPageWithMenu
+          component={component}
+          updateComponentOverrideReactDoc={this._updateComponentOverrideReactDoc}
+        />
+      </div>
     );
   }
 
@@ -66,6 +75,9 @@ const ComponentPageWithDataContainer = Relay.createContainer(
           compiledBundleURI
           reactDoc
           overrideReactDoc
+          examples {
+            ${ComponentExampleWithData.getFragment('example')}
+          }
         }
       `,
     },
