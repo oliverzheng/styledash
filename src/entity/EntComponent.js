@@ -111,6 +111,18 @@ export default class EntComponent extends BaseEnt {
     return await EntExample.genExamplesForComponent(this);
   }
 
+  async genGitHubURL(): Promise<?string> {
+    const repository = await this.genRepository();
+    const user = repository.getGitHubUsername();
+    const repo = repository.getGitHubRepo();
+    const branch = repository.getGitHubBranch();
+    if (!user || !repo || !branch) {
+      return null;
+    }
+
+    return `https:\/\/github.com/${user}/${repo}/blob/${branch}${this.getFilepath()}`;
+  }
+
   // Mutations
 
   async genSetOverrideReactDoc(override: string): Promise<boolean> {
@@ -148,4 +160,5 @@ export default class EntComponent extends BaseEnt {
   reactDoc() { return this.genReactDoc(); }
   overrideReactDoc() { return this.genOverrideReactDoc(); }
   examples() { return this.genExamples(); }
+  githubURL() { return this.genGitHubURL(); }
 }

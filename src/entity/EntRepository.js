@@ -45,6 +45,9 @@ export default class EntRepository extends BaseEnt {
         'name',
         'external_css_url',
         'last_updated_timestamp',
+        'github_username',
+        'github_repo',
+        'github_branch',
       ],
       extendedColumnNames: [
       ],
@@ -78,6 +81,18 @@ export default class EntRepository extends BaseEnt {
 
   getLastUpdatedTimestamp(): number {
     return this._getNumberData('last_updated_timestamp');
+  }
+
+  getGitHubUsername(): ?string {
+    return this._getStringData('github_username');
+  }
+
+  getGitHubRepo(): ?string {
+    return this._getStringData('github_repo');
+  }
+
+  getGitHubBranch(): ?string {
+    return this._getStringData('github_branch');
   }
 
   // TODO at some point, make entquery

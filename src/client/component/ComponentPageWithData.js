@@ -26,6 +26,7 @@ type PropType = {
     reactDoc: string,
     overrideReactDoc: ?string,
     examples: Array<Object>,
+    githubURL: ?string,
   },
   relay: Object,
 };
@@ -86,15 +87,21 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
       ),
     });
 
+    let aux = null;
+    const githubURL = this._getGitHubURL();
+    if (githubURL) {
+      aux = (
+        <Button glyph="github" href={githubURL}>
+          View on GitHub
+        </Button>
+      );
+    }
+
     return (
       <div>
         <PageWithMenu
           pageTitle={component.name}
-          pageTitleAux={
-            <Button glyph="github" href={this._getGithubLink()}>
-              View on GitHub
-            </Button>
-          }
+          pageTitleAux={aux}
           sections={sections}
           wide={false}
         />
@@ -102,9 +109,8 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
     );
   }
 
-  _getGithubLink(): string {
-    // TODO
-    return 'https://github.com';
+  _getGitHubURL(): ?string {
+    return nullthrows(this.props.component).githubURL;
   }
 
   _renderFirstNewExampleSection(): React$Element<*> {
@@ -197,6 +203,7 @@ const ComponentPageWithDataContainer = Relay.createContainer(
             name
             ${ComponentExampleWithData.getFragment('example')}
           }
+          githubURL
           ${ComponentNewExampleWithData.getFragment('component')}
         }
       `,

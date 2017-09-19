@@ -38,6 +38,7 @@ type Component implements Node {
   reactDoc: String!
   overrideReactDoc: String
   examples: [Example]!
+  githubURL: String
 }
 
 type Example implements Node {
