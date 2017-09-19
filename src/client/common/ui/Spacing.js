@@ -12,6 +12,8 @@ const Spacing = {
       n20: 'Spacing-margin-bottom-20',
       n24: 'Spacing-margin-bottom-24',
       n28: 'Spacing-margin-bottom-28',
+      n32: 'Spacing-margin-bottom-32',
+      n36: 'Spacing-margin-bottom-36',
     },
     top: {
       n4: 'Spacing-margin-top-4',
@@ -21,6 +23,8 @@ const Spacing = {
       n20: 'Spacing-margin-top-20',
       n24: 'Spacing-margin-top-24',
       n28: 'Spacing-margin-top-28',
+      n32: 'Spacing-margin-top-32',
+      n36: 'Spacing-margin-top-36',
     },
     left: {
       n4: 'Spacing-margin-left-4',
@@ -30,6 +34,8 @@ const Spacing = {
       n20: 'Spacing-margin-left-20',
       n24: 'Spacing-margin-left-24',
       n28: 'Spacing-margin-left-28',
+      n32: 'Spacing-margin-left-32',
+      n36: 'Spacing-margin-left-36',
     },
     right: {
       n4: 'Spacing-margin-right-4',
@@ -39,6 +45,8 @@ const Spacing = {
       n20: 'Spacing-margin-right-20',
       n24: 'Spacing-margin-right-24',
       n28: 'Spacing-margin-right-28',
+      n32: 'Spacing-margin-right-32',
+      n36: 'Spacing-margin-right-36',
     },
   },
 };

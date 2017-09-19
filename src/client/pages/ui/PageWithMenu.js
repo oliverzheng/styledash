@@ -120,7 +120,7 @@ export default class PageWithMenu extends React.Component<PropType> {
         className={classnames(
           Spacing.margin.bottom.n28,
           {
-            [Spacing.margin.top.n28]: marginBefore,
+            [Spacing.margin.top.n36]: marginBefore,
           },
         )}>
         {section.sectionTitle}
