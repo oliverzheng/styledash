@@ -100,6 +100,19 @@ export default class EntExample extends BaseEnt {
     );
   }
 
+  // Mutations
+
+  async genSetCode(code: string): Promise<boolean> {
+    const res = await this._genMutate(
+      { code },
+    );
+
+    // TODO pull this into the mutator once we have object caching
+    this._data['code'] = code;
+
+    return res;
+  }
+
   // Static helpers
 
   static async genExamplesForComponent(

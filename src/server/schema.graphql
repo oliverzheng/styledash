@@ -70,6 +70,21 @@ type OverrideComponentReactDocPayload {
   component: Component!
 }
 
+
+input SetExampleCodeInput {
+  clientMutationId: String
+  exampleID: ID!
+  code: String!
+}
+
+type SetExampleCodePayload {
+  clientMutationId: String
+  success: Boolean!
+  example: Example!
+}
+
+
 type Mutation {
   overrideComponentReactDoc(input: OverrideComponentReactDocInput!): OverrideComponentReactDocPayload
+  setExampleCode(input: SetExampleCodeInput!): SetExampleCodePayload
 }

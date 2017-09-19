@@ -97,6 +97,31 @@ const root = {
       component,
     };
   },
+
+  setExampleCode: async (
+    args: {
+      input: {
+        exampleID: string,
+        code: string,
+        clientMutationId: string,
+      },
+    },
+    context: Context,
+  ) => {
+    const {
+      exampleID,
+      code,
+      clientMutationId,
+    } = args.input;
+
+    const example = await EntExample.genEnforce(context.vc, exampleID);
+    const success = await example.genSetCode(code);
+    return {
+      clientMutationId,
+      success,
+      example,
+    };
+  },
 };
 
 const graphQLHandlerOpts = {
