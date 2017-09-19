@@ -87,12 +87,24 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
     });
 
     return (
-      <PageWithMenu
-        pageTitle={component.name}
-        sections={sections}
-        wide={false}
-      />
+      <div>
+        <PageWithMenu
+          pageTitle={component.name}
+          pageTitleAux={
+            <Button glyph="github" href={this._getGithubLink()}>
+              View on GitHub
+            </Button>
+          }
+          sections={sections}
+          wide={false}
+        />
+      </div>
     );
+  }
+
+  _getGithubLink(): string {
+    // TODO
+    return 'https://github.com';
   }
 
   _renderFirstNewExampleSection(): React$Element<*> {

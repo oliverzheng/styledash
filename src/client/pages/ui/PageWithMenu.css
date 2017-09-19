@@ -4,6 +4,10 @@
   padding-bottom: 30px;
 }
 
+.PageWithMenu-pageTitleAux {
+  float: right;
+}
+
 .PageWithMenu-menu {
   position: fixed;
 }

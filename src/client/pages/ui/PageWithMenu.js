@@ -25,6 +25,7 @@ export type Section = {
 
 type PropType = FixedWidthPageContainerProps & {
   pageTitle: string,
+  pageTitleAux?: ?React$Node,
   sections: Array<Section>,
 };
 
@@ -146,7 +147,7 @@ export default class PageWithMenu extends React.Component<PropType> {
   }
 
   render(): React$Element<*> {
-    const {pageTitle, sections, wide, ...restProps} = this.props;
+    const {pageTitle, pageTitleAux, sections, wide, ...restProps} = this.props;
 
     const menu = (
       <MenuScrollHighlighter
@@ -169,6 +170,15 @@ export default class PageWithMenu extends React.Component<PropType> {
       (section, i) => this._renderSectionContent(i.toString(), section, i !== 0)
     );
 
+    let aux = null;
+    if (pageTitleAux) {
+      aux = (
+        <span className="PageWithMenu-pageTitleAux">
+          {pageTitleAux}
+        </span>
+      );
+    }
+
     return (
       <FixedWidthPageContainer
         className={
@@ -183,6 +193,7 @@ export default class PageWithMenu extends React.Component<PropType> {
         wide={wide}
         {...restProps}>
         <PageTitle className={Spacing.margin.bottom.n20}>
+          {aux}
           {pageTitle}
         </PageTitle>
         {menu}
