@@ -34,6 +34,10 @@ body .Spacing-margin-bottom-36 {
   margin-bottom: 36px;
 }
 
+body .Spacing-margin-bottom-40 {
+  margin-bottom: 40px;
+}
+
 body .Spacing-margin-top-4 {
   margin-top: 4px;
 }
@@ -68,6 +72,10 @@ body .Spacing-margin-top-32 {
 
 body .Spacing-margin-top-36 {
   margin-top: 36px;
+}
+
+body .Spacing-margin-top-40 {
+  margin-top: 40px;
 }
 
 body .Spacing-margin-left-4 {
@@ -106,6 +114,10 @@ body .Spacing-margin-left-36 {
   margin-left: 36px;
 }
 
+body .Spacing-margin-left-40 {
+  margin-left: 40px;
+}
+
 body .Spacing-margin-right-4 {
   margin-right: 4px;
 }
@@ -140,4 +152,8 @@ body .Spacing-margin-right-32 {
 
 body .Spacing-margin-right-36 {
   margin-right: 36px;
+}
+
+body .Spacing-margin-right-40 {
+  margin-right: 40px;
 }

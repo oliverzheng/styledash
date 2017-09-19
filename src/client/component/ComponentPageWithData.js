@@ -78,8 +78,8 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
     }
 
     sections.push({
-      menuTitle: 'Props',
-      sectionTitle: 'Component Props',
+      menuTitle: 'Properties',
+      sectionTitle: 'Properties',
       children: (
         <ComponentProps
           reactDoc={component.reactDoc}
