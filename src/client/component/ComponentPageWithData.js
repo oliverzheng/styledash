@@ -48,25 +48,33 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
 
     const sections = [];
 
-    sections.push(
-      ...component.examples.map((example, i) => {
-        let children = <ComponentExampleWithData example={example} />;
-        const isLast = i === component.examples.length - 1;
-        if (isLast) {
-          children = (
-            <div>
-              {children}
-              {this._renderAddExampleSection()}
-            </div>
-          );
-        }
-        return {
-          menuTitle: example.name,
-          sectionTitle: example.name,
-          children,
-        };
-      })
-    );
+    if (component.examples.length > 0) {
+      sections.push(
+        ...component.examples.map((example, i) => {
+          let children = <ComponentExampleWithData example={example} />;
+          const isLast = i === component.examples.length - 1;
+          if (isLast) {
+            children = (
+              <div>
+                {children}
+                {this._renderAddExampleSection()}
+              </div>
+            );
+          }
+          return {
+            menuTitle: example.name,
+            sectionTitle: example.name,
+            children,
+          };
+        })
+      );
+    } else {
+      sections.push({
+        menuTitle: 'Add New Example',
+        sectionTitle: 'Add New Example',
+        children: this._renderFirstNewExampleSection(),
+      });
+    }
 
     sections.push({
       menuTitle: 'Props',
@@ -83,6 +91,17 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
         pageTitle={component.name}
         sections={sections}
         wide={false}
+      />
+    );
+  }
+
+  _renderFirstNewExampleSection(): React$Element<*> {
+    const newExampleName = this._getNewExampleName();
+    return (
+      <ComponentNewExampleWithData
+        newExampleName={newExampleName}
+        component={nullthrows(this.props.component)}
+        onSave={this._onExampleSave}
       />
     );
   }
