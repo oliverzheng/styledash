@@ -99,6 +99,7 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
       );
     }
 
+    const newExampleName = this._getNewExampleName();
     return (
       <div>
         <SectionHeader
@@ -106,34 +107,41 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
             Spacing.margin.bottom.n28,
             Spacing.margin.top.n36,
           )}>
-          {this._getNewExampleTitle()}
+          {newExampleName}
         </SectionHeader>
         <ComponentNewExampleWithData
-          newExampleTitle={this._getNewExampleTitle()}
+          newExampleName={newExampleName}
           component={nullthrows(this.props.component)}
+          onSave={this._onExampleSave}
         />
       </div>
     );
   }
 
-  _getNewExampleTitle(): string {
+  _getNewExampleName(): string {
     const {examples} = nullthrows(this.props.component);
     let newIdx = examples.length;
-    let newExampleTitle: string;
+    let newExampleName: string;
     do {
       newIdx++; // The first should be 'example 1'
-      newExampleTitle = 'Example ' + newIdx;
+      newExampleName = 'Example ' + newIdx;
     } while (
       // eslint-disable-next-line no-loop-func
-      examples.some(example => example.name === newExampleTitle)
+      examples.some(example => example.name === newExampleName)
     );
 
-    return newExampleTitle;
+    return newExampleName;
   }
 
   _onAddExampleClick = () => {
     this.setState({
       isAddingExample: true,
+    });
+  }
+
+  _onExampleSave = () => {
+    this.setState({
+      isAddingExample: false,
     });
   }
 }
