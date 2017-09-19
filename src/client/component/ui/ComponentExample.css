@@ -1,3 +1,22 @@
 .ComponentExample-render {
   background: #FFF;
 }
+
+.ComponentExample-codeSection {
+  position: relative;
+}
+
+.ComponentExample-codeTitle {
+  margin-top: 6px;
+}
+
+.ComponentExample-code-actionButtons {
+  position: absolute;
+  top: 8px;
+  right: 15px;
+}
+
+.ComponentExample-code-editor {
+  margin: 2px 15px 0 21px;
+  height: 100px;
+}

@@ -1,6 +1,7 @@
 /** @flow */
 
 import React from 'react';
+import classnames from 'classnames';
 import CodeMirror from 'react-codemirror';
 import 'codemirror/mode/jsx/jsx';
 import 'codemirror/lib/codemirror.css';
@@ -13,6 +14,7 @@ type PropType = {
   initialCode: string,
   onCodeTransform: (transformedCode: string) => any,
   onCodeChange: (transformedCode: ?string) => any,
+  className?: ?string,
 };
 
 type StateType = {
@@ -60,7 +62,7 @@ export default class CodeEditor extends React.Component<PropType, StateType> {
 
     return (
       <CodeMirror
-        className="CodeEditor-root"
+        className={classnames('CodeEditor-root', this.props.className)}
         value={this.state.code}
         onChange={this._onCodeChange}
         options={options}

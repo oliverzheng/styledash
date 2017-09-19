@@ -22,6 +22,24 @@ const Spacing = {
       n24: 'Spacing-margin-top-24',
       n28: 'Spacing-margin-top-28',
     },
+    left: {
+      n4: 'Spacing-margin-left-4',
+      n8: 'Spacing-margin-left-8',
+      n12: 'Spacing-margin-left-12',
+      n16: 'Spacing-margin-left-16',
+      n20: 'Spacing-margin-left-20',
+      n24: 'Spacing-margin-left-24',
+      n28: 'Spacing-margin-left-28',
+    },
+    right: {
+      n4: 'Spacing-margin-right-4',
+      n8: 'Spacing-margin-right-8',
+      n12: 'Spacing-margin-right-12',
+      n16: 'Spacing-margin-right-16',
+      n20: 'Spacing-margin-right-20',
+      n24: 'Spacing-margin-right-24',
+      n28: 'Spacing-margin-right-28',
+    },
   },
 };
 

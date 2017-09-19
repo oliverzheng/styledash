@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256px" height="256px" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.2 (44496) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 2</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="geomicons-wired" transform="translate(-513.000000, -8704.000000)" fill-rule="nonzero" fill="#797C7C">
+            <g id="Group-2" transform="translate(512.000000, 8751.000000)">
+                <path d="M177,161 C172.905,161 168.81,159.438 165.685,156.313 C159.437,150.065 159.437,139.934 165.685,133.686 L218.373,81 L165.685,28.313 C159.437,22.065 159.437,11.934 165.685,5.686 C171.933,-0.563 182.065,-0.563 188.313,5.686 L252.313,69.686 C258.562,75.934 258.562,86.065 252.313,92.313 L188.313,156.313 C185.19,159.438 181.094,161 177,161 L177,161 Z" id="Shape"></path>
+                <path d="M81,161 C76.905,161 72.81,159.438 69.685,156.313 L5.685,92.313 C-0.563,86.065 -0.563,75.934 5.685,69.686 L69.685,5.686 C75.933,-0.563 86.065,-0.563 92.313,5.686 C98.562,11.934 98.562,22.065 92.313,28.313 L39.627,81 L92.313,133.687 C98.562,139.935 98.562,150.066 92.313,156.314 C89.19,159.438 85.094,161 81,161 L81,161 Z" id="Shape"></path>
+            </g>
+        </g>
+    </g>
+</svg>
