@@ -72,6 +72,7 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
             initialCode={this.props.initialCode}
             onCodeTransform={this._onCodeTransform}
             onCodeChange={this._onCodeChange}
+            maxHeight={150}
           />
         </CardFooterSection>
       </Card>

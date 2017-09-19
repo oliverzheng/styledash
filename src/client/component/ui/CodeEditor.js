@@ -2,6 +2,7 @@
 
 import React from 'react';
 import classnames from 'classnames';
+import nullthrows from 'nullthrows';
 import CodeMirror from 'react-codemirror';
 import 'codemirror/mode/jsx/jsx';
 import 'codemirror/lib/codemirror.css';
@@ -10,10 +11,13 @@ import parseCode from '../util/parseCode';
 
 import './CodeEditor.css';
 
+const VERTICAL_PADDING = 10;
+
 type PropType = {
   initialCode: string,
   onCodeTransform: (transformedCode: string) => any,
   onCodeChange: (transformedCode: ?string) => any,
+  maxHeight: number,
   className?: ?string,
 };
 
@@ -22,6 +26,8 @@ type StateType = {
 };
 
 export default class CodeEditor extends React.Component<PropType, StateType> {
+  _cm: ?CodeMirror;
+
   constructor(props: PropType) {
     super(props);
 
@@ -32,10 +38,14 @@ export default class CodeEditor extends React.Component<PropType, StateType> {
 
   componentDidMount() {
     this._parseCode();
+    this._resizeEditor();
   }
 
   _onCodeChange = (code: string) => {
-    this.setState({ code }, () => this._parseCode());
+    this.setState({ code }, () => {
+      this._parseCode();
+      this._resizeEditor();
+    });
   }
 
   _parseCode(): void {
@@ -53,6 +63,15 @@ export default class CodeEditor extends React.Component<PropType, StateType> {
     onCodeChange(transformedCode);
   }
 
+  _resizeEditor(): void {
+    const cm = nullthrows(this._cm).getCodeMirror();
+    const height = Math.min(
+      cm.defaultTextHeight() * cm.getDoc().lineCount() + VERTICAL_PADDING,
+      this.props.maxHeight,
+    );
+    cm.setSize(null, height);
+  }
+
   render(): React$Node {
     const options = {
       lineNumbers: false,
@@ -66,6 +85,7 @@ export default class CodeEditor extends React.Component<PropType, StateType> {
         value={this.state.code}
         onChange={this._onCodeChange}
         options={options}
+        ref={c => this._cm = c}
       />
     );
   }
