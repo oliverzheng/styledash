@@ -39,6 +39,7 @@ class ComponentExampleWithData extends React.Component<PropType> {
         repository={{
           externalCSSURI: repository.externalCSSURI,
         }}
+        showRevert={true}
         onSave={this._onSave}
       />
     );

@@ -24,6 +24,8 @@ type PropType = {
   repository: {
     externalCSSURI: ?string,
   },
+  showRevert: boolean,
+  canSaveInitialCode: boolean,
   onSave: (newCode: string) => any,
 };
 
@@ -33,6 +35,10 @@ type StateType = {
 };
 
 export default class ComponentExample extends React.Component<PropType, StateType> {
+  static defaultProps = {
+    canSaveInitialCode: false,
+  };
+
   state = {
     hasCodeChanged: false,
     hasCodeChangedSinceTransform: false,
@@ -54,15 +60,21 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
 
   render(): React$Node {
     let actionButtons = null;
-    if (this.state.hasCodeChanged) {
-      actionButtons = (
-        <div className="ComponentExample-code-actionButtons">
+    if (this.state.hasCodeChanged || this.props.canSaveInitialCode) {
+      let revertButton = null;
+      if (this.props.showRevert) {
+        revertButton = (
           <Button
             className={Spacing.margin.right.n12}
             purpose="secondary"
             onClick={this._revertCode}>
             Revert
           </Button>
+        );
+      }
+      actionButtons = (
+        <div className="ComponentExample-code-actionButtons">
+          {revertButton}
           <Button
             glyph="save"
             purpose="primary"

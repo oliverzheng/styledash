@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256px" height="256px" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.2 (44496) - http://www.bohemiancoding.com/sketch -->
+    <title>Shape</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="geomicons-wired" transform="translate(-2049.000000, -6656.000000)" fill-rule="nonzero" fill="#797C7C">
+            <path d="M2193,6656 L2161,6656 C2152.164,6656 2145,6663.163 2145,6672 L2145,6848 L2177,6912 L2209,6848 L2209,6672 C2209,6663.163 2201.836,6656 2193,6656 Z M2193,6728 L2161,6728 L2161,6712 L2193,6712 L2193,6728 Z M2161,6736 L2193,6736 L2193,6832 L2161,6832 L2161,6736 Z M2177,6876.224 L2161,6844.223 L2161,6840 L2193,6840 L2193,6844.223 L2177,6876.224 Z M2161,6696 L2161,6672 L2193,6672 L2193,6696 L2161,6696 Z" id="Shape"></path>
+        </g>
+    </g>
+</svg>

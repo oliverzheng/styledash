@@ -2,10 +2,16 @@
 
 import React from 'react';
 import Relay from 'react-relay/classic';
+import nullthrows from 'nullthrows';
+import classnames from 'classnames';
 
 import PageWithMenu from '../pages/ui/PageWithMenu';
 import ComponentExampleWithData from './ComponentExampleWithData';
+import ComponentNewExampleWithData from './ComponentNewExampleWithData';
 import ComponentProps from './ui/ComponentProps';
+import SectionHeader from '../common/ui/SectionHeader';
+import Button from '../common/ui/Button';
+import Spacing from '../common/ui/Spacing';
 
 type PropType = {
   component: ?{
@@ -24,7 +30,15 @@ type PropType = {
   relay: Object,
 };
 
-class ComponentPageWithData extends React.Component<PropType> {
+type StateType = {
+  isAddingExample: boolean,
+};
+
+class ComponentPageWithData extends React.Component<PropType, StateType> {
+  state = {
+    isAddingExample: false,
+  };
+
   render(): ?React$Element<*> {
     const {component} = this.props;
     if (!component) {
@@ -35,13 +49,23 @@ class ComponentPageWithData extends React.Component<PropType> {
     const sections = [];
 
     sections.push(
-      ...component.examples.map(example => ({
-        menuTitle: example.name,
-        sectionTitle: example.name,
-        children: (
-          <ComponentExampleWithData example={example} />
-        ),
-      }))
+      ...component.examples.map((example, i) => {
+        let children = <ComponentExampleWithData example={example} />;
+        const isLast = i === component.examples.length - 1;
+        if (isLast) {
+          children = (
+            <div>
+              {children}
+              {this._renderAddExampleSection()}
+            </div>
+          );
+        }
+        return {
+          menuTitle: example.name,
+          sectionTitle: example.name,
+          children,
+        };
+      })
     );
 
     sections.push({
@@ -61,6 +85,56 @@ class ComponentPageWithData extends React.Component<PropType> {
         wide={true}
       />
     );
+  }
+
+  _renderAddExampleSection(): React$Node {
+    if (!this.state.isAddingExample) {
+      return (
+        <Button
+          className={Spacing.margin.top.n36}
+          glyph="pencil"
+          onClick={this._onAddExampleClick}>
+          Add Example
+        </Button>
+      );
+    }
+
+    return (
+      <div>
+        <SectionHeader
+          className={classnames(
+            Spacing.margin.bottom.n28,
+            Spacing.margin.top.n36,
+          )}>
+          {this._getNewExampleTitle()}
+        </SectionHeader>
+        <ComponentNewExampleWithData
+          newExampleTitle={this._getNewExampleTitle()}
+          component={nullthrows(this.props.component)}
+        />
+      </div>
+    );
+  }
+
+  _getNewExampleTitle(): string {
+    const {examples} = nullthrows(this.props.component);
+    let newIdx = examples.length;
+    let newExampleTitle: string;
+    do {
+      newIdx++; // The first should be 'example 1'
+      newExampleTitle = 'Example ' + newIdx;
+    } while (
+      // eslint-disable-next-line no-loop-func
+      examples.some(example => example.name === newExampleTitle)
+    );
+
+    return newExampleTitle;
+  }
+
+  _onAddExampleClick = () => {
+    this.setState({
+      isAddingExample: true,
+    });
   }
 }
 
@@ -84,6 +158,7 @@ const ComponentPageWithDataContainer = Relay.createContainer(
             name
             ${ComponentExampleWithData.getFragment('example')}
           }
+          ${ComponentNewExampleWithData.getFragment('component')}
         }
       `,
     },

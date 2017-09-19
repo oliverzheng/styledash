@@ -5,14 +5,16 @@ import classnames from 'classnames';
 import invariant from 'invariant';
 
 import { type Color } from './Colors';
-import save from '../icons/save.svg';
 import angleBrackets from '../icons/angle_brackets.svg';
+import pencil from '../icons/pencil.svg';
+import save from '../icons/save.svg';
 
 import './Icon.css';
 
 export type GlyphType =
-  'save' |
-  'angle-brackets';
+  'angle-brackets' |
+  'pencil' |
+  'save';
 
 type IconSize = 18;
 
@@ -75,10 +77,12 @@ export default class Icon extends React.Component<PropType> {
   _getGlyph(): string {
     const {glyph} = this.props;
     switch (glyph) {
-      case 'save':
-        return save;
       case 'angle-brackets':
         return angleBrackets;
+      case 'pencil':
+        return pencil;
+      case 'save':
+        return save;
       default:
         invariant(false, 'Unsupported glyph %s', glyph);
     }
