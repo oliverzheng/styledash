@@ -7,6 +7,8 @@ import getRenderElement from './getRenderElement';
 
 import {SERVER_ADDRESS} from '../../clientserver/serverConfig';
 
+import './ComponentRenderer.css';
+
 export type ComponentRendererProps = {
   transformedCode: string,
   component: {
@@ -64,7 +66,7 @@ export default class ComponentRenderer extends React.Component<ComponentRenderer
     }
 
     return (
-      <div>
+      <div className="ComponentRenderer-root">
         {externalCSSStyle}
         {getRenderElement(component.name, bundledComponent, transformedCode)}
       </div>
