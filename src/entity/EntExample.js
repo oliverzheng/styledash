@@ -102,6 +102,23 @@ export default class EntExample extends BaseEnt {
 
   // Mutations
 
+  static async genCreate(
+    vc: ViewerContext,
+    componentID: string,
+    exampleName: string,
+    code: string,
+  ): Promise<this> {
+    const exampleID = await this._genCreate(
+      vc,
+      {
+        name: exampleName,
+        component_id: componentID,
+        code,
+      },
+    );
+    return await this.genEnforce(vc, exampleID);
+  }
+
   async genSetCode(code: string): Promise<boolean> {
     const res = await this._genMutate(
       { code },

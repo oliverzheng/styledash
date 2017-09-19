@@ -122,6 +122,39 @@ const root = {
       example,
     };
   },
+
+  addExampleCode: async (
+    args: {
+      input: {
+        componentID: string,
+        exampleName: string,
+        code: string,
+        clientMutationId: string,
+      },
+    },
+    context: Context,
+  ) => {
+    const {
+      componentID,
+      exampleName,
+      code,
+      clientMutationId,
+    } = args.input;
+
+    const example = await EntExample.genCreate(
+      context.vc,
+      componentID,
+      exampleName,
+      code,
+    );
+    const component = await example.genComponent();
+    return {
+      clientMutationId,
+      success: true,
+      component,
+      example,
+    };
+  },
 };
 
 const graphQLHandlerOpts = {
