@@ -24,6 +24,7 @@ type PropType = {
   repository: {
     externalCSSURI: ?string,
   },
+  onSave: (newCode: string) => any,
 };
 
 type StateType = {
@@ -36,10 +37,20 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
     hasCodeChanged: false,
     hasCodeChangedSinceTransform: false,
   };
+  _code: ?string;
   _iframe: ?ComponentRenderIFrame;
   _iframeReady: boolean = false;
   _transformedCodeBeforeIFrameReady: ?string = null;
   _ce: ?CodeEditor;
+
+  componentWillReceiveProps(nextProps: PropType) {
+    if (nextProps.initialCode === this._code) {
+      this.setState({
+        hasCodeChanged: false,
+        hasCodeChangedSinceTransform: false,
+      });
+    }
+  }
 
   render(): React$Node {
     let actionButtons = null;
@@ -99,6 +110,8 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
   }
 
   _onCodeChange = (code: string, transformedCode: ?string) => {
+    this._code = code;
+
     this.setState({
       hasCodeChanged: code !== this.props.initialCode,
       hasCodeChangedSinceTransform: transformedCode == null,
@@ -132,5 +145,6 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
   }
 
   _saveCode = () => {
+    this.props.onSave(nullthrows(this._code));
   }
 }

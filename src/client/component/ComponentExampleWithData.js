@@ -4,6 +4,7 @@ import React from 'react';
 import Relay from 'react-relay/classic';
 
 import ComponentExample from './ui/ComponentExample';
+import SetExampleCodeMutation from './mutations/SetExampleCodeMutation';
 
 type PropType = {
   example: {
@@ -18,6 +19,7 @@ type PropType = {
       },
     },
   },
+  relay: Object,
 };
 
 class ComponentExampleWithData extends React.Component<PropType> {
@@ -37,7 +39,17 @@ class ComponentExampleWithData extends React.Component<PropType> {
         repository={{
           externalCSSURI: repository.externalCSSURI,
         }}
+        onSave={this._onSave}
       />
+    );
+  }
+
+  _onSave = (code: string) => {
+    this.props.relay.commitUpdate(
+      new SetExampleCodeMutation({
+        example: this.props.example,
+        code,
+      }),
     );
   }
 }
@@ -58,6 +70,7 @@ const ComponentExampleWithDataContainer = Relay.createContainer(
               externalCSSURI
             }
           }
+          ${SetExampleCodeMutation.getFragment('example')}
         }
       `,
     },
