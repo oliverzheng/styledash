@@ -16,7 +16,7 @@ const VERTICAL_PADDING = 10;
 type PropType = {
   initialCode: string,
   onCodeTransform: (transformedCode: string) => any,
-  onCodeChange: (transformedCode: ?string) => any,
+  onCodeChange: (code: string, transformedCode: ?string) => any,
   maxHeight: number,
   className?: ?string,
 };
@@ -41,6 +41,16 @@ export default class CodeEditor extends React.Component<PropType, StateType> {
     this._resizeEditor();
   }
 
+  setCode(code: string): void {
+    nullthrows(this._cm).getCodeMirror().getDoc().setValue(code);
+    this.setState({
+      code,
+    }, () => {
+      this._parseCode();
+      this._resizeEditor();
+    });
+  }
+
   _onCodeChange = (code: string) => {
     this.setState({ code }, () => {
       this._parseCode();
@@ -60,7 +70,7 @@ export default class CodeEditor extends React.Component<PropType, StateType> {
       onCodeTransform(transformedCode);
     }
 
-    onCodeChange(transformedCode);
+    onCodeChange(code, transformedCode);
   }
 
   _resizeEditor(): void {

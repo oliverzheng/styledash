@@ -1,15 +1,28 @@
 .Button-root {
   display: inline-block;
   background: 0;
-  border: 1px solid #CACACA;
   border-radius: 4px;
   margin: 0;
   font-size: 14px;
   font-family: inherit;
-  padding: 1px 9px 0px 9px;
   line-height: 29px;
   cursor: pointer;
   text-decoration: none;
+  box-sizing: border-box;
+  padding-top: 1px;
+  padding-bottom: 0;
+}
+
+.Button-root.Button-primary {
+  border: 1px solid #CACACA;
+  padding-left: 9px;
+  padding-right: 9px;
+}
+
+.Button-root.Button-secondary {
+  border: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .Button-root:hover {
@@ -17,8 +30,12 @@
   color: #333;
 }
 
-.Button-root:active {
+.Button-root.Button-primary:active {
   background: #F6F6F6;
+}
+
+.Button-root.Button-secondary:hover .Button-text {
+  border-bottom: 1px solid #CCC;
 }
 
 .Button-root .Button-icon {

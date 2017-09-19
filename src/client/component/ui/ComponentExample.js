@@ -27,18 +27,42 @@ type PropType = {
 };
 
 type StateType = {
+  hasCodeChanged: boolean,
   hasCodeChangedSinceTransform: boolean,
 };
 
 export default class ComponentExample extends React.Component<PropType, StateType> {
   state = {
+    hasCodeChanged: false,
     hasCodeChangedSinceTransform: false,
   };
   _iframe: ?ComponentRenderIFrame;
   _iframeReady: boolean = false;
   _transformedCodeBeforeIFrameReady: ?string = null;
+  _ce: ?CodeEditor;
 
   render(): React$Node {
+    let actionButtons = null;
+    if (this.state.hasCodeChanged) {
+      actionButtons = (
+        <div className="ComponentExample-code-actionButtons">
+          <Button
+            className={Spacing.margin.right.n12}
+            purpose="secondary"
+            onClick={this._revertCode}>
+            Revert
+          </Button>
+          <Button
+            glyph="save"
+            purpose="primary"
+            onClick={this._saveCode}
+            disabled={this.state.hasCodeChangedSinceTransform}>
+            Save Example
+          </Button>
+        </div>
+      );
+    }
+
     return (
       <Card>
         <CardSection noPadding={true} className="ComponentExample-render">
@@ -56,23 +80,14 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
             <Icon glyph="angle-brackets" className={Spacing.margin.right.n8} />
             Code
           </div>
-          <div className="ComponentExample-code-actionButtons">
-            <Button glyph="save">
-              Save Example
-            </Button>
-            <Button glyph="save" disabled>
-              Save Example
-            </Button>
-            <Button href="#">
-              Save Example
-            </Button>
-          </div>
+          {actionButtons}
           <CodeEditor
             className="ComponentExample-code-editor"
             initialCode={this.props.initialCode}
             onCodeTransform={this._onCodeTransform}
             onCodeChange={this._onCodeChange}
             maxHeight={150}
+            ref={c => this._ce = c}
           />
         </CardFooterSection>
       </Card>
@@ -83,8 +98,9 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
     this._renderToIFrame(transformedCode);
   }
 
-  _onCodeChange = (transformedCode: ?string) => {
+  _onCodeChange = (code: string, transformedCode: ?string) => {
     this.setState({
+      hasCodeChanged: code !== this.props.initialCode,
       hasCodeChangedSinceTransform: transformedCode == null,
     });
   }
@@ -109,5 +125,12 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
     } else {
       this._transformedCodeBeforeIFrameReady = transformedCode;
     }
+  }
+
+  _revertCode = () => {
+    nullthrows(this._ce).setCode(this.props.initialCode);
+  }
+
+  _saveCode = () => {
   }
 }

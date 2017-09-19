@@ -13,6 +13,7 @@ type PropType = {
   onClick: ?(() => any),
   disabled: boolean,
   glyph: ?GlyphType,
+  purpose: 'primary' | 'secondary',
 
   className?: ?string,
   children?: ?React$Node,
@@ -24,6 +25,7 @@ export default class Button extends React.Component<PropType> {
     onClick: null,
     disabled: false,
     glyph: null,
+    purpose: 'primary',
   };
 
   render(): React$Node {
@@ -32,15 +34,20 @@ export default class Button extends React.Component<PropType> {
       onClick,
       disabled,
       glyph,
+      purpose,
       className,
       children,
     } = this.props;
 
+    const isPrimary = purpose === 'primary';
+    const isSecondary = purpose === 'secondary';
     const forwardProps = {
       className: classnames(
         'Button-root',
         {
           'Button-disabled': disabled,
+          'Button-primary': isPrimary,
+          'Button-secondary': isSecondary,
         },
         TextColor.normal,
         className,
@@ -55,18 +62,23 @@ export default class Button extends React.Component<PropType> {
       );
     }
 
+    let text = children;
+    if (isSecondary) {
+      text = <span className="Button-text">{children}</span>
+    }
+
     if (href != null) {
       return (
         <a href={href} {...forwardProps}>
           {icon}
-          {children}
+          {text}
         </a>
       );
     } else {
       return (
         <button {...forwardProps} disabled={disabled}>
           {icon}
-          {children}
+          {text}
         </button>
       );
     }
