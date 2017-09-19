@@ -5,10 +5,21 @@
 }
 
 .PageWithMenu-menu {
-  width: 230px;
   position: fixed;
 }
 
-.PageWithMenu-content {
+.PageWithMenu-wide .PageWithMenu-menu {
+  width: 230px;
+}
+
+.PageWithMenu-wide .PageWithMenu-content {
   margin-left: 270px;
+}
+
+.PageWithMenu-narrow .PageWithMenu-menu {
+  width: 200px;
+}
+
+.PageWithMenu-narrow .PageWithMenu-content {
+  margin-left: 240px;
 }

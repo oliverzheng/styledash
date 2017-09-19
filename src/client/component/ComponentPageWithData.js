@@ -82,7 +82,7 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
       <PageWithMenu
         pageTitle={component.name}
         sections={sections}
-        wide={true}
+        wide={false}
       />
     );
   }

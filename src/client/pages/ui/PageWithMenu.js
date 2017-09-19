@@ -146,7 +146,7 @@ export default class PageWithMenu extends React.Component<PropType> {
   }
 
   render(): React$Element<*> {
-    const {pageTitle, sections, ...restProps} = this.props;
+    const {pageTitle, sections, wide, ...restProps} = this.props;
 
     const menu = (
       <MenuScrollHighlighter
@@ -170,7 +170,18 @@ export default class PageWithMenu extends React.Component<PropType> {
     );
 
     return (
-      <FixedWidthPageContainer className="PageWithMenu-root" {...restProps}>
+      <FixedWidthPageContainer
+        className={
+          classnames(
+            'PageWithMenu-root',
+            {
+              'PageWithMenu-wide': wide,
+              'PageWithMenu-narrow': !wide,
+            },
+          )
+        }
+        wide={wide}
+        {...restProps}>
         <PageTitle className={Spacing.margin.bottom.n20}>
           {pageTitle}
         </PageTitle>
