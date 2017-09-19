@@ -3,6 +3,7 @@
 import React from 'react';
 import classnames from 'classnames';
 import {Link as RouterLink} from 'react-router';
+import url from 'url';
 
 import './Link.css';
 
@@ -15,8 +16,8 @@ export type VisualProps = {
 
 type PropType = VisualProps & {
   href: string,
-  children: mixed,
   className?: ?string,
+  children?: React$Node,
 };
 
 export const defaultVisualProps = {
@@ -40,20 +41,32 @@ export default class Link extends React.Component<PropType> {
       ...rest
     } = this.props;
     const {darken, underline} = onHover || {};
-    return (
-      <RouterLink
-        to={href}
-        className={classnames(
-          className,
-          {
-            'Link-root': true,
-            'Link-root-darkenOnHover': darken,
-            'Link-root-underlineOnHover': underline,
-          },
-        )}
-        {...rest}>
-        {children}
-      </RouterLink>
+    const joinedClassName = classnames(
+      className,
+      {
+        'Link-root': true,
+        'Link-root-darkenOnHover': darken,
+        'Link-root-underlineOnHover': underline,
+      },
     );
+    if (url.parse(href).host == null) {
+      return (
+        <RouterLink
+          to={href}
+          className={joinedClassName}
+          {...rest}>
+          {children}
+        </RouterLink>
+      );
+    } else {
+      return (
+        <a
+          href={href}
+          className={joinedClassName}
+          {...rest}>
+          {children}
+        </a>
+      );
+    }
   }
 }

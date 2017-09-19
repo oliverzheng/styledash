@@ -8,6 +8,7 @@ import groupPaths, { type PathGroup } from '../../util/groupPaths';
 
 import PageWithMenu, { type Section } from '../../pages/ui/PageWithMenu';
 import TextColor from '../../common/ui/TextColor';
+import Button from '../../common/ui/Button';
 import RepositoryComponentsGrid from './RepositoryComponentsGrid';
 import { type RepositoryComponentsCardProps } from './RepositoryComponentsCard';
 
@@ -15,6 +16,7 @@ import './RepositoryComponentsPageWithMenu.css';
 
 type PropType = {
   repository: {
+    id: string,
     name: string,
     components: Array<{
       filepath: string,
@@ -45,6 +47,11 @@ export default class RepositoryComponentsPageWithMenu extends React.Component<Pr
     return (
       <PageWithMenu
         pageTitle={repository.name}
+        pageTitleAux={
+          <Button glyph="gear" href={`/repository/${repository.id}/settings`}>
+            Repository Settings
+          </Button>
+        }
         sections={sections}
         wide={true}
       />

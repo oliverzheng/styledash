@@ -7,6 +7,7 @@ import RepositoryComponentsPageWithMenu from './ui/RepositoryComponentsPageWithM
 
 type PropType = {
   repository: {
+    repositoryID: string,
     name: string,
     components: Array<{
       componentID: string,
@@ -23,6 +24,7 @@ class RepositoryPageWithData extends React.Component<PropType> {
     return (
       <RepositoryComponentsPageWithMenu
         repository={{
+          id: repository.repositoryID,
           name: repository.name,
           components: repository.components.map(c => ({
             filepath: c.filepath,
@@ -43,6 +45,7 @@ const RepositoryPageWithDataContainer = Relay.createContainer(
     fragments: {
       repository: () => Relay.QL`
         fragment on Repository {
+          repositoryID
           name
           components {
             componentID

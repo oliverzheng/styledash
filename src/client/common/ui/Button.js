@@ -2,6 +2,8 @@
 
 import React from 'react';
 import classnames from 'classnames';
+import {Link as RouterLink} from 'react-router';
+import url from 'url';
 
 import TextColor from './TextColor';
 import Icon, { type GlyphType } from './Icon';
@@ -68,12 +70,21 @@ export default class Button extends React.Component<PropType> {
     }
 
     if (href != null) {
-      return (
-        <a href={href} {...forwardProps}>
-          {icon}
-          {text}
-        </a>
-      );
+      if (url.parse(href).host == null) {
+        return (
+          <RouterLink to={href} {...forwardProps}>
+            {icon}
+            {text}
+          </RouterLink>
+        );
+      } else {
+        return (
+          <a href={href} {...forwardProps}>
+            {icon}
+            {text}
+          </a>
+        );
+      }
     } else {
       return (
         <button {...forwardProps} disabled={disabled}>
