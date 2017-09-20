@@ -1,8 +1,49 @@
-.ComponentProps-root {
-  max-height: 400px;
-  overflow: auto;
-  border: 1px solid #CCC;
-  width: 80%;
-  margin-left: 20px;
-  margin-right: 20px;
+.ComponentProps-prop {
+  position: relative;
+  margin-bottom: 12px;
+  font-size: 14px;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.ComponentProps-prop-name {
+  flex-grow: 1;
+  flex-basis: 0;
+}
+.ComponentProps-prop-typeAndDefault {
+  padding-left: 10px;
+  flex-grow: 2;
+  flex-basis: 0;
+}
+
+.ComponentProps-prop-type {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.ComponentProps-prop-defaultValue {
+  display: inline-block;
+  float: right;
+  margin-left: 10px;
+}
+
+.ComponentProps-prop-name-text,
+.ComponentProps-prop-type,
+.ComponentProps-prop-defaultValue-text {
+  font-family: 'Source Code Pro', monospace;
+}
+
+.ComponentProps-prop-name {
+}
+
+.ComponentProps-prop-required {
+  margin-left: 3px;
+}
+
+.ComponentProps-prop-type {
+}
+
+.ComponentProps-prop-defaultValue-tag {
+  margin-right: 3px;
 }
