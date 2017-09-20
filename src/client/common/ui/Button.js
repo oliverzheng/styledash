@@ -10,7 +10,7 @@ import Icon, { type GlyphType } from './Icon';
 
 import './Button.css';
 
-type PropType = {
+export type ButtonProps = {
   href?: ?string,
   onClick?: ?(() => any),
   disabled?: boolean,
@@ -21,7 +21,7 @@ type PropType = {
   children?: ?React$Node,
 };
 
-export default class Button extends React.Component<PropType> {
+export default class Button extends React.Component<ButtonProps> {
   static defaultProps = {
     href: null,
     onClick: null,

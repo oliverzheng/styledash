@@ -9,6 +9,7 @@ import CodeEditor from './CodeEditor';
 import Card, { CardSection, CardFooterSection } from '../../common/ui/Card';
 import Spacing from '../../common/ui/Spacing';
 import Button from '../../common/ui/Button';
+import ButtonWithAction from '../../common/ui/ButtonWithAction';
 import Icon from '../../common/ui/Icon';
 import FontSize from '../../common/ui/FontSize';
 
@@ -75,13 +76,13 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
       actionButtons = (
         <div className="ComponentExample-code-actionButtons">
           {revertButton}
-          <Button
+          <ButtonWithAction
             glyph="save"
             purpose="primary"
             onClick={this._saveCode}
             disabled={this.state.hasCodeChangedSinceTransform}>
             Save Example
-          </Button>
+          </ButtonWithAction>
         </div>
       );
     }
