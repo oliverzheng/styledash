@@ -11,11 +11,11 @@ import Icon, { type GlyphType } from './Icon';
 import './Button.css';
 
 type PropType = {
-  href: ?string,
-  onClick: ?(() => any),
-  disabled: boolean,
-  glyph: ?GlyphType,
-  purpose: 'primary' | 'secondary',
+  href?: ?string,
+  onClick?: ?(() => any),
+  disabled?: boolean,
+  glyph?: ?GlyphType,
+  purpose?: 'primary' | 'secondary',
 
   className?: ?string,
   children?: ?React$Node,
