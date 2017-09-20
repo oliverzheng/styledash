@@ -44,12 +44,13 @@ class ComponentNewExampleWithData extends React.Component<PropType> {
     );
   }
 
-  _saveNewExample = (code: string) => {
+  _saveNewExample = (code: string, serializedElement: ?string) => {
     this.props.relay.commitUpdate(
       new AddExampleCodeMutation({
         component: this.props.component,
         exampleName: this.props.newExampleName,
         code,
+        serializedElement,
       }),
       {
         onSuccess: () => this.props.onSave(),

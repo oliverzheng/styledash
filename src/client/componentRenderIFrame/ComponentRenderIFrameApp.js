@@ -36,6 +36,8 @@ export default class ComponentRenderIFrameApp extends React.Component<*, StateTy
           transformedCode: message.transformedCode,
           component: message.component,
           repository: message.repository,
+          // Wtf Flow spews shit if this is in render instead of here. :|
+          onRender: this._onRender,
         },
       });
     }
@@ -45,6 +47,14 @@ export default class ComponentRenderIFrameApp extends React.Component<*, StateTy
     nullthrows(this._channel).removeListener(this._onChannelMessage);
     nullthrows(this._channel).destroy();
     this._channel = null;
+  }
+
+  _onRender = (renderer: ComponentRenderer) => {
+    const serializedElement = nullthrows(renderer).serializeRender();
+    nullthrows(this._channel).sendMessage({
+      type: 'componentRendered',
+      serializedElement: JSON.stringify(serializedElement),
+    });
   }
 
   render() {

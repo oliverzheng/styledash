@@ -69,6 +69,7 @@ export default class EntExample extends BaseEnt {
         'name',
         'component_id',
         'code',
+        'serialized_element',
       ],
       extendedColumnNames: [
       ],
@@ -93,6 +94,10 @@ export default class EntExample extends BaseEnt {
     return this._getStringData('code');
   }
 
+  getSerializedElement(): ?string {
+    return this._getNullableStringData('serialized_element');
+  }
+
   async genComponent(): Promise<EntComponent> {
     return await EntComponent.genEnforce(
       this.getViewerContext(),
@@ -107,6 +112,7 @@ export default class EntExample extends BaseEnt {
     componentID: string,
     exampleName: string,
     code: string,
+    serializedElement: ?string,
   ): Promise<this> {
     const exampleID = await this._genCreate(
       vc,
@@ -114,18 +120,26 @@ export default class EntExample extends BaseEnt {
         name: exampleName,
         component_id: componentID,
         code,
+        serialized_element: serializedElement,
       },
     );
     return await this.genEnforce(vc, exampleID);
   }
 
-  async genSetCode(code: string): Promise<boolean> {
+  async genSetCode(
+    code: string,
+    serializedElement: ?string,
+  ): Promise<boolean> {
     const res = await this._genMutate(
-      { code },
+      {
+        code,
+        serialized_element: serializedElement,
+      },
     );
 
     // TODO pull this into the mutator once we have object caching
     this._data['code'] = code;
+    this._data['serialized_element'] = serializedElement;
 
     return res;
   }
@@ -149,4 +163,5 @@ export default class EntExample extends BaseEnt {
   exampleID() { return this.getID(); }
   component() { return this.genComponent(); }
   code() { return this.getCode(); }
+  serializedElement() { return this.getSerializedElement(); }
 }

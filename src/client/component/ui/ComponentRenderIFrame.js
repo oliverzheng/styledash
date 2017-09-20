@@ -14,6 +14,7 @@ type PropType = {
   title: string,
   // eslint-disable-next-line
   onReady?: (ref: ComponentRenderIFrame) => any,
+  onSerializedElement?: (serializedElement: string) => any,
   className?: ?string,
   style?: ?Object,
 };
@@ -29,11 +30,21 @@ export default class ComponentRenderIFrame extends React.Component<PropType> {
     if (onReady) {
       channel.genIFrameSetup().then(() => onReady(this));
     }
+
+    channel.addListener(this._onChannelMessage);
   }
 
   componentWillUnmount() {
     nullthrows(this._channel).destroy();
     this._channel = null;
+  }
+
+  _onChannelMessage = (message: Message) => {
+    if (
+      message.type === 'componentRendered' && this.props.onSerializedElement
+    ) {
+      this.props.onSerializedElement(message.serializedElement);
+    }
   }
 
   sendMessage(message: Message) {

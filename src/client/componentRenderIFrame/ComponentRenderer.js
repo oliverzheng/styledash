@@ -4,6 +4,10 @@ import React from 'react';
 
 import loadComponentBundle from '../util/loadComponentBundle';
 import getRenderElement from './getRenderElement';
+import {
+  type SerializedElement,
+  serializeElementWithStyles,
+} from '../util/elementWithStylesSerialization';
 
 import {SERVER_ADDRESS} from '../../clientserver/serverConfig';
 
@@ -18,6 +22,8 @@ export type ComponentRendererProps = {
   repository: {
     externalCSSURI: ?string,
   },
+  // eslint-disable-next-line no-use-before-define
+  onRender: (renderer: ComponentRenderer) => any,
 };
 
 type StateType = {
@@ -25,6 +31,8 @@ type StateType = {
 };
 
 export default class ComponentRenderer extends React.Component<ComponentRendererProps, StateType> {
+  _root: ?HTMLDivElement;
+
   state = {
     bundledComponent: null,
   };
@@ -50,6 +58,25 @@ export default class ComponentRenderer extends React.Component<ComponentRenderer
     });
   }
 
+  serializeRender(): ?SerializedElement {
+    if (this._root == null) {
+      console.log('no root');
+      return null;
+    }
+    const child = this._root.childNodes[0];
+    if (child instanceof HTMLElement) {
+      return serializeElementWithStyles(child);
+    }
+    console.log('child weird', this._root.childNodes);
+    return null;
+  }
+
+  componentDidUpdate() {
+    if (this.state.bundledComponent != null) {
+      this.props.onRender(this);
+    }
+  }
+
   render(): ?React$Element<*> {
     const bundledComponent = this.state.bundledComponent;
     if (!bundledComponent) {
@@ -66,9 +93,11 @@ export default class ComponentRenderer extends React.Component<ComponentRenderer
     }
 
     return (
-      <div className="ComponentRenderer-root">
+      <div>
         {externalCSSStyle}
-        {getRenderElement(component.name, bundledComponent, transformedCode)}
+        <div className="ComponentRenderer-root" ref={c => this._root = c}>
+          {getRenderElement(component.name, bundledComponent, transformedCode)}
+        </div>
       </div>
     );
   }

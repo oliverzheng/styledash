@@ -45,11 +45,12 @@ class ComponentExampleWithData extends React.Component<PropType> {
     );
   }
 
-  _onSave = (code: string) => {
+  _onSave = (code: string, serializedElement: ?string) => {
     this.props.relay.commitUpdate(
       new SetExampleCodeMutation({
         example: this.props.example,
         code,
+        serializedElement,
       }),
     );
   }

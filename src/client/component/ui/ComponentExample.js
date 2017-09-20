@@ -27,7 +27,7 @@ type PropType = {
   },
   showRevert: boolean,
   canSaveInitialCode: boolean,
-  onSave: (newCode: string) => any,
+  onSave: (newCode: string, serializedElement: ?string) => any,
 };
 
 type StateType = {
@@ -45,6 +45,7 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
     hasCodeChangedSinceTransform: false,
   };
   _code: ?string;
+  _serializedElement: ?string;
   _iframe: ?ComponentRenderIFrame;
   _iframeReady: boolean = false;
   _transformedCodeBeforeIFrameReady: ?string = null;
@@ -94,6 +95,7 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
             ref={c => this._iframe = c}
             title={this.props.exampleID}
             onReady={this._onIFrameReady}
+            onSerializedElement={this._onSerializedElement}
           />
         </CardSection>
         <CardFooterSection className="ComponentExample-codeSection">
@@ -158,6 +160,10 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
   }
 
   _saveCode = () => {
-    this.props.onSave(nullthrows(this._code));
+    this.props.onSave(nullthrows(this._code), this._serializedElement);
+  }
+
+  _onSerializedElement = (serializedElement: string) => {
+    this._serializedElement = serializedElement;
   }
 }

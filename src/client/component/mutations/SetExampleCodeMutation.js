@@ -24,6 +24,7 @@ export default class SetExampleCodeMutation extends Relay.Mutation {
     return {
       exampleID: this.props.example.exampleID,
       code: this.props.code,
+      serializedElement: this.props.serializedElement,
     };
   }
 
@@ -32,6 +33,7 @@ export default class SetExampleCodeMutation extends Relay.Mutation {
       fragment on SetExampleCodePayload {
         example {
           code
+          serializedElement
         }
       }
     `;

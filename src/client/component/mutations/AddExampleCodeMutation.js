@@ -25,6 +25,7 @@ export default class AddExampleCodeMutation extends Relay.Mutation {
       componentID: this.props.component.componentID,
       exampleName: this.props.exampleName,
       code: this.props.code,
+      serializedElement: this.props.serializedElement,
     };
   }
 

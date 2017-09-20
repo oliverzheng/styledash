@@ -103,6 +103,7 @@ const root = {
       input: {
         exampleID: string,
         code: string,
+        serializedElement: ?string,
         clientMutationId: string,
       },
     },
@@ -111,11 +112,12 @@ const root = {
     const {
       exampleID,
       code,
+      serializedElement,
       clientMutationId,
     } = args.input;
 
     const example = await EntExample.genEnforce(context.vc, exampleID);
-    const success = await example.genSetCode(code);
+    const success = await example.genSetCode(code, serializedElement);
     return {
       clientMutationId,
       success,
@@ -129,6 +131,7 @@ const root = {
         componentID: string,
         exampleName: string,
         code: string,
+        serializedElement: ?string,
         clientMutationId: string,
       },
     },
@@ -138,6 +141,7 @@ const root = {
       componentID,
       exampleName,
       code,
+      serializedElement,
       clientMutationId,
     } = args.input;
 
@@ -146,6 +150,7 @@ const root = {
       componentID,
       exampleName,
       code,
+      serializedElement,
     );
     const component = await example.genComponent();
     return {

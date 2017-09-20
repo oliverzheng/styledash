@@ -15,6 +15,9 @@ export type Message = {
   repository: {
     externalCSSURI: ?string,
   },
+} | {
+  type: 'componentRendered',
+  serializedElement: string,
 };
 
 export type MessageWrapper = {
