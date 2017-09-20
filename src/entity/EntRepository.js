@@ -84,15 +84,15 @@ export default class EntRepository extends BaseEnt {
   }
 
   getGitHubUsername(): ?string {
-    return this._getStringData('github_username');
+    return this._getNullableStringData('github_username');
   }
 
   getGitHubRepo(): ?string {
-    return this._getStringData('github_repo');
+    return this._getNullableStringData('github_repo');
   }
 
   getGitHubBranch(): ?string {
-    return this._getStringData('github_branch');
+    return this._getNullableStringData('github_branch');
   }
 
   // TODO at some point, make entquery
