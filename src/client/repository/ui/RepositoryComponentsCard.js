@@ -5,6 +5,10 @@ import classnames from 'classnames';
 
 import LinkCard from '../../common/ui/LinkCard';
 import {CardSection, CardFooterSection} from '../../common/ui/Card';
+import {
+  renderSerializedElementWithStyles,
+  type SerializedElement,
+} from '../../util/elementWithStylesSerialization';
 
 import './RepositoryComponentsCard.css';
 
@@ -13,6 +17,7 @@ const {LinkText} = LinkCard;
 export type RepositoryComponentsCardProps = {
   componentID: string,
   name: string,
+  serializedElement: ?string,
   className?: ?string,
 };
 
@@ -25,8 +30,9 @@ export default class RepositoryComponentsCard extends React.Component<Repository
         className={classnames('RepositoryComponentsCard-card', className)}>
         <CardSection
           className="RepositoryComponentsCard-preview"
+          noPadding={true}
           fillHeight={true}>
-          No preview yet
+          {this._renderPreview()}
         </CardSection>
         <CardFooterSection>
           <LinkText onHover={{darken: true, underline: false}}>
@@ -35,5 +41,15 @@ export default class RepositoryComponentsCard extends React.Component<Repository
         </CardFooterSection>
       </LinkCard>
     );
+  }
+
+  _renderPreview(): React$Node {
+    const {serializedElement} = this.props;
+    if (serializedElement == null) {
+      return 'No preview yet'
+    }
+    const obj = ((JSON.parse(serializedElement): any): SerializedElement);
+
+    return renderSerializedElementWithStyles(obj);
   }
 }

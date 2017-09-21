@@ -43,7 +43,12 @@ export function renderSerializedElementWithStyles(
   // TODO nodeAttrs
   const styles = {};
   Object.keys(serialized.styles).forEach(styleAttrName => {
-    styles[camelcase(styleAttrName)] = serialized.styles[styleAttrName];
+    let camelCaseName = camelcase(styleAttrName);
+    if (camelCaseName.startsWith('webkit')) {
+      // React likes 'em capitalized :/
+      camelCaseName = camelCaseName.replace('webkit', 'Webkit');
+    }
+    styles[camelCaseName] = serialized.styles[styleAttrName];
   });
   const children = serialized.children.map(child => {
     if (typeof child === 'string') {

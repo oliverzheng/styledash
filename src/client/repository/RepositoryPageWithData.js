@@ -13,6 +13,9 @@ type PropType = {
       componentID: string,
       name: string,
       filepath: string,
+      examples: Array<{
+        serializedElement: ?string,
+      }>
     }>,
   },
 };
@@ -31,6 +34,7 @@ class RepositoryPageWithData extends React.Component<PropType> {
             data: {
               componentID: c.componentID,
               name: c.name,
+              serializedElement: (c.examples[0] || {}).serializedElement,
             },
           })),
         }}
@@ -51,6 +55,9 @@ const RepositoryPageWithDataContainer = Relay.createContainer(
             componentID
             name
             filepath
+            examples {
+              serializedElement
+            }
           }
         }
       `,
