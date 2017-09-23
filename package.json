@@ -2,6 +2,9 @@
   "name": "styledash",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "8.1.x"
+  },
   "dependencies": {
     "async-load": "^1.0.7",
     "autoprefixer": "7.1.2",
