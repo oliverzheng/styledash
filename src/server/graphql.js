@@ -12,9 +12,10 @@ import EntRepository from '../entity/EntRepository';
 import EntComponent from '../entity/EntComponent';
 import EntExample from '../entity/EntExample';
 import Viewer from './Viewer';
+import getResourcePath from '../getResourcePath';
 
 const schema = buildSchema(
-  fs.readFileSync(path.resolve(__dirname, './schema.graphql')).toString()
+  fs.readFileSync(getResourcePath('schema.graphql')).toString()
 );
 
 // TODO this is currently broken. Need

@@ -1,11 +1,16 @@
 /** @flow */
 
+import process from 'process';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+import exphbs from 'express-handlebars';
+import webpack from 'webpack';
+import nullthrows from 'nullthrows';
+import webpackDevMiddleware from 'webpack-dev-middleware';
 
-import dbconfig from '../dbconfig.json'; // TODO use env
+import dbconfig from './dbconfig.json'; // TODO use env
 import EntComponent from './entity/EntComponent';
 import {
   connectToMySQL,
@@ -33,7 +38,17 @@ import {
   requireAuth,
   register,
 } from './server/authentication';
+import getClientAssetURLs, { MAIN_APP_JS } from './server/getClientAssetURLs';
+import getResourcePath from './getResourcePath';
 
+let webpackConfig = null;
+if (process.env.NODE_ENV !== 'production') {
+  // Don't add some shit like require('../' + CONST). Webpack will go, "Oh you
+  // want possibly everything in the parent directory? Let me include every
+  // bloody file in this entire repository, including the build artifacts from
+  // the last build, recursively bulking the build process each time.
+  webpackConfig = require(nullthrows(process.env.STYLEDASH_WEBPACK_CONFIG));
+}
 
 async function main() {
   printAction('Connecting to MySQL...');
@@ -48,6 +63,13 @@ async function main() {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(initAuth(conn));
+
+    app.engine('handlebars', exphbs({
+      defaultLayout: 'main',
+      layoutsDir: getResourcePath('views/'),
+    }));
+    app.set('view engine', 'handlebars');
+    app.set('views', getResourcePath('views/'));
 
     // TODO - react is hot-served via webpack on a different port right now
     app.use((req, res, next) => {
@@ -67,9 +89,25 @@ async function main() {
     app.get(SERVER_IS_LOGGED_IN_PATH, isLoggedIn());
     app.post(SERVER_REGISTER_PATH, register());
 
+    if (process.env.NODE_ENV === 'production') {
+      app.use('/_static', express.static(STYLEDASH_CLIENT_BUILD_DIRECTORY));
+    } else {
+      app.get('/_static/*', webpackDevMiddleware(
+        webpack(webpackConfig),
+        {
+          publicPath: '/_static',
+        }
+      ));
+    }
+
     // Temp
     app.get('/', (req, res) => {
-      res.send('derp ' + req.vc.getUserID());
+      const assets = getClientAssetURLs();
+      res.render('index', {
+        layout: false,
+        scripts: assets.js.map(url => ({url: `/_static/${url}`})),
+        stylesheets: assets.css.map(url => ({url: `/_static/${url}`})),
+      });
     });
     app.get('/login', (req, res) => {
       if (res.user) {
