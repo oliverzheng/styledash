@@ -2,6 +2,7 @@ const path = require('path');
 const invariant = require('invariant');
 
 const rootDir = path.join(__dirname, '..');
+const nodeModulesDir = path.join(rootDir, 'node_modules');
 const srcDir = path.join(rootDir, 'src');
 const buildDir = path.join(rootDir, 'build');
 
@@ -36,6 +37,10 @@ module.exports = {
     },
     appEntryPoints: [
       clientEntryPointApp,
+    ],
+    // There are packages we depend on that don't transpile to ES5 themselves.
+    packagesThatNeedBabel: [
+      path.join(nodeModulesDir, 'camelcase'),
     ],
   },
 };

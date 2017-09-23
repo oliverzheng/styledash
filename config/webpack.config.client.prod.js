@@ -13,9 +13,20 @@ if (process.env['NODE_ENV'] !== 'production') {
   throw new Error('Production builds must have NODE_ENV=production.');
 }
 
+const babelIncludeSrc = [
+  pathConfig.srcDir,
+];
+pathConfig.client.packagesThatNeedBabel.forEach(
+  pkg => babelIncludeSrc.push(pkg)
+);
+
 module.exports = {
   bail: true,
   devtool: 'cheap-module-source-map',
+
+  stats: {
+    children: false,
+  },
 
   entry: Object.assign(
     {
@@ -90,7 +101,7 @@ module.exports = {
           // Process JS with Babel.
           {
             test: /\.(js|jsx)$/,
-            include: pathConfig.srcDir,
+            include: babelIncludeSrc,
             loader: require.resolve('babel-loader'),
             options: {
               compact: true,
