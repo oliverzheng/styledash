@@ -11,7 +11,7 @@ import {
 import useRelay from 'react-router-relay';
 import window from 'global/window';
 
-import {SERVER_GRAPHQL_ADDRESS} from '../clientserver/serverConfig';
+import {SERVER_GRAPHQL_PATH} from '../clientserver/serverConfig';
 import {
   genIsLoggedIn,
   genLogOut,
@@ -33,7 +33,7 @@ export default class App extends React.Component<*> {
   componentWillMount(): void {
     Relay.injectNetworkLayer(
       new Relay.DefaultNetworkLayer(
-        SERVER_GRAPHQL_ADDRESS,
+        SERVER_GRAPHQL_PATH,
         {
           // TODO change this to same-origin when we aren't on react hotloading
           // anymore.

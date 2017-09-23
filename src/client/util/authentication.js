@@ -5,10 +5,10 @@ import window from 'global/window';
 import 'whatwg-fetch'; // polyfill global fetch
 
 import {
-  SERVER_LOGIN_ADDRESS,
-  SERVER_LOGOUT_ADDRESS,
-  SERVER_IS_LOGGED_IN_ADDRESS,
-  SERVER_REGISTER_ADDRESS,
+  SERVER_LOGIN_PATH,
+  SERVER_LOGOUT_PATH,
+  SERVER_IS_LOGGED_IN_PATH,
+  SERVER_REGISTER_PATH,
 } from '../../clientserver/serverConfig';
 import {
   type RegisterErrorType,
@@ -58,7 +58,7 @@ export async function genIsLoggedIn(): Promise<boolean> {
   }
 
   const res = await window.fetch(
-    SERVER_IS_LOGGED_IN_ADDRESS,
+    SERVER_IS_LOGGED_IN_PATH,
     {
       method: 'GET',
       // TODO
@@ -82,7 +82,7 @@ export async function genLogIn(
   isLoggedIn: boolean,
 }> {
   const res = await window.fetch(
-    SERVER_LOGIN_ADDRESS,
+    SERVER_LOGIN_PATH,
     {
       method: 'POST',
       headers: {
@@ -121,7 +121,7 @@ export async function genLogIn(
 
 export async function genLogOut(): Promise<boolean> {
   const res = await window.fetch(
-    SERVER_LOGOUT_ADDRESS,
+    SERVER_LOGOUT_PATH,
     {
       method: 'POST',
       // TODO
@@ -146,7 +146,7 @@ export async function genRegister(
   isLoggedIn: boolean,
 }> {
   const res = await window.fetch(
-    SERVER_REGISTER_ADDRESS,
+    SERVER_REGISTER_PATH,
     {
       method: 'POST',
       headers: {

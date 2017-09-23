@@ -6,20 +6,10 @@ import mysql from 'mysql';
 export opaque type Connection = Object;
 
 export async function connectToMySQL(
-  dbconfig: {
-    host: string,
-    user: string,
-    password: string,
-    database: string,
-  },
+  dbURL: string,
 ): Promise<Connection> {
   return await new Promise((resolve, reject) => {
-    const connection = mysql.createConnection({
-      host: dbconfig.host,
-      user: dbconfig.user,
-      password: dbconfig.password,
-      database: dbconfig.database,
-    });
+    const connection = mysql.createConnection(dbURL);
     connection.connect((err) => {
       if (err) {
         reject('Cannot connect to db: ' + err);

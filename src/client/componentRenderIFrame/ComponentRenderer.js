@@ -9,8 +9,6 @@ import {
   serializeElementWithStyles,
 } from '../util/elementWithStylesSerialization';
 
-import {SERVER_ADDRESS} from '../../clientserver/serverConfig';
-
 import './ComponentRenderer.css';
 
 export type ComponentRendererProps = {
@@ -51,7 +49,7 @@ export default class ComponentRenderer extends React.Component<ComponentRenderer
   }
 
   _loadComponentBundle(bundleURI: string): void {
-    loadComponentBundle(`${SERVER_ADDRESS}${bundleURI}`).then(Component => {
+    loadComponentBundle(`${bundleURI}`).then(Component => {
       this.setState({
         bundledComponent: Component,
       });

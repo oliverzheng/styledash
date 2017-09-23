@@ -9,7 +9,7 @@ import exphbs from 'express-handlebars';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 
-import dbconfig from './dbconfig.json'; // TODO use env
+import envConfig from './envConfig';
 import EntComponent from './entity/EntComponent';
 import {
   connectToMySQL,
@@ -21,7 +21,7 @@ import {
   printError,
 } from './consoleUtil';
 import {
-  SERVER_PORT,
+  SERVER_GRAPHQL_PATH,
   SERVER_LOGIN_PATH,
   SERVER_LOGOUT_PATH,
   SERVER_IS_LOGGED_IN_PATH,
@@ -49,14 +49,14 @@ if (process.env.NODE_ENV === 'development') {
 
 async function main() {
   printAction('Connecting to MySQL...');
-  const conn = await connectToMySQL(dbconfig);
+  const conn = await connectToMySQL(envConfig.dbURL);
   printActionResult('Connected.');
 
   try {
     // Setup
     const app = express();
     app.use(morgan('dev'));
-    app.use(cookieParser(dbconfig.cookieSecret));
+    app.use(cookieParser(envConfig.server.cookieSecret));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(initAuth(conn));
@@ -139,12 +139,12 @@ async function main() {
 
     // GraphQL
     app.post(
-      '/graphql',
+      SERVER_GRAPHQL_PATH,
       requireAuth((req, res) => res.send('Unauthenticated', 401)),
       graphqlAPI(),
     );
     app.get(
-      '/graphql',
+      SERVER_GRAPHQL_PATH,
       requireAuth((req, res) => res.send('Unauthenticated', 401)),
       (req, res, next) => {
         if (req.vc.isDev()) {
@@ -156,8 +156,8 @@ async function main() {
       graphiql(),
     );
 
-    printAction(`Setting up listener on port ${SERVER_PORT}...`);
-    app.listen(SERVER_PORT, () => {
+    printAction(`Setting up listener on port ${envConfig.server.port}...`);
+    app.listen(envConfig.server.port, () => {
       printActionResult('Listener setup.');
     });
   }

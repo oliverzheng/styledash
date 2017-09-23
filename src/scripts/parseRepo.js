@@ -15,7 +15,7 @@ import nullthrows from 'nullthrows';
 import PromisePool from 'es6-promise-pool';
 import {parse as parseReactDocs} from 'react-docgen';
 
-import dbconfig from '../dbconfig.json';
+import envConfig from '../envConfig';
 import {
   connectToMySQL,
   executeSQL,
@@ -49,7 +49,7 @@ async function main(): Promise<*> {
   }
 
   printAction('Connecting to MySQL...');
-  const mysqlConnection = await connectToMySQL(dbconfig);
+  const mysqlConnection = await connectToMySQL(envConfig.dbURL);
 
   try {
     printAction('Parsing directory...');
