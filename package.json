@@ -102,6 +102,7 @@
     "check:flow": "flow",
     "check:lint": "esw src/",
     "check": "yarn run check:flow && yarn run check:lint",
+    "setup:hooks": "./scripts/linkHooks.sh",
     "test": "node scripts/test.js --env=jsdom",
     "parse-debug": "babel-node src/scripts/parseRepo.js"
   },
