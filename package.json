@@ -101,8 +101,8 @@
     "whatwg-fetch": "^2.0.3"
   },
   "scripts": {
-    "build:server": "NODE_ENV='production' webpack --config config/webpack.config.server.prod.js --progress",
-    "build:client": "NODE_ENV='production' webpack --config config/webpack.config.client.prod.js --progress",
+    "build:server": "NODE_ENV='production' webpack --config config/webpack.config.server.prod.js --display errors-only",
+    "build:client": "NODE_ENV='production' webpack --config config/webpack.config.client.prod.js --display errors-only",
     "build": "yarn run build:server && yarn run build:client",
     "start:server": "NODE_ENV='production' node build/server.js",
     "start:devserver": "NODE_ENV='development' STYLEDASH_WEBPACK_CONFIG='config/webpack.config.client.dev.js' babel-watch src/server.js",
