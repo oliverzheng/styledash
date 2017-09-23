@@ -3,7 +3,7 @@
 import React from 'react';
 import classnames from 'classnames';
 
-import LinkCard from '../../common/ui/LinkCard';
+import LinkCard, {LinkText} from '../../common/ui/LinkCard';
 import {CardSection, CardFooterSection} from '../../common/ui/Card';
 import {
   renderSerializedElementWithStyles,
@@ -11,8 +11,6 @@ import {
 } from '../../util/elementWithStylesSerialization';
 
 import './RepositoryComponentsCard.css';
-
-const {LinkText} = LinkCard;
 
 export type RepositoryComponentsCardProps = {
   componentID: string,

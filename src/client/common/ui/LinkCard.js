@@ -17,7 +17,7 @@ type LinkTextPropType = VisualProps & {
   children: React$Element<*> | string,
 };
 
-class LinkText extends React.Component<LinkTextPropType> {
+export class LinkText extends React.Component<LinkTextPropType> {
   static defaultProps = {
     ...defaultVisualProps,
   };
@@ -56,8 +56,6 @@ type PropType = {
 };
 
 export default class LinkCard extends React.Component<PropType> {
-  static LinkText = LinkText;
-
   render(): React$Element<*> {
     const {
       href,

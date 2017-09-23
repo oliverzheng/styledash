@@ -6,14 +6,12 @@ import relativeDate from 'relative-date';
 import classnames from 'classnames';
 
 import SectionHeader from '../../common/ui/SectionHeader';
-import LinkCard from '../../common/ui/LinkCard';
+import LinkCard, {LinkText} from '../../common/ui/LinkCard';
 import {CardSection} from '../../common/ui/Card';
 import SubText from '../../common/ui/SubText';
 import Spacing from '../../common/ui/Spacing';
 
 import './RepositoryListCard.css';
-
-const {LinkText} = LinkCard;
 
 type PropType = {
   name: string,
