@@ -2,6 +2,8 @@
 
 import fs from 'fs';
 
+import {getClientManifest} from '../prodCompileConstants';
+
 export const MAIN_APP_JS = 'app.js';
 const MAIN_APP_CSS = 'app.css';
 const POLYFILLS_JS = 'polyfills.js';
@@ -13,7 +15,7 @@ export default function getClientAssetURLs(
 } {
   if (process.env.NODE_ENV === 'production') {
     const appManifest = JSON.parse(
-      fs.readFileSync(STYLEDASH_CLIENT_MANIFEST).toString()
+      fs.readFileSync(getClientManifest()).toString()
     );
 
     return {

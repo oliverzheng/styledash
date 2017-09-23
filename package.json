@@ -96,9 +96,8 @@
     "build:client": "NODE_ENV='production' webpack --config config/webpack.config.client.prod.js --progress",
     "build": "yarn run build:server && yarn run build:client",
     "start:server": "NODE_ENV='production' node build/server.js",
-
-    "start:devserver": "NODE_ENV='development' STYLEDASH_WEBPACK_CONFIG='../config/webpack.config.client.dev.js' babel-watch src/server.js",
-
+    "start:devserver": "NODE_ENV='development' STYLEDASH_WEBPACK_CONFIG='config/webpack.config.client.dev.js' babel-watch src/server.js",
+    "check:flow": "flow",
     "test": "node scripts/test.js --env=jsdom",
     "parse-debug": "babel-node src/scripts/parseRepo.js"
   },

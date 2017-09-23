@@ -40,14 +40,12 @@ import {
 } from './server/authentication';
 import getClientAssetURLs, { MAIN_APP_JS } from './server/getClientAssetURLs';
 import getResourcePath from './getResourcePath';
+import {getClientBuildDir} from './prodCompileConstants';
+import {getClientDevWebpackConfig} from './devConstants';
 
 let webpackConfig = null;
-if (process.env.NODE_ENV !== 'production') {
-  // Don't add some shit like require('../' + CONST). Webpack will go, "Oh you
-  // want possibly everything in the parent directory? Let me include every
-  // bloody file in this entire repository, including the build artifacts from
-  // the last build, recursively bulking the build process each time.
-  webpackConfig = require(nullthrows(process.env.STYLEDASH_WEBPACK_CONFIG));
+if (process.env.NODE_ENV === 'development') {
+  webpackConfig = getClientDevWebpackConfig();
 }
 
 async function main() {
@@ -90,7 +88,7 @@ async function main() {
     app.post(SERVER_REGISTER_PATH, register());
 
     if (process.env.NODE_ENV === 'production') {
-      app.use('/_static', express.static(STYLEDASH_CLIENT_BUILD_DIRECTORY));
+      app.use('/_static', express.static(getClientBuildDir()));
     } else {
       app.get('/_static/*', webpackDevMiddleware(
         webpack(webpackConfig),
