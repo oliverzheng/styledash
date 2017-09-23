@@ -7,7 +7,6 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import exphbs from 'express-handlebars';
 import webpack from 'webpack';
-import nullthrows from 'nullthrows';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 
 import dbconfig from './dbconfig.json'; // TODO use env
@@ -38,7 +37,7 @@ import {
   requireAuth,
   register,
 } from './server/authentication';
-import getClientAssetURLs, { MAIN_APP_JS } from './server/getClientAssetURLs';
+import getClientAssetURLs from './server/getClientAssetURLs';
 import getResourcePath from './getResourcePath';
 import {getClientBuildDir} from './prodCompileConstants';
 import {getClientDevWebpackConfig} from './devConstants';

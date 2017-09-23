@@ -16,91 +16,7 @@ type AnyPermission =
   typeof READ_WRITE_PERMISSION |
   typeof ADMIN_PERMISSION;
 
-const repositoryPermissionPrivacy: PrivacyType<EntRepositoryPermission> = {
-  async genCanViewerSee(obj: EntRepositoryPermission): Promise<boolean> {
-    const vc = obj.getViewerContext();
-
-    if (vc.getUserID() === obj.getUserID()) {
-      return true;
-    }
-
-    // You can also see a permission if you have any permission for the repo
-    return await EntRepositoryPermission.genDoesViewerHaveAnyPermission(
-      vc,
-      obj.getRepositoryID(),
-    );
-  },
-
-  async genCanViewerMutate(obj: EntRepositoryPermission): Promise<boolean> {
-    const vc = obj.getViewerContext();
-
-    // A user cannot change their own permissions
-    if (vc.getUserID() === obj.getUserID()) {
-      return false;
-    }
-
-    // An admin for the repo can change it for others though
-    return await EntRepositoryPermission.genIsViewerAdmin(
-      vc,
-      obj.getRepositoryID(),
-    );
-  },
-
-  async genCanViewerDelete(obj: EntRepositoryPermission): Promise<boolean> {
-    const vc = obj.getViewerContext();
-
-    // A user can delete their own permissions, unless this permission is the
-    // only admin one left for the project. At least someone needs to be the
-    // admin.
-    if (vc.getUserID() === obj.getUserID()) {
-      if (obj.isReadWrite()) {
-        return true;
-      } else if (obj.isAdmin()) {
-        const adminPerms = await EntRepositoryPermission.genPermissionsThatAre(
-          vc,
-          obj.getRepositoryID(),
-          EntRepositoryPermission.ADMIN,
-        );
-        return adminPerms.length > 1;
-      } else {
-        invariant(false, 'NYI');
-      }
-    }
-
-    // An admin for the repo can change it for others though
-    return await EntRepositoryPermission.genIsViewerAdmin(
-      vc,
-      obj.getRepositoryID(),
-    );
-  },
-
-  async genCanViewerCreate(
-    vc: ViewerContext,
-    data: {[columnName: string]: mixed},
-  ): Promise<boolean> {
-    const repositoryID = data['repository_id'];
-    const permission = data['permission'];
-
-    // An admin can do whatever, but a user can only add readWrite permissions.
-    const allPerms = await EntRepositoryPermission.genAllPermissions(
-      vc,
-      ((repositoryID: any): string),
-      vc.getUserID(),
-    );
-    const isAdmin = allPerms.some(perm => perm.isAdmin());
-    const hasAnyPerms = allPerms.length > 0;
-
-    if (isAdmin) {
-      return true;
-    } else if (permission === EntRepositoryPermission.ADMIN) {
-      return false;
-    } else if (permission === EntRepositoryPermission.READ_WRITE) {
-      return hasAnyPerms;
-    } else {
-      invariant(false, 'NYI');
-    }
-  },
-};
+let repositoryPermissionPrivacy;
 
 export default class EntRepositoryPermission extends BaseEnt {
 
@@ -238,3 +154,89 @@ export default class EntRepositoryPermission extends BaseEnt {
     return this._getStringData('permission') === ADMIN_PERMISSION;
   }
 }
+
+repositoryPermissionPrivacy = (({
+  async genCanViewerSee(obj: EntRepositoryPermission): Promise<boolean> {
+    const vc = obj.getViewerContext();
+
+    if (vc.getUserID() === obj.getUserID()) {
+      return true;
+    }
+
+    // You can also see a permission if you have any permission for the repo
+    return await EntRepositoryPermission.genDoesViewerHaveAnyPermission(
+      vc,
+      obj.getRepositoryID(),
+    );
+  },
+
+  async genCanViewerMutate(obj: EntRepositoryPermission): Promise<boolean> {
+    const vc = obj.getViewerContext();
+
+    // A user cannot change their own permissions
+    if (vc.getUserID() === obj.getUserID()) {
+      return false;
+    }
+
+    // An admin for the repo can change it for others though
+    return await EntRepositoryPermission.genIsViewerAdmin(
+      vc,
+      obj.getRepositoryID(),
+    );
+  },
+
+  async genCanViewerDelete(obj: EntRepositoryPermission): Promise<boolean> {
+    const vc = obj.getViewerContext();
+
+    // A user can delete their own permissions, unless this permission is the
+    // only admin one left for the project. At least someone needs to be the
+    // admin.
+    if (vc.getUserID() === obj.getUserID()) {
+      if (obj.isReadWrite()) {
+        return true;
+      } else if (obj.isAdmin()) {
+        const adminPerms = await EntRepositoryPermission.genPermissionsThatAre(
+          vc,
+          obj.getRepositoryID(),
+          EntRepositoryPermission.ADMIN,
+        );
+        return adminPerms.length > 1;
+      } else {
+        invariant(false, 'NYI');
+      }
+    }
+
+    // An admin for the repo can change it for others though
+    return await EntRepositoryPermission.genIsViewerAdmin(
+      vc,
+      obj.getRepositoryID(),
+    );
+  },
+
+  async genCanViewerCreate(
+    vc: ViewerContext,
+    data: {[columnName: string]: mixed},
+  ): Promise<boolean> {
+    const repositoryID = data['repository_id'];
+    const permission = data['permission'];
+
+    // An admin can do whatever, but a user can only add readWrite permissions.
+    const allPerms = await EntRepositoryPermission.genAllPermissions(
+      vc,
+      ((repositoryID: any): string),
+      vc.getUserID(),
+    );
+    const isAdmin = allPerms.some(perm => perm.isAdmin());
+    const hasAnyPerms = allPerms.length > 0;
+
+    if (isAdmin) {
+      return true;
+    } else if (permission === EntRepositoryPermission.ADMIN) {
+      return false;
+    } else if (permission === EntRepositoryPermission.READ_WRITE) {
+      return hasAnyPerms;
+    } else {
+      invariant(false, 'NYI');
+    }
+  },
+}): PrivacyType<EntRepositoryPermission>);

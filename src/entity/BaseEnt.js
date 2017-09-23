@@ -290,7 +290,7 @@ export default class BaseEnt {
     });
     sql.append(SQL` WHERE id = ${this.getID()}`);
 
-    const res = await executeSQL(
+    await executeSQL(
       this.getViewerContext().getDatabaseConnection(),
       sql,
     );

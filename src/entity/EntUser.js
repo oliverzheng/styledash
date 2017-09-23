@@ -2,7 +2,6 @@
 
 import invariant from 'invariant';
 import bcrypt from 'bcryptjs';
-import SQL from 'sql-template-strings';
 
 import ViewerContext from './vc';
 import BaseEnt, {
@@ -11,44 +10,7 @@ import BaseEnt, {
 } from './BaseEnt';
 import {isPasswordValid} from '../clientserver/authentication';
 
-const userPrivacy: PrivacyType<EntUser> = {
-  async genCanViewerSee(obj: EntUser): Promise<boolean> {
-    // TODO This is janky for a few reasons:
-    // There should be a concept of organizations, so it's not possible for
-    // a user of one org to see the user of another org.
-    // "See" here means all fields on an object. Password isn't exposed, but it
-    // could be and the privacy would leak. There would need to be field-level
-    // restrictions.
-    return true;
-  },
-  async genCanViewerMutate(obj: EntUser): Promise<boolean> {
-    // TODO make sure new password is valid
-    return obj.getID() === obj.getViewerContext().getUserID();
-  },
-  async genCanViewerDelete(obj: EntUser): Promise<boolean> {
-    return obj.getID() === obj.getViewerContext().getUserID();
-  },
-  async genCanViewerCreate(
-    vc: ViewerContext,
-    data: {[columnName: string]: mixed},
-  ): Promise<boolean> {
-    // Logged in users can't create users. There isn't really any business logic
-    // that prevents them from doing so, but it gets weird when the resulting
-    // user has a VC of the current user.
-    if (vc.isAuthenticated()) {
-      return false;
-    }
-
-    const email = data['email'];
-    invariant(typeof email === 'string', 'Email must be a string');
-
-    if (await EntUser.genIsEmailAlreadyInUse(vc, email)) {
-      return false;
-    }
-
-    return true;
-  },
-};
+let userPrivacy;
 
 export default class EntUser extends BaseEnt {
   static _getEntConfig(): EntConfig<this> {
@@ -159,3 +121,41 @@ export default class EntUser extends BaseEnt {
   email() { return this.getEmail(); }
 }
 
+userPrivacy = (({
+  async genCanViewerSee(obj: EntUser): Promise<boolean> {
+    // TODO This is janky for a few reasons:
+    // There should be a concept of organizations, so it's not possible for
+    // a user of one org to see the user of another org.
+    // "See" here means all fields on an object. Password isn't exposed, but it
+    // could be and the privacy would leak. There would need to be field-level
+    // restrictions.
+    return true;
+  },
+  async genCanViewerMutate(obj: EntUser): Promise<boolean> {
+    // TODO make sure new password is valid
+    return obj.getID() === obj.getViewerContext().getUserID();
+  },
+  async genCanViewerDelete(obj: EntUser): Promise<boolean> {
+    return obj.getID() === obj.getViewerContext().getUserID();
+  },
+  async genCanViewerCreate(
+    vc: ViewerContext,
+    data: {[columnName: string]: mixed},
+  ): Promise<boolean> {
+    // Logged in users can't create users. There isn't really any business logic
+    // that prevents them from doing so, but it gets weird when the resulting
+    // user has a VC of the current user.
+    if (vc.isAuthenticated()) {
+      return false;
+    }
+
+    const email = data['email'];
+    invariant(typeof email === 'string', 'Email must be a string');
+
+    if (await EntUser.genIsEmailAlreadyInUse(vc, email)) {
+      return false;
+    }
+
+    return true;
+  },
+}): PrivacyType<EntUser>);

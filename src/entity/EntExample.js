@@ -11,54 +11,7 @@ import BaseEnt, {
 } from './BaseEnt';
 import EntComponent from './EntComponent';
 
-const examplePrivacy: PrivacyType<EntExample> = {
-  async genCanViewerSee(obj: EntExample): Promise<boolean> {
-    const component = await EntComponent.genNullable(
-      obj.getViewerContext(),
-      obj.getComponentID(),
-    );
-    if (!component) {
-      return false;
-    }
-    return await genDeferCanSeePrivacyTo(component);
-  },
-
-  async genCanViewerMutate(obj: EntExample): Promise<boolean> {
-    const component = await EntComponent.genNullable(
-      obj.getViewerContext(),
-      obj.getComponentID(),
-    );
-    if (!component) {
-      return false;
-    }
-    return await genDeferCanMutatePrivacyTo(component);
-  },
-
-  async genCanViewerDelete(obj: EntExample): Promise<boolean> {
-    const component = await EntComponent.genNullable(
-      obj.getViewerContext(),
-      obj.getComponentID(),
-    );
-    if (!component) {
-      return false;
-    }
-    return await genDeferCanMutatePrivacyTo(component);
-  },
-
-  async genCanViewerCreate(
-    vc: ViewerContext,
-    data: {[columnName: string]: mixed},
-  ): Promise<boolean> {
-    const componentID = data['component_id'];
-    invariant(typeof componentID === 'string', 'ComponentID must be a string');
-
-    const component = await EntComponent.genNullable(vc, componentID);
-    if (!component) {
-      return false;
-    }
-    return await genDeferCanMutatePrivacyTo(component);
-  },
-};
+let examplePrivacy;
 
 export default class EntExample extends BaseEnt {
   static _getEntConfig(): EntConfig<this> {
@@ -165,3 +118,52 @@ export default class EntExample extends BaseEnt {
   code() { return this.getCode(); }
   serializedElement() { return this.getSerializedElement(); }
 }
+
+examplePrivacy = (({
+  async genCanViewerSee(obj: EntExample): Promise<boolean> {
+    const component = await EntComponent.genNullable(
+      obj.getViewerContext(),
+      obj.getComponentID(),
+    );
+    if (!component) {
+      return false;
+    }
+    return await genDeferCanSeePrivacyTo(component);
+  },
+
+  async genCanViewerMutate(obj: EntExample): Promise<boolean> {
+    const component = await EntComponent.genNullable(
+      obj.getViewerContext(),
+      obj.getComponentID(),
+    );
+    if (!component) {
+      return false;
+    }
+    return await genDeferCanMutatePrivacyTo(component);
+  },
+
+  async genCanViewerDelete(obj: EntExample): Promise<boolean> {
+    const component = await EntComponent.genNullable(
+      obj.getViewerContext(),
+      obj.getComponentID(),
+    );
+    if (!component) {
+      return false;
+    }
+    return await genDeferCanMutatePrivacyTo(component);
+  },
+
+  async genCanViewerCreate(
+    vc: ViewerContext,
+    data: {[columnName: string]: mixed},
+  ): Promise<boolean> {
+    const componentID = data['component_id'];
+    invariant(typeof componentID === 'string', 'ComponentID must be a string');
+
+    const component = await EntComponent.genNullable(vc, componentID);
+    if (!component) {
+      return false;
+    }
+    return await genDeferCanMutatePrivacyTo(component);
+  },
+}): PrivacyType<EntExample>);

@@ -12,32 +12,7 @@ import EntRepository from './EntRepository';
 import EntRepositoryPermission from './EntRepositoryPermission';
 import EntExample from './EntExample';
 
-const componentPrivacy: PrivacyType<EntComponent> = {
-  async genCanViewerSee(obj: EntComponent): Promise<boolean> {
-    return await EntRepositoryPermission.genCanViewerReadWrite(
-      obj.getViewerContext(),
-      obj.getRepositoryID(),
-    );
-  },
-
-  async genCanViewerMutate(obj: EntComponent): Promise<boolean> {
-    return await EntRepositoryPermission.genCanViewerReadWrite(
-      obj.getViewerContext(),
-      obj.getRepositoryID(),
-    );
-  },
-
-  async genCanViewerDelete(obj: EntComponent): Promise<boolean> {
-    // Let's say no for now...?
-    return false;
-  },
-
-  async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
-    // TODO Only scripts/background processes can create it. Need to open that
-    // up here.
-    return false;
-  },
-};
+let componentPrivacy;
 
 export default class EntComponent extends BaseEnt {
   static _getEntConfig(): EntConfig<this> {
@@ -120,7 +95,7 @@ export default class EntComponent extends BaseEnt {
       return null;
     }
 
-    return `https:\/\/github.com/${user}/${repo}/blob/${branch}${this.getFilepath()}`;
+    return `https://github.com/${user}/${repo}/blob/${branch}${this.getFilepath()}`;
   }
 
   // Mutations
@@ -162,3 +137,30 @@ export default class EntComponent extends BaseEnt {
   examples() { return this.genExamples(); }
   githubURL() { return this.genGitHubURL(); }
 }
+
+componentPrivacy = (({
+  async genCanViewerSee(obj: EntComponent): Promise<boolean> {
+    return await EntRepositoryPermission.genCanViewerReadWrite(
+      obj.getViewerContext(),
+      obj.getRepositoryID(),
+    );
+  },
+
+  async genCanViewerMutate(obj: EntComponent): Promise<boolean> {
+    return await EntRepositoryPermission.genCanViewerReadWrite(
+      obj.getViewerContext(),
+      obj.getRepositoryID(),
+    );
+  },
+
+  async genCanViewerDelete(obj: EntComponent): Promise<boolean> {
+    // Let's say no for now...?
+    return false;
+  },
+
+  async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
+    // TODO Only scripts/background processes can create it. Need to open that
+    // up here.
+    return false;
+  },
+}): PrivacyType<EntComponent>);

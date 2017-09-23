@@ -1,10 +1,10 @@
 /** @flow */
 
 import fs from 'fs';
-import path from 'path';
 import {buildSchema} from 'graphql';
 import graphqlHTTP from 'express-graphql';
 import nullthrows from 'nullthrows';
+import invariant from 'invariant';
 
 import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
@@ -23,7 +23,6 @@ const schema = buildSchema(
 // ... then why is this here? Has it never worked? Doesn't Relay need this?
 // If it does end up working, make the enumeration of types automatic.
 async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
-  const conn = vc.getDatabaseConnection();
   const separatorIndex = id.indexOf(':');
   let type: string;
   let objID: ?string = null
@@ -43,9 +42,9 @@ async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
       return await EntComponent.genNullable(vc, nullthrows(objID));
     case 'example':
       return await EntExample.genNullable(vc, nullthrows(objID));
+    default:
+      invariant(false, 'Unexpected type %s', type);
   }
-
-  return null;
 }
 
 type Context = {

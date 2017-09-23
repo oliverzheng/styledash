@@ -8,33 +8,7 @@ import BaseEnt, {
 import EntRepositoryPermission from './EntRepositoryPermission';
 import EntComponent from './EntComponent';
 
-const repoPrivacy: PrivacyType<EntRepository> = {
-  async genCanViewerSee(obj: EntRepository): Promise<boolean> {
-    return await EntRepositoryPermission.genDoesViewerHaveAnyPermission(
-      obj.getViewerContext(),
-      obj.getID(),
-    );
-  },
-
-  async genCanViewerMutate(obj: EntRepository): Promise<boolean> {
-    return await EntRepositoryPermission.genIsViewerAdmin(
-      obj.getViewerContext(),
-      obj.getID(),
-    );
-  },
-
-  async genCanViewerDelete(obj: EntRepository): Promise<boolean> {
-    return await EntRepositoryPermission.genIsViewerAdmin(
-      obj.getViewerContext(),
-      obj.getID(),
-    );
-  },
-
-  async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
-    // TODO this will depend on billing/pricing of some kind at some point
-    return true;
-  },
-};
+let repoPrivacy;
 
 export default class EntRepository extends BaseEnt {
   static _getEntConfig(): EntConfig<this> {
@@ -119,3 +93,31 @@ export default class EntRepository extends BaseEnt {
   components() { return this.genComponents(); }
   lastUpdatedTimestamp() { return this.getLastUpdatedTimestamp(); }
 }
+
+repoPrivacy = (({
+  async genCanViewerSee(obj: EntRepository): Promise<boolean> {
+    return await EntRepositoryPermission.genDoesViewerHaveAnyPermission(
+      obj.getViewerContext(),
+      obj.getID(),
+    );
+  },
+
+  async genCanViewerMutate(obj: EntRepository): Promise<boolean> {
+    return await EntRepositoryPermission.genIsViewerAdmin(
+      obj.getViewerContext(),
+      obj.getID(),
+    );
+  },
+
+  async genCanViewerDelete(obj: EntRepository): Promise<boolean> {
+    return await EntRepositoryPermission.genIsViewerAdmin(
+      obj.getViewerContext(),
+      obj.getID(),
+    );
+  },
+
+  async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
+    // TODO this will depend on billing/pricing of some kind at some point
+    return true;
+  },
+}): PrivacyType<EntRepository>);

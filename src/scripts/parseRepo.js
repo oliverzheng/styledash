@@ -8,7 +8,6 @@ import {spawn} from 'child_process';
 import {Readable} from 'stream';
 
 import invariant from 'invariant';
-import webpack from 'webpack';
 import findRoot from 'find-root';
 import SQL from 'sql-template-strings';
 import filesize from 'filesize';
@@ -16,7 +15,7 @@ import nullthrows from 'nullthrows';
 import PromisePool from 'es6-promise-pool';
 import {parse as parseReactDocs} from 'react-docgen';
 
-import dbconfig from '../../dbconfig.json';
+import dbconfig from '../dbconfig.json';
 import {
   connectToMySQL,
   executeSQL,
@@ -154,10 +153,12 @@ async function main(): Promise<*> {
             insertID: sqlResult.insertId,
           };
         }).catch(err => {
-          throw {
-            component: compiledComponent,
-            error: err,
-          };
+          throw new Error(
+            JSON.stringify({
+              component: compiledComponent,
+              error: err,
+            })
+          );
         });
       },
       PROMISE_POOL_SIZE,
@@ -455,9 +456,6 @@ const NPM_PACKAGE_TO_BABEL_PRESETS = {
   'babel-preset-flow': 'flow',
   'babel-preset-stage-0': 'stage-0',
   'babel-preset-stage-1': 'stage-1',
-};
-
-const NPM_PACKAGE_TO_BABEL_PLUGINS = {
 };
 
 function getBabelOptions(dir: string, packageJSON: Object): ?Object {

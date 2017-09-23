@@ -38,6 +38,7 @@
     "eslint-plugin-import": "2.7.0",
     "eslint-plugin-jsx-a11y": "5.1.1",
     "eslint-plugin-react": "7.1.0",
+    "eslint-watch": "^3.1.2",
     "express": "^4.15.4",
     "express-graphql": "^0.6.7",
     "express-handlebars": "^3.0.0",
@@ -97,7 +98,10 @@
     "build": "yarn run build:server && yarn run build:client",
     "start:server": "NODE_ENV='production' node build/server.js",
     "start:devserver": "NODE_ENV='development' STYLEDASH_WEBPACK_CONFIG='config/webpack.config.client.dev.js' babel-watch src/server.js",
+    "start:lint": "esw src/ -w",
     "check:flow": "flow",
+    "check:lint": "esw src/",
+    "check": "yarn run check:flow && yarn run check:lint",
     "test": "node scripts/test.js --env=jsdom",
     "parse-debug": "babel-node src/scripts/parseRepo.js"
   },
