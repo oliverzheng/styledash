@@ -11,7 +11,15 @@ import {
 import useRelay from 'react-router-relay';
 import window from 'global/window';
 
-import {SERVER_GRAPHQL_PATH} from '../clientserver/serverConfig';
+import {
+  SERVER_GRAPHQL_PATH,
+  MAIN_SITE_PATH,
+  REPOSITORY_LIST_PATH,
+  REPOSITORY_PATH,
+  COMPONENT_PATH,
+  LOGIN_PATH,
+  LOGOUT_PATH,
+} from '../clientserver/urlPaths';
 import {
   genIsLoggedIn,
   genLogOut,
@@ -55,7 +63,7 @@ export default class App extends React.Component<*> {
 
       if (!isLoggedIn) {
         // Turns out we aren't logged in
-        browserHistory.push('/login');
+        browserHistory.push(LOGIN_PATH);
       }
       // If we are logged in, everything is fine.
 
@@ -65,7 +73,7 @@ export default class App extends React.Component<*> {
       if (!prevIsLoggedIn) {
         // Just logged in. Use replace() instead of push() here, so the /login
         // in the history is removed.
-        browserHistory.replace('/');
+        browserHistory.replace(REPOSITORY_LIST_PATH);
       } else {
         // Just got logged out. We want to do a full page refresh here, because
         // we want to clear all JS in-memory caches. If Relay actually supported
@@ -73,7 +81,7 @@ export default class App extends React.Component<*> {
         // reload.
         // Use .replace() here, since we are already on the /logout url. Remove
         // that from the stack history.
-        window.location.replace('/');
+        window.location.replace(MAIN_SITE_PATH);
       }
     }
   }
@@ -86,28 +94,28 @@ export default class App extends React.Component<*> {
         onUpdate={this._onUpdate}
         environment={Relay.Store}>
         <Route
-          path="/"
+          path={REPOSITORY_LIST_PATH}
           component={RepositoryListPage}
           queries={RepositoryListPage.queries}
           onEnter={this._requireAuth}
         />
         <Route
-          path="/login"
+          path={LOGIN_PATH}
           component={LoginPage}
         />
         <Route
-          path="/logout"
+          path={LOGOUT_PATH}
           component={LoginPage}
           onEnter={this._logout}
         />
         <Route
-          path="repository/:repositoryID"
+          path={`${REPOSITORY_PATH}/:repositoryID`}
           component={RepositoryPage}
           queries={RepositoryPage.queries}
           onEnter={this._requireAuth}
         />
         <Route
-          path="component/:componentID"
+          path={`${COMPONENT_PATH}/:componentID`}
           component={ComponentPage}
           queries={ComponentPage.queries}
           onEnter={this._requireAuth}
@@ -128,7 +136,7 @@ export default class App extends React.Component<*> {
   async _requireAuth(_: Object, replace: Function, callback: Function) {
     const isLoggedIn = await genIsLoggedIn();
     if (!isLoggedIn) {
-      replace('/login');
+      replace(LOGIN_PATH);
     }
     callback();
   }

@@ -5,6 +5,9 @@ import React from 'react';
 import Link from '../common/ui/Link';
 import PageHeader from './ui/PageHeader';
 import {
+  LOGOUT_PATH,
+} from '../../clientserver/urlPaths';
+import {
   genIsLoggedIn,
   genLogIn,
   genRegister,
@@ -63,7 +66,7 @@ export default class LoginPage extends React.Component<*, StateType> {
     let registerForm = null;
     if (login.isLoggedIn) {
       status = 'Logged in';
-      link = <Link href="/logout">Logout</Link>;
+      link = <Link href={LOGOUT_PATH}>Logout</Link>;
     } else {
       status = 'Not logged in';
       loginForm = (

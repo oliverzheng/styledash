@@ -27,7 +27,15 @@ import {
   SERVER_LOGOUT_PATH,
   SERVER_IS_LOGGED_IN_PATH,
   SERVER_REGISTER_PATH,
-} from './clientserver/serverConfig';
+
+  MAIN_SITE_PATH,
+  REPOSITORY_LIST_PATH,
+  REPOSITORY_PATH,
+  COMPONENT_PATH,
+  LOGIN_PATH,
+  LOGOUT_PATH,
+  COMPONENT_RENDER_PATH,
+} from './clientserver/urlPaths';
 import {graphqlAPI, graphiql} from './server/graphql';
 import {
   initAuth,
@@ -98,36 +106,34 @@ async function main() {
       ));
     }
 
-    // Temp
-    app.get('/', (req, res) => {
+    app.get(MAIN_SITE_PATH, (req, res) => {
+      res.send('sup');
+    });
+
+    const showReactApp = (req, res) => {
       const assets = getClientAssetURLs();
       res.render('index', {
         layout: false,
         scripts: assets.js.map(url => ({url: `/_static/${url}`})),
         stylesheets: assets.css.map(url => ({url: `/_static/${url}`})),
       });
-    });
-    app.get('/login', (req, res) => {
-      if (res.user) {
-        res.send('logged in');
-      } else {
-        res.send(`
-          <html>
-            <body>
-              <h1>Login</h1>
-              <form method="POST" action="/login">
-                <p>Email: <input type="text" name="email" /></p>
-                <p>Password: <input type="password" name="password" /></p>
-                <input type="submit" value="Login" />
-              </form>
-            </body>
-          </html>
-        `);
-      }
-    });
+    };
+
+    app.get(
+      [
+        REPOSITORY_LIST_PATH,
+        REPOSITORY_PATH,
+        COMPONENT_PATH,
+        LOGIN_PATH,
+        LOGOUT_PATH,
+        COMPONENT_RENDER_PATH,
+      ].map(urlPath => urlPath + '(/*)?'),
+      showReactApp,
+    );
 
     // Business logic
-    app.get('/component/:componentID/bundle.js', async (req, res) => {
+    // TODO refactor this out so EntComponent doesn't have this url cloned
+    app.get('/_componentBundle/:componentID/bundle.js', async (req, res) => {
       const component =
         await EntComponent.genNullable(req.vc, req.params.componentID);
       if (!component) {

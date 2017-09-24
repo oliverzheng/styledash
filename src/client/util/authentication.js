@@ -9,7 +9,7 @@ import {
   SERVER_LOGOUT_PATH,
   SERVER_IS_LOGGED_IN_PATH,
   SERVER_REGISTER_PATH,
-} from '../../clientserver/serverConfig';
+} from '../../clientserver/urlPaths';
 import {
   type RegisterErrorType,
 } from '../../clientserver/authentication';

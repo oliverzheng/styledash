@@ -9,6 +9,11 @@ import {
   removeLoginStatusChangeListener,
 } from '../../util/authentication';
 import FullWidthPageContainer from './FullWidthPageContainer';
+import {
+  REPOSITORY_LIST_PATH,
+  LOGIN_PATH,
+  LOGOUT_PATH,
+} from '../../../clientserver/urlPaths';
 
 import './PageHeader.css';
 
@@ -48,15 +53,15 @@ export default class PageHeader extends React.Component<*, StateType> {
       links = null;
     } else if (isLoggedIn) {
       links = [(
-        <Link key="account" href="/account">Account</Link>
+        <Link key="account" href="#">Account</Link>
       ), (
-        <Link key="help" href="/help">Help</Link>
+        <Link key="help" href="#">Help</Link>
       ), (
-        <Link key="logout" href="/logout">Logout</Link>
+        <Link key="logout" href={LOGOUT_PATH}>Logout</Link>
       )];
     } else {
       links = (
-        <Link href="/login">Login</Link>
+        <Link href={LOGIN_PATH}>Login</Link>
       );
     }
 
@@ -66,7 +71,7 @@ export default class PageHeader extends React.Component<*, StateType> {
           {links}
         </div>
         <h1>
-          <Link href="/">
+          <Link href={REPOSITORY_LIST_PATH}>
             Styledash
           </Link>
         </h1>

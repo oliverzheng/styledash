@@ -6,7 +6,7 @@ import nullthrows from 'nullthrows';
 
 import {ParentChannel} from '../../componentRenderIFrame/IFrameChannel';
 import {type Message} from '../../componentRenderIFrame/IFrameChannelMessage';
-import {CLIENT_COMPONENT_RENDER_PATH} from '../../../clientserver/serverConfig';
+import {COMPONENT_RENDER_PATH} from '../../../clientserver/urlPaths';
 
 import './ComponentRenderIFrame.css';
 
@@ -55,7 +55,7 @@ export default class ComponentRenderIFrame extends React.Component<PropType> {
     return (
       <iframe
         ref="iframe"
-        src={CLIENT_COMPONENT_RENDER_PATH}
+        src={COMPONENT_RENDER_PATH}
         className={
           classnames('ComponentRenderIFrame-iframe', this.props.className)
         }

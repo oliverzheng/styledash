@@ -58,7 +58,7 @@ export default class EntComponent extends BaseEnt {
   }
 
   getCompiledBundleURI(): string {
-    return `/component/${this.getID()}/bundle.js`;
+    return `/_componentBundle/${this.getID()}/bundle.js`;
   }
 
   async genReactDoc(): Promise<string> {
