@@ -22,7 +22,7 @@ pathConfig.client.packagesThatNeedBabel.forEach(
 
 module.exports = {
   bail: true,
-  devtool: 'cheap-module-source-map',
+  devtool: 'source-map',
 
   stats: {
     children: false,
