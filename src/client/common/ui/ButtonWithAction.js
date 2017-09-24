@@ -18,11 +18,11 @@ export default class ButtonWithAction extends React.Component<PropType, StateTyp
   };
 
   render(): React$Node {
-    const { onClick, ...rest } = this.props;
+    const { onClick, disabled, ...rest } = this.props;
     return (
       <Button
         onClick={this._onClick}
-        disabled={this.state.didClick}
+        disabled={this.state.didClick || disabled}
         {...rest}
       />
     );

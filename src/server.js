@@ -28,6 +28,8 @@ import {
   SERVER_IS_LOGGED_IN_PATH,
   SERVER_REGISTER_PATH,
 
+  SERVER_WAITLIST_ADD_EMAIL_PATH,
+
   MAIN_SITE_PATH,
   REPOSITORY_LIST_PATH,
   REPOSITORY_PATH,
@@ -96,18 +98,26 @@ async function main() {
     }
 
     app.get(MAIN_SITE_PATH, (req, res) => {
-      res.send('sup');
+      const assets = getClientAssetURLs('main-site');
+      res.render('index', {
+        layout: false,
+        scripts: assets.js.map(url => ({url: `/_static/${url}`})),
+        stylesheets: assets.css.map(url => ({url: `/_static/${url}`})),
+      });
+    });
+    app.post(SERVER_WAITLIST_ADD_EMAIL_PATH, (req, res) => {
+      console.log(req.body.email);
+      res.send();
     });
 
     const showReactApp = (req, res) => {
-      const assets = getClientAssetURLs();
+      const assets = getClientAssetURLs('app');
       res.render('index', {
         layout: false,
         scripts: assets.js.map(url => ({url: `/_static/${url}`})),
         stylesheets: assets.css.map(url => ({url: `/_static/${url}`})),
       });
     };
-
     app.get(
       [
         REPOSITORY_LIST_PATH,

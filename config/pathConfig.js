@@ -15,6 +15,7 @@ const clientAssetDir = path.join(clientBuildDir, 'assets');
 const clientAssetManifest = 'asset-manifest.json';
 
 const clientEntryPointApp = path.join(clientSrcDir, 'index.js');
+const clientEntryPointMainSite = path.join(clientSrcDir, 'indexMainSiteApp.js');
 
 module.exports = {
   srcDir: srcDir,
@@ -34,9 +35,11 @@ module.exports = {
     assetDir: clientAssetDir,
     apps: {
       app: clientEntryPointApp,
+      mainSite: clientEntryPointMainSite,
     },
     appEntryPoints: [
       clientEntryPointApp,
+      clientEntryPointMainSite,
     ],
     // There are packages we depend on that don't transpile to ES5 themselves.
     packagesThatNeedBabel: [

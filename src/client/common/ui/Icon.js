@@ -6,6 +6,7 @@ import invariant from 'invariant';
 
 import { type Color } from './Colors';
 import angleBrackets from '../icons/angle_brackets.svg';
+import bell from '../icons/bell.svg';
 import gear from '../icons/gear.svg';
 import github from '../icons/github.svg';
 import pencil from '../icons/pencil.svg';
@@ -15,6 +16,7 @@ import './Icon.css';
 
 export type GlyphType =
   'angle-brackets' |
+  'bell' |
   'gear' |
   'github' |
   'pencil' |
@@ -83,6 +85,8 @@ export default class Icon extends React.Component<PropType> {
     switch (glyph) {
       case 'angle-brackets':
         return angleBrackets;
+      case 'bell':
+        return bell;
       case 'gear':
         return gear;
       case 'github':
