@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import exphbs from 'express-handlebars';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
+import 'source-map-support/register';
 
 import envConfig from './envConfig';
 import EntComponent from './entity/EntComponent';
