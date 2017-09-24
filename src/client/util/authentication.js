@@ -61,8 +61,7 @@ export async function genIsLoggedIn(): Promise<boolean> {
     SERVER_IS_LOGGED_IN_PATH,
     {
       method: 'GET',
-      // TODO
-      credentials: 'include',
+      credentials: 'same-origin',
     },
   );
   const json = await res.json();
@@ -92,8 +91,7 @@ export async function genLogIn(
         email,
         password,
       }),
-      // TODO
-      credentials: 'include',
+      credentials: 'same-origin',
     },
   );
   const json = await res.json();
@@ -124,8 +122,7 @@ export async function genLogOut(): Promise<boolean> {
     SERVER_LOGOUT_PATH,
     {
       method: 'POST',
-      // TODO
-      credentials: 'include',
+      credentials: 'same-origin',
     },
   );
   const json = await res.json();
@@ -158,8 +155,7 @@ export async function genRegister(
         firstName,
         lastName,
       }),
-      // TODO
-      credentials: 'include',
+      credentials: 'same-origin',
     },
   );
   const json = await res.json();

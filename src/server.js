@@ -77,17 +77,6 @@ async function main() {
     app.set('view engine', 'handlebars');
     app.set('views', getResourcePath('views/'));
 
-    // TODO - react is hot-served via webpack on a different port right now
-    app.use((req, res, next) => {
-      res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-      res.header('Access-Control-Allow-Credentials', 'true');
-      res.header(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept',
-      );
-      next();
-    });
-
     // Auth
     app.post(SERVER_LOGIN_PATH, login());
     app.all('*', authenticate({ loginPath: SERVER_LOGIN_PATH, loginMethod: 'POST' }));

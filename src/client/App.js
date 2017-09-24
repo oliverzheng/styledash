@@ -43,9 +43,7 @@ export default class App extends React.Component<*> {
       new Relay.DefaultNetworkLayer(
         SERVER_GRAPHQL_PATH,
         {
-          // TODO change this to same-origin when we aren't on react hotloading
-          // anymore.
-          credentials: 'include',
+          credentials: 'same-origin',
         },
       ),
     );
