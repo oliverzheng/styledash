@@ -109,7 +109,7 @@
     "start:devserver": "NODE_ENV='development' STYLEDASH_WEBPACK_CONFIG='config/webpack.config.client.dev.js' babel-watch src/server.js",
     "start:lint": "esw src/ -w",
     "check:flow": "flow",
-    "check:lint": "esw src/",
+    "check:lint": "esw --max-warnings 0 src/",
     "check": "yarn run check:flow && yarn run check:lint",
     "setup:hooks": "./scripts/linkHooks.sh",
     "deploy:pre": "yarn run build",
