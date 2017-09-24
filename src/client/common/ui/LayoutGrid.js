@@ -25,10 +25,12 @@ export default class LayoutGrid extends React.Component<PropType> {
     const chunks = chunk(React.Children.toArray(children), columnCount);
     const lastChunk = chunks[chunks.length - 1];
 
-    // Fill the last row so it's complete
-    const lastChunkCount = lastChunk.length;
-    for (let i = 0; i < (columnCount - lastChunkCount); i++) {
-      lastChunk.push(null);
+    if (lastChunk) {
+      // Fill the last row so it's complete
+      const lastChunkCount = lastChunk.length;
+      for (let i = 0; i < (columnCount - lastChunkCount); i++) {
+        lastChunk.push(null);
+      }
     }
 
     let gutterFixed: boolean;
