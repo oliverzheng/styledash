@@ -29,6 +29,14 @@ const noStyleTags = {
   'TITLE': true,
 };
 
+const serializeAttrsForNodeName = {
+  'SVG': [
+    'width',
+    'height',
+    'viewBox',
+  ],
+};
+
 export type SerializedElement = {
   tagName: string,
   nodeAttrs: { [attrName: string]: string },
@@ -40,7 +48,7 @@ export function renderSerializedElementWithStyles(
   serialized: SerializedElement,
 ): React$Element<*> {
   const Component = serialized.tagName;
-  // TODO nodeAttrs
+
   const styles = {};
   Object.keys(serialized.styles).forEach(styleAttrName => {
     let camelCaseName = camelcase(styleAttrName);
@@ -50,6 +58,12 @@ export function renderSerializedElementWithStyles(
     }
     styles[camelCaseName] = serialized.styles[styleAttrName];
   });
+
+  const attrs = {};
+  Object.keys(serialized.nodeAttrs).forEach(attrName => {
+    attrs[attrName] = serialized.nodeAttrs[attrName];
+  });
+
   const children = serialized.children.map((child, i) => {
     if (typeof child === 'string') {
       return child;
@@ -62,10 +76,10 @@ export function renderSerializedElementWithStyles(
   });
   if (children.length === 0) {
     // Components like <input> can't have children, and React barfs if they do
-    return <Component style={styles} />;
+    return <Component style={styles} {...attrs} />;
   } else {
     return (
-      <Component style={styles}>
+      <Component style={styles} {...attrs} >
         {children}
       </Component>
     );
@@ -75,11 +89,12 @@ export function renderSerializedElementWithStyles(
 export function serializeElementWithStyles(
   element: Element,
 ): SerializedElement {
+  const tagName = element.tagName.toUpperCase();
   const styles = {};
-  if (!noStyleTags[element.tagName]) {
+  if (!noStyleTags[tagName]) {
     // TODO pseudo elements
     const computedStyle = getComputedStyle(element);
-    const defaultStyle = getDefaultStyleByTagName(element.tagName);
+    const defaultStyle = getDefaultStyleByTagName(tagName);
     for (let i = 0; i < computedStyle.length; i++) {
       const cssPropName = computedStyle[i];
       if (computedStyle[cssPropName] !== defaultStyle[cssPropName]) {
@@ -102,9 +117,20 @@ export function serializeElementWithStyles(
     }
   }
 
+  const nodeAttrs = {};
+  const attrsToSerialize = serializeAttrsForNodeName[tagName];
+  if (attrsToSerialize) {
+    attrsToSerialize.forEach(attrName => {
+      const attrValue = element.getAttribute(attrName);
+      if (attrValue != null) {
+        nodeAttrs[attrName] = attrValue;
+      }
+    });
+  }
+
   return {
     tagName: element.tagName,
-    nodeAttrs: {}, // TODO node attrs, for things like input / buttons
+    nodeAttrs,
     styles,
     children,
   };
