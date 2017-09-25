@@ -19,6 +19,7 @@ export type ComponentRendererProps = {
   },
   repository: {
     externalCSSURI: ?string,
+    rootCSS: ?string,
   },
   // eslint-disable-next-line no-use-before-define
   onRender: (renderer: ComponentRenderer) => any,
@@ -89,10 +90,17 @@ export default class ComponentRenderer extends React.Component<ComponentRenderer
         <link href={repository.externalCSSURI} rel="stylesheet" />
       );
     }
+    let rootCSSStyle = null;
+    if (repository.rootCSS) {
+      rootCSSStyle = (
+        <style dangerouslySetInnerHTML={{__html: repository.rootCSS}} />
+      );
+    }
 
     return (
-      <div>
+      <div className="Styledash-render-root">
         {externalCSSStyle}
+        {rootCSSStyle}
         <div className="ComponentRenderer-root" ref={c => this._root = c}>
           {getRenderElement(component.name, bundledComponent, transformedCode)}
         </div>

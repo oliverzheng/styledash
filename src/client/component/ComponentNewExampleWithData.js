@@ -13,6 +13,7 @@ type PropType = {
     compiledBundleURI: string,
     repository: {
       externalCSSURI: ?string,
+      rootCSS: ?string,
     },
   },
   onSave: () => any,
@@ -36,6 +37,7 @@ class ComponentNewExampleWithData extends React.Component<PropType> {
         }}
         repository={{
           externalCSSURI: repository.externalCSSURI,
+          rootCSS: repository.rootCSS,
         }}
         showRevert={false}
         canSaveInitialCode={true}
@@ -69,6 +71,7 @@ const ComponentNewExampleWithDataContainer = Relay.createContainer(
           compiledBundleURI
           repository {
             externalCSSURI
+            rootCSS
           }
           ${AddExampleCodeMutation.getFragment('component')}
         }

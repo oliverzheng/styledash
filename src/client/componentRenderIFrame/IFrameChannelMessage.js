@@ -14,6 +14,7 @@ export type Message = {
   },
   repository: {
     externalCSSURI: ?string,
+    rootCSS: ?string,
   },
 } | {
   type: 'componentRendered',

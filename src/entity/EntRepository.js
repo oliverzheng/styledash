@@ -18,6 +18,7 @@ export default class EntRepository extends BaseEnt {
         'id',
         'name',
         'external_css_url',
+        'root_css',
         'last_updated_timestamp',
         'github_username',
         'github_repo',
@@ -51,6 +52,10 @@ export default class EntRepository extends BaseEnt {
 
   getExternalCSSUrl(): ?string {
     return this._getNullableStringData('external_css_url');
+  }
+
+  getRootCSS(): ?string {
+    return this._getNullableStringData('root_css');
   }
 
   getLastUpdatedTimestamp(): number {
@@ -89,6 +94,7 @@ export default class EntRepository extends BaseEnt {
   name() { return this.getName(); }
   repositoryID() { return this.getID(); }
   externalCSSURI() { return this.getExternalCSSUrl(); }
+  rootCSS() { return this.getRootCSS(); }
   componentsCount() { return this.genComponentsCount(); }
   components() { return this.genComponents(); }
   lastUpdatedTimestamp() { return this.getLastUpdatedTimestamp(); }

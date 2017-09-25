@@ -24,6 +24,7 @@ type PropType = {
   },
   repository: {
     externalCSSURI: ?string,
+    rootCSS: ?string,
   },
   showRevert: boolean,
   canSaveInitialCode: boolean,
