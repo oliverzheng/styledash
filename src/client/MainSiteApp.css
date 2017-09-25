@@ -40,6 +40,10 @@
   color: #69D2E7;
 }
 
+.MainSiteApp-notify-input {
+  width: 145px;
+}
+
 .MainSiteApp-notified {
   font-size: 26px;
 }

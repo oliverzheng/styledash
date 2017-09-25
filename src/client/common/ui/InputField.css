@@ -7,6 +7,8 @@
   height: 29px;
   border: 1px solid #CACACA;
   border-radius: 4px;
+  appearance: none;
+  line-height: 1em;
 }
 
 .InputField-root::placeholder {
