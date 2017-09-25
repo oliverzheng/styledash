@@ -12,6 +12,7 @@ import Spacing from './common/ui/Spacing';
 import {
   SERVER_WAITLIST_ADD_EMAIL_PATH,
 } from '../clientserver/urlPaths';
+import {isEmailValid} from '../clientserver/authentication';
 
 import './MainSiteApp.css';
 
@@ -65,7 +66,7 @@ export default class MainSiteApp extends React.Component<*, StateType> {
               ref={c => this._emailInput = c}
             />
             <ButtonWithAction
-              disabled={this.state.email.length === 0}
+              disabled={!isEmailValid(this.state.email)}
               glyph="bell"
               onClick={this._registerEmail}>
               Notify Me

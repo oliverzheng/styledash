@@ -12,6 +12,7 @@ import 'source-map-support/register';
 
 import envConfig from './envConfig';
 import EntComponent from './entity/EntComponent';
+import EntWaitlistEmail from './entity/EntWaitlistEmail';
 import {
   connectToMySQL,
   cleanupConnection,
@@ -105,8 +106,8 @@ async function main() {
         stylesheets: assets.css.map(url => ({url: `/_static/${url}`})),
       });
     });
-    app.post(SERVER_WAITLIST_ADD_EMAIL_PATH, (req, res) => {
-      console.log(req.body.email);
+    app.post(SERVER_WAITLIST_ADD_EMAIL_PATH, async (req, res) => {
+      await EntWaitlistEmail.genWaitlist(req.vc, req.body.email);
       res.send();
     });
 
