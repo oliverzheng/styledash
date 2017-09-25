@@ -3,6 +3,7 @@
 import process from 'process';
 import fs from 'fs';
 import nullthrows from 'nullthrows';
+import invariant from 'invariant';
 import findRoot from 'find-root';
 import path from 'path';
 
@@ -21,6 +22,12 @@ if (process.env.NODE_ENV === 'development') {
     ).toString(),
   );
 } else {
+  invariant(process.env.DATABASE_URL != null, 'Undefined DATABASE_URL env');
+  invariant(process.env.PORT != null, 'Undefined PORT env');
+  invariant(
+    process.env.STYLEDASH_COOKIE_SECRET != null,
+    'Undefined STYLEDASH_COOKIE_SECRET env',
+  );
   envConfig = {
     dbURL: nullthrows(process.env.DATABASE_URL),
     server: {
