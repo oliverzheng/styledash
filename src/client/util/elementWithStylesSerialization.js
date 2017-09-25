@@ -73,7 +73,7 @@ export function renderSerializedElementWithStyles(
 }
 
 export function serializeElementWithStyles(
-  element: HTMLElement,
+  element: Element,
 ): SerializedElement {
   const styles = {};
   if (!noStyleTags[element.tagName]) {
@@ -96,7 +96,8 @@ export function serializeElementWithStyles(
       children.push(child.textContent);
 
     } else if (child.nodeType === Node.ELEMENT_NODE) {
-      invariant(child instanceof HTMLElement, 'flow');
+      // Element is a base of SVGElement
+      invariant(child instanceof Element, 'flow');
       children.push(serializeElementWithStyles(child));
     }
   }

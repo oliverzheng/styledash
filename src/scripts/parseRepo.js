@@ -329,8 +329,10 @@ function createComponentWebpackSerializedScript(
           'css-loader',
         ],
       }, {
+        // TODO this is temporary. We should really look at how the target
+        // repo's webpack does things and clone those.
         test: /\.svg$/,
-        use: ['file-loader'],
+        use: 'react-svg-inline-loader',
       }],
     };
 
