@@ -38,7 +38,7 @@ export type SerializedElement = {
 
 export function renderSerializedElementWithStyles(
   serialized: SerializedElement,
-): React$Node {
+): React$Element<*> {
   const Component = serialized.tagName;
   // TODO nodeAttrs
   const styles = {};
@@ -50,18 +50,26 @@ export function renderSerializedElementWithStyles(
     }
     styles[camelCaseName] = serialized.styles[styleAttrName];
   });
-  const children = serialized.children.map(child => {
+  const children = serialized.children.map((child, i) => {
     if (typeof child === 'string') {
       return child;
     } else {
-      return renderSerializedElementWithStyles(child);
+      return React.cloneElement(
+        renderSerializedElementWithStyles(child),
+        { key: i },
+      );
     }
   });
-  return (
-    <Component style={styles}>
-      {children}
-    </Component>
-  );
+  if (children.length === 0) {
+    // Components like <input> can't have children, and React barfs if they do
+    return <Component style={styles} />;
+  } else {
+    return (
+      <Component style={styles}>
+        {children}
+      </Component>
+    );
+  }
 }
 
 export function serializeElementWithStyles(
