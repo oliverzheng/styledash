@@ -35,6 +35,13 @@ const serializeAttrsForNodeName = {
     'height',
     'viewBox',
   ],
+  'INPUT': [
+    'type',
+    'placeholder',
+    'disabled',
+    'checked',
+    'selected',
+  ],
 };
 
 export type SerializedElement = {
