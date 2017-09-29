@@ -92,12 +92,12 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       STYLEDASH_SERVER_RESOURCE_DIRECTORY:
-        JSON.stringify(pathConfig.server.resBuildDir),
+        JSON.stringify(pathConfig.server.resBuildDirRuntime),
       STYLEDASH_CLIENT_BUILD_DIRECTORY:
-        JSON.stringify(pathConfig.client.buildDir),
+        JSON.stringify(pathConfig.client.buildDirRuntime),
       STYLEDASH_CLIENT_MANIFEST:
         JSON.stringify(
-          path.join(pathConfig.client.buildDir, pathConfig.client.assetManifest)
+          path.join(pathConfig.client.buildDirRuntime, pathConfig.client.assetManifest)
         ),
     }),
     new CopyWebpackPlugin([{
