@@ -36,3 +36,20 @@ param_host="$(echo $param_hostAndPort | grep : | cut -d: -f1)"
 param_port="$(echo $param_hostAndPort | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
 # extract the path (if any)
 param_db="$(echo $param_url | grep / | cut -d/ -f2-)"
+
+if [ -z "$param_user" ]; then
+  echo "Error: missing database user"
+  exit 1
+fi
+if [ -z "$param_pass" ]; then
+  echo "Error: missing database password"
+  exit 1
+fi
+if [ -z "$param_host" ]; then
+  echo "Error: missing database host"
+  exit 1
+fi
+if [ -z "$param_port" ]; then
+  echo "Error: missing database port"
+  exit 1
+fi
