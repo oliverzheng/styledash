@@ -2,10 +2,11 @@
 
 my_dir="$(dirname "$0")"
 source $my_dir/schemaDBParams.sh
+source $my_dir/schemaSetupSkeema.sh
 
 cd src/schemas
 
-skeema diff -H "echo $param_host" -u $param_user --password=$param_pass
+$skeema_bin diff -H "echo $param_host" -u $param_user --password=$param_pass
 diffResult=$?
 if [ $diffResult -eq 0 ]; then
   echo "No diff in schema - not pushing anything";
@@ -55,4 +56,4 @@ if [ "$token" != "$fetchedToken" ]; then
   exit 1;
 fi
 
-skeema push $pushFlag -H "echo $param_host" -u $param_user --password=$param_pass
+$skeema_bin push $pushFlag -H "echo $param_host" -u $param_user --password=$param_pass

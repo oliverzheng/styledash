@@ -121,6 +121,7 @@
     "deploy:set-schema-token-unsafe": "PUSH_TYPE=push-unsafe ./scripts/schemaSetDeploymentToken.sh",
     "deploy:devschema": "NODE_ENV=development DEV_ENV_CONFIG_PATH=devEnvConfig.json ./scripts/schemaPush.sh",
     "deploy:schema": "NODE_ENV=production ./scripts/schemaPush.sh",
+    "deploy:pre": "yarn run deploy:schema",
     "test": "node scripts/test.js --env=jsdom",
     "parse-debug": "babel-node src/scripts/parseRepo.js"
   },
