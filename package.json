@@ -116,11 +116,11 @@
     "check:schema": "NODE_ENV=production ./scripts/schemaEnsureNoDiff.sh",
     "check": "yarn run check:flow && yarn run check:lint && yarn run check:devschema",
     "setup:hooks": "./scripts/linkHooks.sh",
+    "heroku-postbuild": "yarn run build",
     "deploy:set-schema-token": "PUSH_TYPE=push ./scripts/schemaSetDeploymentToken.sh",
     "deploy:set-schema-token-unsafe": "PUSH_TYPE=push-unsafe ./scripts/schemaSetDeploymentToken.sh",
     "deploy:devschema": "NODE_ENV=development DEV_ENV_CONFIG_PATH=devEnvConfig.json ./scripts/schemaPush.sh",
     "deploy:schema": "NODE_ENV=production ./scripts/schemaPush.sh",
-    "deploy:pre": "yarn run build",
     "test": "node scripts/test.js --env=jsdom",
     "parse-debug": "babel-node src/scripts/parseRepo.js"
   },
