@@ -22,9 +22,11 @@ module.exports = {
   target: 'node',
   externals: [nodeExternals()],
 
+  entry: pathConfig.server.apps,
+
   output: {
     path: pathConfig.buildDir,
-    filename: pathConfig.server.buildOutputFilename,
+    filename: '[name].js',
     // Point sourcemap entries to original disk location (format as URL on Windows)
     devtoolModuleFilenameTemplate: info =>
       path

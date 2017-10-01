@@ -35,8 +35,10 @@ module.exports = {
   buildDir: buildDir,
 
   server: {
-    srcEntry: path.join(srcDir, 'server.js'),
-    buildOutputFilename: 'server.js',
+    apps: {
+      server: path.join(srcDir, 'server.js'),
+      compileWorker: path.join(srcDir, 'compileWorker.js'),
+    },
 
     resDir: serverResourceDir, 
     resBuildDir: serverResourceBuildDir,
@@ -52,10 +54,6 @@ module.exports = {
       app: clientEntryPointApp,
       mainSite: clientEntryPointMainSite,
     },
-    appEntryPoints: [
-      clientEntryPointApp,
-      clientEntryPointMainSite,
-    ],
     // There are packages we depend on that don't transpile to ES5 themselves.
     packagesThatNeedBabel: [
       path.join(nodeModulesDir, 'camelcase'),

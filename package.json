@@ -110,6 +110,8 @@
     "build": "yarn run build:server && yarn run build:client",
     "start:server": "NODE_ENV='production' node build/server.js",
     "start:devserver": "NODE_ENV='development' STYLEDASH_WEBPACK_CONFIG='config/webpack.config.client.dev.js' babel-watch src/server.js",
+    "start:compile-worker": "NODE_ENV='production' node build/compileWorker.js",
+    "start:dev-compile-worker": "NODE_ENV='development' babel-watch src/compileWorker.js",
     "start:lint": "esw src/ -w",
     "check:flow": "flow",
     "check:lint": "esw --max-warnings 0 src/",
