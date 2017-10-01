@@ -6,6 +6,7 @@
     "node": "8.1.x"
   },
   "dependencies": {
+    "amqplib": "^0.5.1",
     "async-load": "^1.0.7",
     "autoprefixer": "7.1.2",
     "babel-cli": "^6.26.0",

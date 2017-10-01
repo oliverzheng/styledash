@@ -19,7 +19,7 @@ import envConfig from '../envConfig';
 import {
   connectToMySQL,
   executeSQL,
-  cleanupConnection,
+  cleanupMySQLConnection,
 } from '../storage/mysql';
 import {
   printAction,
@@ -180,11 +180,11 @@ async function main(): Promise<*> {
     printActionResult('Saved.');
   }
   catch (err) {
-    cleanupConnection(mysqlConnection);
+    cleanupMySQLConnection(mysqlConnection);
     throw err;
   }
 
-  cleanupConnection(mysqlConnection);
+  cleanupMySQLConnection(mysqlConnection);
 }
 
 main().catch(err => printError(err));

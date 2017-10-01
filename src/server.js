@@ -15,8 +15,12 @@ import EntComponent from './entity/EntComponent';
 import EntWaitlistEmail from './entity/EntWaitlistEmail';
 import {
   connectToMySQL,
-  cleanupConnection,
+  cleanupMySQLConnection,
 } from './storage/mysql';
+import {
+  genConnectToServer,
+  genDisconnectFromServer,
+} from './storage/queue';
 import {
   printAction,
   printActionResult,
@@ -61,8 +65,13 @@ if (process.env.NODE_ENV === 'development') {
 
 async function main() {
   printAction('Connecting to MySQL...');
-  const conn = await connectToMySQL(envConfig.dbURL);
+  const dbConn = await connectToMySQL(envConfig.dbURL);
   printActionResult('Connected.');
+
+  printAction('Connecting to RabbitMQ...');
+  const queueConn = await genConnectToServer(envConfig.queueURL);
+  printActionResult('Connected.');
+
 
   try {
     // Setup
@@ -71,7 +80,7 @@ async function main() {
     app.use(cookieParser(envConfig.server.cookieSecret));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(initAuth(conn));
+    app.use(initAuth(dbConn, queueConn));
 
     app.engine('handlebars', exphbs({
       defaultLayout: 'main',
@@ -170,7 +179,8 @@ async function main() {
   }
   catch (err) {
     printError(err);
-    cleanupConnection(conn);
+    cleanupMySQLConnection(dbConn);
+    await genDisconnectFromServer(queueConn);
   }
 }
 

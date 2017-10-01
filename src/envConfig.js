@@ -9,6 +9,7 @@ import path from 'path';
 
 let envConfig: {
   dbURL: string,
+  queueURL: string,
   server: {
     port: number,
     cookieSecret: string,
@@ -30,6 +31,7 @@ if (process.env.NODE_ENV === 'development') {
   );
   envConfig = {
     dbURL: nullthrows(process.env.DATABASE_URL),
+    queueURL: nullthrows(process.env.QUEUE_URL),
     server: {
       port: nullthrows(process.env.PORT),
       cookieSecret: nullthrows(process.env.STYLEDASH_COOKIE_SECRET),

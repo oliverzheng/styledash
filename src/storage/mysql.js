@@ -3,11 +3,11 @@
 import nullthrows from 'nullthrows';
 import mysql from 'mysql';
 
-export opaque type Connection = Object;
+export opaque type MySQLConnection = Object;
 
 export async function connectToMySQL(
   dbURL: string,
-): Promise<Connection> {
+): Promise<MySQLConnection> {
   return await new Promise((resolve, reject) => {
     const pool = mysql.createPool(`${dbURL}?acquireTimeout=null`);
     // We don't need to add additional logic to check to see the connection is
@@ -29,7 +29,7 @@ export async function connectToMySQL(
   });
 }
 
-export async function executeSQL(connection: Connection, sql: string): Promise<Object> {
+export async function executeSQL(connection: MySQLConnection, sql: string): Promise<Object> {
   if (!connection) {
     throw new Error('No connection to MySQL');
   }
@@ -44,7 +44,7 @@ export async function executeSQL(connection: Connection, sql: string): Promise<O
   });
 }
 
-export function cleanupConnection(connection: ?Connection) {
+export function cleanupMySQLConnection(connection: ?MySQLConnection) {
   if (connection) {
     connection.destroy();
   }

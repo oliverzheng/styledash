@@ -4,7 +4,8 @@ import passport from 'passport';
 import {Strategy as LocalStrategy} from 'passport-local';
 import CustomStrategy from 'passport-custom';
 
-import type {Connection} from '../storage/mysql';
+import type {MySQLConnection} from '../storage/mysql';
+import type {QueueConnection} from '../storage/queue';
 import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
 import {
@@ -43,8 +44,8 @@ function getCookieUserIDFromRequest(req: Object): ?string {
   return userID;
 }
 
-export function initAuth(conn: Connection) {
-  const anonymousVC = new ViewerContext(conn, null);
+export function initAuth(dbConn: MySQLConnection, queueConn: QueueConnection) {
+  const anonymousVC = new ViewerContext(dbConn, queueConn, null);
 
   passport.use(new LocalStrategy(
     {
@@ -59,7 +60,7 @@ export function initAuth(conn: Connection) {
           password,
         );
         if (userID) {
-          return done(null, new ViewerContext(conn, userID));
+          return done(null, new ViewerContext(dbConn, queueConn, userID));
         } else {
           return done(
             null,
@@ -78,7 +79,7 @@ export function initAuth(conn: Connection) {
   passport.use('cookie', new CustomStrategy(
     (req, callback) => {
       const userID = getCookieUserIDFromRequest(req);
-      const vc = new ViewerContext(conn, userID);
+      const vc = new ViewerContext(dbConn, queueConn, userID);
       callback(null, vc);
     },
   ));
@@ -139,9 +140,10 @@ export function logout() {
   return (req: Object, res: Object) => {
     setCookieUserIDOnResponse(res, null);
 
-    const conn = req.vc.getDatabaseConnection();
+    const dbConn = req.vc.getDatabaseConnection();
+    const queueConn = req.vc.getQueueConnection();
     req.logout(); // this deletes req.vc. let's set it back.
-    req.vc = new ViewerContext(conn, null);
+    req.vc = new ViewerContext(dbConn, queueConn, null);
 
     res.json({
       isLoggedIn: req.vc.isAuthenticated(),

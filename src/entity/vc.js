@@ -3,18 +3,27 @@
 import nullthrows from 'nullthrows';
 
 import type {
-  Connection,
+  MySQLConnection,
 } from '../storage/mysql';
+import type {
+  QueueConnection,
+} from '../storage/queue';
 import EntUser from './EntUser';
 
 export default class ViewerContext {
-  _conn: Connection;
+  _dbConn: MySQLConnection;
+  _queueConn: QueueConnection;
   _userID: ?string;
 
   // Don't you dare instantiate this with a user ID if the user is not
   // authenticated
-  constructor(conn: Connection, userID: ?string) {
-    this._conn = conn;
+  constructor(
+    dbConn: MySQLConnection,
+    queueConn: QueueConnection,
+    userID: ?string,
+  ) {
+    this._dbConn = dbConn;
+    this._queueConn = queueConn;
     this._userID = userID;
   }
 
@@ -34,8 +43,12 @@ export default class ViewerContext {
     return await EntUser.genEnforce(this, this.getUserID());
   }
 
-  getDatabaseConnection(): Connection {
-    return this._conn;
+  getDatabaseConnection(): MySQLConnection {
+    return this._dbConn;
+  }
+
+  getQueueConnection(): QueueConnection {
+    return this._queueConn;
   }
 
   isDev(): boolean {
