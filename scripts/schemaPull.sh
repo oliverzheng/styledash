@@ -14,4 +14,4 @@ cd src/schemas
 $skeema_bin pull -H "echo $param_host" -u $param_user --password=$param_pass
 
 # Skeema pulls in auto-inc IDs for some reason even when not specified to do so
-sed -i'' -E 's/AUTO_INCREMENT\=[0-9]* //' styledash/*.sql
+sed -i'' -E 's/AUTO_INCREMENT\=[0-9]* //' styledash-database/*.sql
