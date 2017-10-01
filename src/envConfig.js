@@ -31,7 +31,7 @@ if (process.env.NODE_ENV === 'development') {
   );
   envConfig = {
     dbURL: nullthrows(process.env.DATABASE_URL),
-    queueURL: nullthrows(process.env.QUEUE_URL),
+    queueURL: nullthrows(process.env.RABBITMQ_URL),
     server: {
       port: nullthrows(process.env.PORT),
       cookieSecret: nullthrows(process.env.STYLEDASH_COOKIE_SECRET),
