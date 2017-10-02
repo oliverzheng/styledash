@@ -46,6 +46,6 @@ export async function executeSQL(connection: MySQLConnection, sql: string): Prom
 
 export function cleanupMySQLConnection(connection: ?MySQLConnection) {
   if (connection) {
-    connection.destroy();
+    connection.end();
   }
 }
