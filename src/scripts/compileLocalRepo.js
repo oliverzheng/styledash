@@ -23,6 +23,7 @@ import {
   genVerifyPackageJSON,
   parseComponents,
   genCompileParsedComponents,
+  getCompiledComponentsLOC,
 } from '../compile/genCompileRepo';
 
 
@@ -63,12 +64,8 @@ async function main(): Promise<*> {
     );
 
     if (compiledComponents.length > 0) {
-      const totalLOC = compiledComponents.map(
-        component => component.compiledBundle.split('\n').length
-      ).reduce((a, b) => a + b);
-      const totalBytes = compiledComponents.map(
-        component => component.compiledBundle.length
-      ).reduce((a, b) => a + b);
+      const {totalLOC, totalBytes} =
+        getCompiledComponentsLOC(compiledComponents);
       printActionResult(
         `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
       );
@@ -138,12 +135,9 @@ async function main(): Promise<*> {
 
     printActionResult('Saved.');
   }
-  catch (err) {
+  finally (err) {
     cleanupMySQLConnection(mysqlConnection);
-    throw err;
   }
-
-  cleanupMySQLConnection(mysqlConnection);
 }
 
 main().catch(err => printError(err));

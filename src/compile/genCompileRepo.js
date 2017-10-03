@@ -42,6 +42,24 @@ function getComponentRelativeFilepath(
   return path.resolve('/', path.relative(repoPath, componentFilepath));
 }
 
+export function getCompiledComponentsLOC(
+  compiledComponents: Array<CompiledComponent>,
+): {
+  totalLOC: number,
+  totalBytes: number,
+} {
+  const totalLOC = compiledComponents.map(
+    component => component.compiledBundle.split('\n').length
+  ).reduce((a, b) => a + b);
+  const totalBytes = compiledComponents.map(
+    component => component.compiledBundle.length
+  ).reduce((a, b) => a + b);
+  return {
+    totalLOC,
+    totalBytes,
+  };
+}
+
 
 //// Cloning repo
 
@@ -60,31 +78,32 @@ async function genCloneRepo(
   cleanupCallback: () => void,
 }> {
   return new Promise((resolve, reject) => {
-    tmp.dir(async (err, dirPath, cleanup) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      const {
-        code,
-        stderr,
-      } = await genLaunchChildProcess('git', ['clone', url, 'repo'], dirPath);
-      if (code !== 0) {
-        reject(
-          `Git clone failed with error code ${code}` +
-            (stderr != null ? ` and error message ${stderr}` : '')
-        );
-        cleanup();
-        return;
-      }
+    tmp.dir(
+      { unsafeCleanup: true },
+      async (err, dirPath, cleanup) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        const {
+          code,
+          stderr,
+        } = await genLaunchChildProcess('git', ['clone', url, 'repo'], dirPath);
+        if (code !== 0) {
+          reject(
+            `Git clone failed with error code ${code}` +
+              (stderr != null ? ` and error message ${stderr}` : '')
+          );
+          cleanup();
+          return;
+        }
 
-      // TODO yarn install
-
-      resolve({
-        repoPath: path.join(dirPath, 'repo'),
-        cleanupCallback: cleanup,
-      });
-    });
+        resolve({
+          repoPath: path.join(dirPath, 'repo'),
+          cleanupCallback: cleanup,
+        });
+      },
+    );
   });
 }
 
@@ -158,6 +177,17 @@ export async function genVerifyPackageJSON(repoPath: string): Promise<Object> {
   }
 
   return packageJSON;
+}
+
+export async function genYarnInstall(repoPath: string): Promise<void> {
+  const {code, stderr} = await genLaunchChildProcess(
+    'yarn',
+    ['install'],
+    repoPath,
+  );
+  if (code !== 0) {
+    throw new Error('Could not yarn install. ' + (stderr || ''));
+  }
 }
 
 
@@ -431,6 +461,8 @@ function getBabelOptions(repoPath: string, packageJSON: Object): ?Object {
 
 //// Main function
 
+// TODO this should really use an EventEmitter since it's so long running with
+// multiple steps
 export default async function genCompileRepo(
   repo: EntRepository,
   /*TODO use the ent*/ token: string,
@@ -452,6 +484,8 @@ export default async function genCompileRepo(
   const commitHash = await genHeadCommitHash(repoPath);
 
   const packageJSON = await genVerifyPackageJSON(repoPath);
+  await genYarnInstall(repoPath);
+
   const parsedComponents = parseComponents(repoPath);
   const compiledComponents = await genCompileParsedComponents(
     repoPath,
