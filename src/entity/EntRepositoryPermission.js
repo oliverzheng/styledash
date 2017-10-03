@@ -49,7 +49,6 @@ export default class EntRepositoryPermission extends BaseEnt {
     const perm = await EntRepositoryPermission.genPermission(
       vc,
       repositoryID,
-      vc.getUserID(),
       EntRepositoryPermission.ADMIN,
     );
     return perm != null;
@@ -62,7 +61,6 @@ export default class EntRepositoryPermission extends BaseEnt {
     const perm = await EntRepositoryPermission.genPermission(
       vc,
       repositoryID,
-      vc.getUserID(),
       EntRepositoryPermission.READ_WRITE,
     );
     return perm != null;
@@ -75,7 +73,6 @@ export default class EntRepositoryPermission extends BaseEnt {
     const perms = await EntRepositoryPermission.genAllPermissions(
       vc,
       repositoryID,
-      vc.getUserID(),
     );
     return perms.length > 0;
   }
@@ -83,9 +80,12 @@ export default class EntRepositoryPermission extends BaseEnt {
   static async genPermission(
     vc: ViewerContext,
     repositoryID: string,
-    userID: string,
     permission: AnyPermission,
   ): Promise<?this> {
+    const userID = vc.getUserID();
+    if (userID == null) {
+      return null;
+    }
     const perms = await this.genWhereMulti(
       vc,
       {
@@ -100,8 +100,11 @@ export default class EntRepositoryPermission extends BaseEnt {
   static async genAllPermissions(
     vc: ViewerContext,
     repositoryID: string,
-    userID: string,
   ): Promise<Array<this>> {
+    const userID = vc.getUserID();
+    if (userID == null) {
+      return [];
+    }
     return await this.genWhereMulti(
       vc,
       {
@@ -224,7 +227,6 @@ repositoryPermissionPrivacy = (({
     const allPerms = await EntRepositoryPermission.genAllPermissions(
       vc,
       ((repositoryID: any): string),
-      vc.getUserID(),
     );
     const isAdmin = allPerms.some(perm => perm.isAdmin());
     const hasAnyPerms = allPerms.length > 0;

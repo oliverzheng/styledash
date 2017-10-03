@@ -1,5 +1,6 @@
 /** @flow */
 
+import process from 'process';
 import nullthrows from 'nullthrows';
 
 import type {
@@ -31,16 +32,22 @@ export default class ViewerContext {
     return this._userID != null;
   }
 
-  // Requires isAuthenticated to be true
-  getUserID(): string {
+  // Returning null means it's not authenticated and there is no user associated
+  // with this vc
+  getUserID(): ?string {
+    return this._userID;
+  }
+
+  getUserIDX(): string {
     return nullthrows(this._userID);
   }
 
   async genUser(): Promise<?EntUser> {
-    if (!this.isAuthenticated()) {
+    const userID = this._userID;
+    if (userID == null) {
       return null;
     }
-    return await EntUser.genEnforce(this, this.getUserID());
+    return await EntUser.genEnforce(this, userID);
   }
 
   getDatabaseConnection(): MySQLConnection {
@@ -51,8 +58,7 @@ export default class ViewerContext {
     return this._queueConn;
   }
 
-  isDev(): boolean {
-    // TODO make is dev environment
-    return true;
+  isDevEnvironment(): boolean {
+    return process.env.NODE_ENV === 'development';
   }
 }

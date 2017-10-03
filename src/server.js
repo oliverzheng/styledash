@@ -163,7 +163,7 @@ async function main() {
       SERVER_GRAPHQL_PATH,
       requireAuth((req, res) => res.send('Unauthenticated', 401)),
       (req, res, next) => {
-        if (req.vc.isDev()) {
+        if (req.vc.isDevEnvironment()) {
           next();
         } else {
           res.redirect('/');
