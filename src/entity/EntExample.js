@@ -30,6 +30,12 @@ export default class EntExample extends BaseEnt {
         'id',
         'component_id',
       ],
+      foreignKeys: {
+        'component_id': {
+          referenceEnt: EntComponent,
+          onDelete: 'cascade',
+        },
+      },
       typeName: 'example',
       privacy: examplePrivacy,
     };
@@ -118,6 +124,8 @@ export default class EntExample extends BaseEnt {
   code() { return this.getCode(); }
   serializedElement() { return this.getSerializedElement(); }
 }
+
+BaseEnt.registerEnt(EntExample);
 
 examplePrivacy = (({
   async genCanViewerSee(obj: EntExample): Promise<boolean> {

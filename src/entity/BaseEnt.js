@@ -4,13 +4,27 @@ import invariant from 'invariant';
 import SQL, {SQLStatement} from 'sql-template-strings';
 
 import ViewerContext from './vc';
-import {executeSQL} from '../storage/mysql';
+import {executeSQL, executeSQLTransaction} from '../storage/mysql';
+
+// in the future, support restrict, set null, no action.
+type ForeignKeyPropagation =
+  'cascade';
 
 export type EntConfig<EntType> = {
   tableName: string,
   defaultColumnNames: Array<string>,
   extendedColumnNames: Array<string>,
   immutableColumnNames: Array<string>,
+  // Foreign keys are supported at the application level instead of at the db
+  // layer because Skeema doesn't support that.
+  // See https://github.com/skeema/skeema/issues/11
+  foreignKeys?: ?{
+    [columnName: string]: {
+      referenceEnt: Class<BaseEnt>,
+      onDelete: ForeignKeyPropagation,
+      // onUpdate not supported for now since ids are assumed to be immutable.
+    },
+  },
   // used across API boundaries, and thus possibly persistence. Don't change it.
   typeName: string,
   privacy: PrivacyType<EntType>,
@@ -53,7 +67,22 @@ export function genDeferCanCreatePrivacyTo<EntType: BaseEnt>(
   return obj.constructor._getEntConfig().privacy.genCanViewerCreate(vc, data);
 }
 
+
 export default class BaseEnt {
+  static _allEntClasses: Array<Class<BaseEnt>> = [];
+
+  static getAllEntClasses(): Array<Class<BaseEnt>> {
+    return this._allEntClasses;
+  }
+
+  static registerEnt(entClass: Class<BaseEnt>): void {
+    invariant(
+      this._allEntClasses.indexOf(entClass) === -1,
+      'Already registered',
+    );
+    this._allEntClasses.push(entClass);
+  }
+
   // Child needs to override
   static _getEntConfig(): EntConfig<this> {
     invariant(false, 'NYI');
@@ -238,6 +267,9 @@ export default class BaseEnt {
     return obj;
   }
 
+
+  //// MUTATIONS
+
   async _genMutate(
     data: {[columnName: string]: mixed},
   ): Promise<boolean> {
@@ -290,8 +322,9 @@ export default class BaseEnt {
     });
     sql.append(SQL` WHERE id = ${this.getID()}`);
 
-    await executeSQL(
-      this.getViewerContext().getDatabaseConnection(),
+    await this.constructor._genExecuteCreateOrUpdateSQL(
+      this.getViewerContext(),
+      data,
       sql,
     );
     return true;
@@ -346,8 +379,242 @@ export default class BaseEnt {
     });
     sql.append(SQL`)`);
 
-    const res = await executeSQL(vc.getDatabaseConnection(), sql);
+    const res = await this._genExecuteCreateOrUpdateSQL(vc, data, sql);
     return res.insertId.toString();
+  }
+
+  // Ensures foreign keys are valid
+  // TODO add some god damn tests for this please
+  static async _genExecuteCreateOrUpdateSQL(
+    vc: ViewerContext,
+    data: {[columnName: string]: mixed},
+    sql: SQLStatement,
+  ): Promise<Object> {
+    const {foreignKeys} = this._getEntConfig();
+
+    const foreignKeyChecks: Array<{
+      ent: Class<BaseEnt>,
+      id: string,
+    }> = [];
+
+    if (foreignKeys) {
+      Object.keys(data).forEach(columnName => {
+        const foreignKey = foreignKeys[columnName];
+        if (foreignKey) {
+          const foreignID = data[columnName];
+          invariant(
+            typeof foreignID === 'string',
+            'Foreign id must be a string',
+          );
+          foreignKeyChecks.push({
+            ent: foreignKey.referenceEnt,
+            id: foreignID,
+          });
+        }
+      });
+    }
+
+    if (foreignKeyChecks.length === 0) {
+      return await executeSQL(vc.getDatabaseConnection(), sql);
+    } else {
+      const statements = foreignKeyChecks.map((check, i) => {
+        return previousResult => {
+          if (
+            i !== 0 &&
+            (!previousResult || previousResult.length === 0)
+          ) {
+            return { action: 'rollback' };
+          }
+
+          const entConfig = check.ent._getEntConfig();
+          return {
+            action: 'executeSQL',
+            sql: SQL`SELECT id from `
+              .append(entConfig.tableName)
+              // Lock the row so it must exist after this mutation. Whatever
+              // deletes it will cascade the changes.
+              .append(SQL` WHERE id = ${check.id} FOR UPDATE`),
+          };
+        }
+      });
+      statements.push(previousResult => {
+        if (!previousResult || previousResult.length === 0) {
+          return { action: 'rollback' };
+        }
+        return { action: 'executeSQL', sql };
+      });
+
+      const result = await
+        executeSQLTransaction(vc.getDatabaseConnection(), statements);
+      if (!result) {
+        throw new Error('Tranaction failed');
+      }
+      return result;
+    }
+  }
+
+  async genDelete(): Promise<void> {
+    const dependents = genForeignKeyDependentsRecursively(this.constructor);
+
+    type Deletion = {
+      ent: Class<BaseEnt>,
+      qualifier:
+        string /* this ent's id */ |
+        {
+          // column name of this foreign ent
+          columnName: string,
+          dependency: Deletion,
+        },
+      sqlSelectForUpdateQuery: SQLStatement,
+      sqlDeleteQuery: SQLStatement,
+    };
+
+    function createSQLSubQueryForDeletion(
+      ent: Class<BaseEnt>,
+      qualifier:
+        string |
+        {
+          columnName: string,
+          dependency: Deletion,
+        },
+    ): { selectForUpdate: SQLStatement, delete: SQLStatement } {
+      const entConfig = ent._getEntConfig();
+
+      if (typeof qualifier === 'string') {
+        return {
+          selectForUpdate:
+            SQL`SELECT id FROM `
+              .append(entConfig.tableName)
+              .append(SQL` WHERE id = ${qualifier} FOR UPDATE`),
+          delete:
+            SQL`DELETE FROM `
+              .append(entConfig.tableName)
+              .append(SQL` WHERE id = ${qualifier}`),
+        };
+      }
+
+      return {
+        selectForUpdate:
+          SQL`SELECT id FROM `
+            .append(entConfig.tableName)
+            .append(SQL` WHERE `)
+            .append(qualifier.columnName)
+            .append(SQL` IN ( `)
+            .append(qualifier.dependency.sqlSelectForUpdateQuery)
+            .append(SQL` ) FOR UPDATE`),
+        delete:
+          SQL`DELETE FROM `
+            .append(entConfig.tableName)
+            .append(SQL` WHERE `)
+            .append(qualifier.columnName)
+            .append(SQL` IN ( `)
+            .append(qualifier.dependency.sqlSelectForUpdateQuery)
+            .append(SQL` )`),
+      };
+    }
+
+    function constructDeletionsForDependent(
+      dependency: Deletion,
+      dependent: ForeignKeyDependent,
+    ): Array<Deletion> {
+      const deletions = [];
+
+      if (dependent.onDelete === 'cascade') {
+        const {
+          selectForUpdate: sqlSelectForUpdateQuery,
+          delete: sqlDeleteQuery,
+        } = createSQLSubQueryForDeletion(
+          dependent.entClass,
+          {
+            columnName: dependent.columnName,
+            dependency,
+          },
+        );
+        const deletionForDependent = {
+          ent: dependent.entClass,
+          qualifier: {
+            columnName: dependent.columnName,
+            dependency,
+          },
+          sqlSelectForUpdateQuery,
+          sqlDeleteQuery,
+        };
+
+        dependent.subDependents
+          .map(
+            subDependent =>
+              constructDeletionsForDependent(deletionForDependent, subDependent)
+          )
+          .forEach(deletions => allDeletions.push(...deletions));
+
+        // Push this after dependents get pushed, because if the deletion for
+        // a dependency runs first, then when we do a select, nothing will show
+        // cause we've already deleted it.
+        deletions.push(deletionForDependent);
+
+        // It's okay if we have a dependency tree where it's like:
+        //   A
+        //  / \
+        // B   C
+        //    /
+        //   B
+        //
+        // Because A will trigger B and C, and C will trigger B. If A's
+        // B executes first, then it simply won't exist by the time we to C's B.
+        // It's not possible for any dependents of C'B to be dangling, because
+        // we'd have discovered that at A's B.
+        //
+        // TODO: add a test for this
+      } else {
+        invariant(false, 'Unsupported onDelete scheme');
+      }
+
+      return deletions;
+    }
+
+    const allDeletions: Array<Deletion> = [];
+    const {
+      selectForUpdate: sqlSelectForUpdateQuery,
+      delete: sqlDeleteQuery,
+    } = createSQLSubQueryForDeletion(this.constructor, this.getID());
+    const deletionForSelf: Deletion = {
+      ent: this.constructor,
+      qualifier: this.getID(),
+      sqlSelectForUpdateQuery,
+      sqlDeleteQuery,
+    };
+
+    dependents
+      .map(
+        dependent => constructDeletionsForDependent(deletionForSelf, dependent)
+      )
+      .forEach(deletions => allDeletions.push(...deletions));
+
+    // Same deal as earlier - this must happen after dependents are inserted
+    allDeletions.push(deletionForSelf);
+
+    const sqlStatements = [];
+
+    // First, do a select on all the dependents to lock the rows.
+    allDeletions.forEach(deletion =>
+      sqlStatements.push(() => ({
+        action: 'executeSQL',
+        sql: deletion.sqlSelectForUpdateQuery,
+      }))
+    );
+
+    // Then do the actual delete.
+    allDeletions.forEach(deletion =>
+      sqlStatements.push(() => ({
+        action: 'executeSQL',
+        sql: deletion.sqlDeleteQuery,
+      }))
+    );
+
+    await executeSQLTransaction(
+      this.getViewerContext().getDatabaseConnection(),
+      sqlStatements,
+    );
   }
 
   static async _genColumnValues(
@@ -387,4 +654,37 @@ export default class BaseEnt {
     invariant(values, 'Object has been deleted in the db');
     return values[columnName];
   }
+}
+
+type ForeignKeyDependent = {
+  entClass: Class<BaseEnt>,
+  columnName: string,
+  onDelete: ForeignKeyPropagation,
+  subDependents: Array<ForeignKeyDependent>,
+};
+
+function genForeignKeyDependentsRecursively(
+  entClass: Class<BaseEnt>,
+): Array<ForeignKeyDependent> {
+  const deps = [];
+
+  BaseEnt.getAllEntClasses().forEach(entClass2 => {
+    const foreignKeys = entClass2._getEntConfig().foreignKeys;
+    if (!foreignKeys) {
+      return;
+    }
+
+    Object.keys(foreignKeys).forEach(columnName => {
+      if (foreignKeys[columnName].referenceEnt === entClass) {
+        deps.push({
+          entClass: entClass2,
+          columnName,
+          onDelete: foreignKeys[columnName].onDelete,
+          subDependents: genForeignKeyDependentsRecursively(entClass2),
+        });
+      }
+    });
+  });
+
+  return deps;
 }

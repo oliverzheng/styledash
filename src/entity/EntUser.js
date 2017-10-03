@@ -121,6 +121,8 @@ export default class EntUser extends BaseEnt {
   email() { return this.getEmail(); }
 }
 
+BaseEnt.registerEnt(EntUser);
+
 userPrivacy = (({
   async genCanViewerSee(obj: EntUser): Promise<boolean> {
     // TODO This is janky for a few reasons:

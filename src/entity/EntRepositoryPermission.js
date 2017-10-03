@@ -7,6 +7,8 @@ import BaseEnt, {
   type EntConfig,
   type PrivacyType,
 } from './BaseEnt';
+import EntRepository from './EntRepository';
+import EntUser from './EntUser';
 
 // This is an enum in the db.
 const READ_WRITE_PERMISSION = 'read_write';
@@ -37,6 +39,16 @@ export default class EntRepositoryPermission extends BaseEnt {
       immutableColumnNames: [
         'id',
       ],
+      foreignKeys: {
+        'repository_id': {
+          referenceEnt: EntRepository,
+          onDelete: 'cascade',
+        },
+        'user_id': {
+          referenceEnt: EntUser,
+          onDelete: 'cascade',
+        },
+      },
       typeName: 'repository_permission',
       privacy: repositoryPermissionPrivacy,
     };
@@ -169,6 +181,8 @@ export default class EntRepositoryPermission extends BaseEnt {
     return this._getStringData('permission') === ADMIN_PERMISSION;
   }
 }
+
+BaseEnt.registerEnt(EntRepositoryPermission);
 
 repositoryPermissionPrivacy = (({
   async genCanViewerSee(obj: EntRepositoryPermission): Promise<boolean> {

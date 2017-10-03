@@ -118,6 +118,8 @@ export default class EntRepository extends BaseEnt {
   lastUpdatedTimestamp() { return this.getLastUpdatedTimestamp(); }
 }
 
+BaseEnt.registerEnt(EntRepository);
+
 repoPrivacy = (({
   async genCanViewerSee(obj: EntRepository): Promise<boolean> {
     return await EntRepositoryPermission.genDoesViewerHaveAnyPermission(

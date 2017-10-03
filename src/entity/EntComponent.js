@@ -33,6 +33,12 @@ export default class EntComponent extends BaseEnt {
         'id',
         'repository_id',
       ],
+      foreignKeys: {
+        'repository_id': {
+          referenceEnt: EntRepository,
+          onDelete: 'cascade',
+        },
+      },
       typeName: 'component',
       privacy: componentPrivacy,
     };
@@ -158,6 +164,8 @@ export default class EntComponent extends BaseEnt {
   examples() { return this.genExamples(); }
   githubURL() { return this.genGitHubURL(); }
 }
+
+BaseEnt.registerEnt(EntComponent);
 
 componentPrivacy = (({
   async genCanViewerSee(obj: EntComponent): Promise<boolean> {

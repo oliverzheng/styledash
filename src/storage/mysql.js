@@ -2,6 +2,7 @@
 
 import nullthrows from 'nullthrows';
 import mysql from 'mysql';
+import {SQLStatement} from 'sql-template-strings';
 
 export opaque type MySQLConnection = Object;
 
@@ -29,7 +30,7 @@ export async function connectToMySQL(
   });
 }
 
-export async function executeSQL(connection: MySQLConnection, sql: string): Promise<Object> {
+export async function executeSQL(connection: MySQLConnection, sql: SQLStatement): Promise<Object> {
   if (!connection) {
     throw new Error('No connection to MySQL');
   }
@@ -40,6 +41,65 @@ export async function executeSQL(connection: MySQLConnection, sql: string): Prom
         return;
       }
       resolve(results);
+    });
+  });
+}
+
+export async function executeSQLTransaction(
+  connection: MySQLConnection,
+  sqlStatementGenerators: Array<
+    (previousResult: ?Object) =>
+      { action: 'executeSQL', sql: SQLStatement } |
+      { action: 'rollback' }
+  >,
+): Promise<?Object> {
+  return await new Promise((resolve, reject) => {
+    connection.getConnection((err, conn) => {
+      if (err) {
+        reject('Cannot connect to db: ' + err);
+        return;
+      }
+
+      conn.beginTransaction(err => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        let previousResult = null;
+        const sqlStatementGeneratorsLeft = sqlStatementGenerators.slice(0);
+
+        function executeNextStatement() {
+          if (sqlStatementGeneratorsLeft.length === 0) {
+            conn.commit(error => {
+              if (error) {
+                conn.rollback(() => reject(error));
+                return;
+              }
+              resolve(previousResult);
+            });
+            return;
+          }
+
+          const sqlGenerator = sqlStatementGeneratorsLeft.shift();
+          const generated = sqlGenerator(previousResult);
+
+          if (generated.action === 'rollback') {
+            conn.rollback(() => resolve(null));
+
+          } else if (generated.action === 'executeSQL') {
+            conn.query(generated.sql, (error, results, fields) => {
+              if (error) {
+                conn.rollback(() => reject(error));
+                return;
+              }
+              previousResult = results;
+              executeNextStatement();
+            });
+          }
+        }
+        executeNextStatement();
+      });
     });
   });
 }

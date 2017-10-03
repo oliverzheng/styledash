@@ -65,6 +65,8 @@ export default class EntWaitlistEmail extends BaseEnt {
   }
 }
 
+BaseEnt.registerEnt(EntWaitlistEmail);
+
 waitlistEmailPrivacy = (({
   async genCanViewerSee(obj: EntWaitlistEmail): Promise<boolean> {
     return true;
