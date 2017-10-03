@@ -3,17 +3,21 @@
 import process from 'process';
 import os from 'os';
 
-import SQL from 'sql-template-strings';
 import filesize from 'filesize';
-import nullthrows from 'nullthrows';
 import PromisePool from 'es6-promise-pool';
 
 import envConfig from '../envConfig';
+import ViewerContext from '../entity/vc';
 import {
   connectToMySQL,
-  executeSQL,
   cleanupMySQLConnection,
 } from '../storage/mysql';
+import {
+  genConnectToServer,
+  genDisconnectFromServer,
+} from '../storage/queue';
+import EntRepository from '../entity/EntRepository';
+import EntComponent from '../entity/EntComponent';
 import {
   printAction,
   printActionResult,
@@ -42,6 +46,13 @@ async function main(): Promise<*> {
 
   printAction('Connecting to MySQL...');
   const mysqlConnection = await connectToMySQL(envConfig.dbURL);
+  printActionResult('Connected.');
+
+  printAction('Connecting to RabbitMQ...');
+  const queueConn = await genConnectToServer(envConfig.queueURL);
+  printActionResult('Connected.');
+
+  const vc = ViewerContext.getScriptViewerContext(mysqlConnection, queueConn);
 
   try {
     printAction('Parsing directory...');
@@ -72,11 +83,8 @@ async function main(): Promise<*> {
     }
 
     printAction('Saving new repo to database...');
-    const repoID: string = (await executeSQL(
-      mysqlConnection,
-      SQL`INSERT INTO repository (name, last_updated_timestamp)
-          VALUES (${repoName}, UNIX_TIMESTAMP())`
-    )).insertId;
+    const repo = await EntRepository.genCreate(vc, repoName, null, null);
+    const repoID = repo.getID();
     printActionResult(`Saved as repo #${repoID}.`);
 
     printAction('Saving compiled components to database...');
@@ -87,36 +95,18 @@ async function main(): Promise<*> {
           return null;
         }
         const compiledComponent = componentsLeftToSave.shift();
-        return executeSQL(
-          mysqlConnection,
-          SQL`
-            INSERT INTO component (
-              name,
-              repository_id,
-              filepath,
-              compiled_bundle,
-              react_doc
-            )
-            VALUES (
-              ${compiledComponent.name},
-              ${nullthrows(repoID)},
-              ${compiledComponent.relativeFilepath},
-              ${compiledComponent.compiledBundle},
-              ${JSON.stringify(compiledComponent.doc)}
-            )
-          `,
-        ).then(sqlResult => {
+        return EntComponent.genCreate(
+          vc,
+          compiledComponent.name,
+          repoID,
+          compiledComponent.relativeFilepath,
+          compiledComponent.compiledBundle,
+          JSON.stringify(compiledComponent.doc),
+        ).then(entComponent => {
           return {
             component: compiledComponent,
-            insertID: sqlResult.insertId,
+            insertID: entComponent.getID(),
           };
-        }).catch(err => {
-          throw new Error(
-            JSON.stringify({
-              component: compiledComponent,
-              error: err,
-            })
-          );
         });
       },
       PROMISE_POOL_SIZE,
@@ -135,8 +125,9 @@ async function main(): Promise<*> {
 
     printActionResult('Saved.');
   }
-  finally (err) {
+  finally {
     cleanupMySQLConnection(mysqlConnection);
+    await genDisconnectFromServer(queueConn);
   }
 }
 

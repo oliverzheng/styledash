@@ -46,7 +46,11 @@ export default class EntRepositoryPermission extends BaseEnt {
     vc: ViewerContext,
     repositoryID: string,
   ): Promise<boolean> {
-    const perm = await EntRepositoryPermission.genPermission(
+    if (vc.isAllPowerful()) {
+      return true;
+    }
+
+    const perm = await EntRepositoryPermission._genPermission(
       vc,
       repositoryID,
       EntRepositoryPermission.ADMIN,
@@ -58,7 +62,11 @@ export default class EntRepositoryPermission extends BaseEnt {
     vc: ViewerContext,
     repositoryID: string,
   ): Promise<boolean> {
-    const perm = await EntRepositoryPermission.genPermission(
+    if (vc.isAllPowerful()) {
+      return true;
+    }
+
+    const perm = await EntRepositoryPermission._genPermission(
       vc,
       repositoryID,
       EntRepositoryPermission.READ_WRITE,
@@ -70,14 +78,18 @@ export default class EntRepositoryPermission extends BaseEnt {
     vc: ViewerContext,
     repositoryID: string,
   ): Promise<boolean> {
-    const perms = await EntRepositoryPermission.genAllPermissions(
+    if (vc.isAllPowerful()) {
+      return true;
+    }
+
+    const perms = await EntRepositoryPermission._genAllPermissions(
       vc,
       repositoryID,
     );
     return perms.length > 0;
   }
 
-  static async genPermission(
+  static async _genPermission(
     vc: ViewerContext,
     repositoryID: string,
     permission: AnyPermission,
@@ -97,7 +109,7 @@ export default class EntRepositoryPermission extends BaseEnt {
     return perms[0];
   }
 
-  static async genAllPermissions(
+  static async _genAllPermissions(
     vc: ViewerContext,
     repositoryID: string,
   ): Promise<Array<this>> {
@@ -224,7 +236,7 @@ repositoryPermissionPrivacy = (({
     const permission = data['permission'];
 
     // An admin can do whatever, but a user can only add readWrite permissions.
-    const allPerms = await EntRepositoryPermission.genAllPermissions(
+    const allPerms = await EntRepositoryPermission._genAllPermissions(
       vc,
       ((repositoryID: any): string),
     );

@@ -16,6 +16,16 @@ export default class ViewerContext {
   _queueConn: QueueConnection;
   _userID: ?string;
 
+  static getScriptViewerContext(
+    dbConn: MySQLConnection,
+    queueConn: QueueConnection,
+  ): ViewerContext {
+    if (scriptVC == null) {
+      scriptVC = new ViewerContext(dbConn, queueConn, null);
+    }
+    return scriptVC;
+  }
+
   // Don't you dare instantiate this with a user ID if the user is not
   // authenticated
   constructor(
@@ -26,6 +36,10 @@ export default class ViewerContext {
     this._dbConn = dbConn;
     this._queueConn = queueConn;
     this._userID = userID;
+  }
+
+  isAllPowerful(): boolean {
+    return this === scriptVC;
   }
 
   isAuthenticated(): boolean {
@@ -62,3 +76,5 @@ export default class ViewerContext {
     return process.env.NODE_ENV === 'development';
   }
 }
+
+let scriptVC: ?ViewerContext = null;

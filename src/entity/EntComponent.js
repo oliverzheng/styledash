@@ -100,6 +100,27 @@ export default class EntComponent extends BaseEnt {
 
   // Mutations
 
+  static async genCreate(
+    vc: ViewerContext,
+    name: string,
+    repositoryID: string,
+    filepath: string,
+    compiledBundle: string,
+    reactDoc: string,
+  ): Promise<this> {
+    const componentID = await this._genCreate(
+      vc,
+      {
+        name,
+        repository_id: repositoryID,
+        filepath,
+        compiled_bundle: compiledBundle,
+        react_doc: reactDoc,
+      },
+    );
+    return await this.genEnforce(vc, componentID);
+  }
+
   async genSetOverrideReactDoc(override: string): Promise<boolean> {
     const res = await this._genMutate(
       {override_react_doc: override},
@@ -154,13 +175,10 @@ componentPrivacy = (({
   },
 
   async genCanViewerDelete(obj: EntComponent): Promise<boolean> {
-    // Let's say no for now...?
-    return false;
+    return obj.getViewerContext().isAllPowerful();
   },
 
   async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
-    // TODO Only scripts/background processes can create it. Need to open that
-    // up here.
-    return false;
+    return vc.isAllPowerful();
   },
 }): PrivacyType<EntComponent>);

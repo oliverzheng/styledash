@@ -34,6 +34,24 @@ export default class EntRepository extends BaseEnt {
     };
   }
 
+  static async genCreate(
+    vc: ViewerContext,
+    name: string,
+    githubUsername: ?string,
+    githubRepo: ?string,
+  ): Promise<EntRepository> {
+    const repoID = await this._genCreate(
+      vc,
+      {
+        name,
+        github_username: githubUsername,
+        github_repo: githubRepo,
+        last_updated_timestamp: Math.round((new Date()).getTime() / 1000),
+      },
+    );
+    return await this.genEnforce(vc, repoID);
+  }
+
   static async genForViewer(vc: ViewerContext): Promise<Array<this>> {
     const perms = await EntRepositoryPermission.genAllForViewer(
       vc,
