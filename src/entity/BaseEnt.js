@@ -453,6 +453,9 @@ export default class BaseEnt {
     }
   }
 
+  // TODO what about deadlocks - can a delete's select-for-updates be
+  // interweaved between another delete's select-for-updates in a way that makes
+  // them deadlock each other?
   async genDelete(): Promise<void> {
     const dependents = genForeignKeyDependentsRecursively(this.constructor);
 
