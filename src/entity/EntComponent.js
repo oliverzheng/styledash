@@ -221,6 +221,8 @@ componentPrivacy = (({
   },
 
   async genCanViewerDelete(obj: EntComponent): Promise<boolean> {
+    // If a user deletes a repo and triggers cascading deletion of components,
+    // this is fine because cascaded deletes don't go through ent privacy.
     return obj.getViewerContext().isAllPowerful();
   },
 

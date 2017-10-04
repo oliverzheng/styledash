@@ -55,6 +55,7 @@ async function main(): Promise<*> {
     printAction('Cloning and compiling repo...');
     const {
       components: compiledComponents,
+      commitHash,
     } = await genCompileRepo(
       repo,
       {
@@ -77,6 +78,7 @@ async function main(): Promise<*> {
     printAction('Saving compiled components to database...');
     await genSaveCompiledRepo(
       repo,
+      commitHash,
       compiledComponents,
       {
         concurrency: PROMISE_POOL_SIZE,

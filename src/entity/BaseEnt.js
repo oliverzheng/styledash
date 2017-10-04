@@ -177,6 +177,10 @@ export default class BaseEnt {
   static async genWhereMulti(
     vc: ViewerContext,
     where: {[columnName: string]: mixed/*columnValues*/},
+    orders: Array<{
+      columnName: string,
+      ascending: boolean,
+    }> = [],
   ): Promise<Array<this>> {
     const {
       defaultColumnNames,
@@ -191,6 +195,7 @@ export default class BaseEnt {
       .append(SQL` WHERE `);
 
     this._addWhereToSQL(sql, where);
+    this._addOrderByToSQL(sql, orders);
 
     const res = await executeSQL(vc.getDatabaseConnection(), sql);
     const entsWithoutPrivacy = res.map(row => new this(vc, row));
@@ -248,6 +253,39 @@ export default class BaseEnt {
       sql
         .append(columnName)
         .append(SQL`= ${where[columnName]}`);
+    });
+  }
+
+  static _addOrderByToSQL(
+    sql: SQLStatement,
+    orders: Array<{
+      columnName: string,
+      ascending: boolean,
+    }> = [],
+  ): void {
+    if (orders.length === 0) {
+      return;
+    }
+
+    const {defaultColumnNames} = this._getEntConfig();
+
+    orders.forEach(order =>
+      invariant(
+        defaultColumnNames.indexOf(order.columnName) !== -1,
+        'Must have %s as a default column',
+        order.columnName,
+      )
+    );
+
+    orders.forEach((order, i) => {
+      if (i === 0) {
+        sql.append(SQL` ORDER BY `);
+      } else {
+        sql.append(SQL`, `);
+      }
+      sql
+        .append(order.columnName)
+        .append(order.ascending ? SQL` ASC` : SQL` DESC`);
     });
   }
 

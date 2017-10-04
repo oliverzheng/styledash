@@ -4,6 +4,7 @@ import PromisePool from 'es6-promise-pool';
 
 import EntComponent from '../entity/EntComponent';
 import EntRepository from '../entity/EntRepository';
+import EntRepositoryCompilation from '../entity/EntRepositoryCompilation';
 import type { CompiledComponent } from './genCompileRepo';
 import {printError} from '../consoleUtil';
 
@@ -16,13 +17,23 @@ export type SaveCompiledRepoOptions = {
 
 export default async function genSaveCompiledRepo(
   repo: EntRepository,
+  commitHash: string,
   components: Array<CompiledComponent>,
   options: SaveCompiledRepoOptions,
-): Promise<void> {
+): Promise<EntRepositoryCompilation> {
   let oldComponents = {};
   if (options.deleteOldComponents) {
     oldComponents = await repo.genComponents();
   }
+
+  // TODO
+  //
+  // Ideally, all this happens in 1 transaction in a connection. That requires
+  // transactions at the ent mutation level.
+  //
+  // Second to that, we should lock this so at least multiple calls to this
+  // function cannot overwrite each other. (Mutations from other places can
+  // still cause overwrites.)
 
   const componentsLeftToSave = components.slice(0);
   const saveComponentPool = new PromisePool(
@@ -107,4 +118,6 @@ export default async function genSaveCompiledRepo(
     options.concurrency,
   );
   await deleteComponentPool.start();
+
+  return await EntRepositoryCompilation.genCreate(repo, commitHash);
 }

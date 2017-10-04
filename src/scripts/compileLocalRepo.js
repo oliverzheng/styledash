@@ -22,6 +22,7 @@ import {
   printError,
 } from '../consoleUtil';
 import {
+  genHeadCommitHash,
   genVerifyPackageJSON,
   parseComponents,
   genCompileParsedComponents,
@@ -54,6 +55,10 @@ async function main(): Promise<*> {
   const vc = ViewerContext.getScriptViewerContext(mysqlConnection, queueConn);
 
   try {
+    printAction('Getting git commit hash...');
+    const commitHash = await genHeadCommitHash(directory);
+    printActionResult(`Operating on commit ${commitHash}`);
+
     printAction('Parsing directory...');
     const components = parseComponents(directory);
     printActionResult(`Parsed ${components.length} components.`);
@@ -89,6 +94,7 @@ async function main(): Promise<*> {
     printAction('Saving compiled components to database...');
     await genSaveCompiledRepo(
       repo,
+      commitHash,
       compiledComponents,
       {
         concurrency: PROMISE_POOL_SIZE,

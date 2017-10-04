@@ -111,7 +111,7 @@ async function genCloneRepo(
 
 //// Git
 
-async function genHeadCommitHash(
+export async function genHeadCommitHash(
   repoPath: string,
 ): Promise<string> {
   const {code, stdout, stderr} =
