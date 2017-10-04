@@ -127,7 +127,8 @@
     "deploy:schema": "NODE_ENV=production ./scripts/schemaPush.sh",
     "deploy:pre": "yarn run deploy:schema",
     "test": "node scripts/test.js --env=jsdom",
-    "compile:local-repo": "NODE_ENV=development babel-node src/scripts/compileLocalRepo.js"
+    "compile:local-repo": "NODE_ENV=development babel-node src/scripts/compileLocalRepo.js",
+    "compile:github-repo": "NODE_ENV=development babel-node src/scripts/compileGitHubRepo.js"
   },
   "devDependencies": {
     "babel-watch": "^2.0.7"
