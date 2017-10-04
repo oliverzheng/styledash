@@ -14,6 +14,7 @@ import walkDirectory from '../util/walkDirectory';
 import genLaunchChildProcess from '../util/genLaunchChildProcess';
 import {printError} from '../consoleUtil';
 import EntRepository from '../entity/EntRepository';
+import EntGitHubToken from '../entity/EntGitHubToken';
 
 export type CompiledComponent = {
   name: string,
@@ -465,12 +466,16 @@ function getBabelOptions(repoPath: string, packageJSON: Object): ?Object {
 // multiple steps
 export default async function genCompileRepo(
   repo: EntRepository,
-  /*TODO use the ent*/ token: string,
   options: CompileOptions,
 ): Promise<{
   commitHash: string,
   components: Array<CompiledComponent>,
 }> {
+  const token = await EntGitHubToken.genTokenForRepository(repo);
+  if (!token) {
+    throw new Error(`No GitHub token available for repo ${repo.getID()}`);
+  }
+
   const cloneURL = getGitHubCloneRepoURL(
     nullthrows(repo.getGitHubUsername()),
     nullthrows(repo.getGitHubRepo()),
