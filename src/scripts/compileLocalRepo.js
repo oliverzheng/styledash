@@ -4,7 +4,6 @@ import process from 'process';
 import os from 'os';
 
 import filesize from 'filesize';
-import PromisePool from 'es6-promise-pool';
 
 import envConfig from '../envConfig';
 import ViewerContext from '../entity/vc';
@@ -17,7 +16,6 @@ import {
   genDisconnectFromServer,
 } from '../storage/queue';
 import EntRepository from '../entity/EntRepository';
-import EntComponent from '../entity/EntComponent';
 import {
   printAction,
   printActionResult,
@@ -29,6 +27,7 @@ import {
   genCompileParsedComponents,
   getCompiledComponentsLOC,
 } from '../compile/genCompileRepo';
+import genSaveCompiledRepo from '../compile/genSaveCompiledRepo';
 
 
 const PROMISE_POOL_SIZE = os.cpus().length;
@@ -88,40 +87,18 @@ async function main(): Promise<*> {
     printActionResult(`Saved as repo #${repoID}.`);
 
     printAction('Saving compiled components to database...');
-    const componentsLeftToSave = compiledComponents.slice(0);
-    const saveComponentPool = new PromisePool(
-      () => {
-        if (componentsLeftToSave.length === 0) {
-          return null;
-        }
-        const compiledComponent = componentsLeftToSave.shift();
-        return EntComponent.genCreate(
-          vc,
-          compiledComponent.name,
-          repoID,
-          compiledComponent.relativeFilepath,
-          compiledComponent.compiledBundle,
-          JSON.stringify(compiledComponent.doc),
-        ).then(entComponent => {
-          return {
-            component: compiledComponent,
-            insertID: entComponent.getID(),
-          };
-        });
+    await genSaveCompiledRepo(
+      repo,
+      compiledComponents,
+      {
+        concurrency: PROMISE_POOL_SIZE,
+        deleteOldComponents: true, // doesn't matter, it's a new repo
+        onComponentSaved: component =>
+          printActionResult(
+            `Saved ${component.getFilepath()} as component ID #${component.getID()}`
+          ),
       },
-      PROMISE_POOL_SIZE,
     );
-    saveComponentPool.addEventListener('fulfilled', event => {
-      const {component, insertID} = event.data.result;
-      printActionResult(
-        `Saved ${component.relativeFilepath} as component ID #${insertID}`
-      );
-    });
-    saveComponentPool.addEventListener('rejected', event => {
-      const {component, error} = event.data.error;
-      printError(`Error while saving ${component.relativeFilepath}: ${error}`);
-    });
-    await saveComponentPool.start();
 
     printActionResult('Saved.');
   }

@@ -138,6 +138,26 @@ export default class EntComponent extends BaseEnt {
     return res;
   }
 
+  async genUpdateComponent(
+    reactDoc: string,
+    bundle: string,
+  ): Promise<boolean> {
+    const res = await this._genMutate(
+      {
+        'react_doc': reactDoc,
+        'compiled_bundle': bundle,
+      },
+    );
+
+    if (res) {
+      // TODO pull this into the mutator once we have object caching
+      this._data['react_doc'] = reactDoc;
+      this._data['compiled_bundle'] = bundle;
+    }
+
+    return res;
+  }
+
   // Static helpers
 
   static async genComponentsCountForRepository(
@@ -151,6 +171,24 @@ export default class EntComponent extends BaseEnt {
     );
     invariant(typeof count === 'number', 'Must be a number');
     return count;
+  }
+
+  static async genComponentInRepositoryWithFilepath(
+    repo: EntRepository,
+    filepath: string,
+  ): Promise<?this> {
+    const components = await this.genWhereMulti(
+      repo.getViewerContext(),
+      {
+        'repository_id': repo.getID(),
+        'filepath': filepath,
+      },
+    );
+    invariant(
+      components.length <= 1,
+      `Multiple components for repo ${repo.getID()} at filepath ${filepath}`,
+    );
+    return components[0];
   }
 
   /* TODO (graphql resolver) */
