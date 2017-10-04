@@ -21,3 +21,4 @@ yarn-debug.log*
 yarn-error.log*
 
 devEnvConfig.json
+src/scripts/playground.js
