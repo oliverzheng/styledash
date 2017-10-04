@@ -55,6 +55,9 @@ export async function executeSQLTransaction(
 ): Promise<?Object> {
   return await new Promise((resolve, reject) => {
     connection.getConnection((err, conn) => {
+      // Have to release the connection for every instance of resolve/reject
+      // being called.
+
       if (err) {
         reject('Cannot connect to db: ' + err);
         return;
@@ -62,6 +65,7 @@ export async function executeSQLTransaction(
 
       conn.beginTransaction(err => {
         if (err) {
+          conn.release();
           reject(err);
           return;
         }
@@ -73,9 +77,14 @@ export async function executeSQLTransaction(
           if (sqlStatementGeneratorsLeft.length === 0) {
             conn.commit(error => {
               if (error) {
-                conn.rollback(() => reject(error));
+                conn.rollback(() => {
+                  conn.release();
+                  reject(error);
+                });
                 return;
               }
+
+              conn.release();
               resolve(previousResult);
             });
             return;
@@ -85,12 +94,18 @@ export async function executeSQLTransaction(
           const generated = sqlGenerator(previousResult);
 
           if (generated.action === 'rollback') {
-            conn.rollback(() => resolve(null));
+            conn.rollback(() => {
+              conn.release();
+              resolve(null);
+            });
 
           } else if (generated.action === 'executeSQL') {
             conn.query(generated.sql, (error, results, fields) => {
               if (error) {
-                conn.rollback(() => reject(error));
+                conn.rollback(() => {
+                  conn.release();
+                  reject(error);
+                });
                 return;
               }
               previousResult = results;
