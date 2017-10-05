@@ -13,6 +13,7 @@ import EntComponent from '../entity/EntComponent';
 import EntExample from '../entity/EntExample';
 import Viewer from './Viewer';
 import getResourcePath from '../getResourcePath';
+import { genEnqueueRepoCompilation } from '../compile/compileRepoQueue';
 
 const schema = buildSchema(
   fs.readFileSync(getResourcePath('schema.graphql')).toString()
@@ -159,6 +160,35 @@ const root = {
       component,
       example,
     };
+  },
+
+  refreshRepository: async (
+    args: {
+      input: {
+        repositoryID: string,
+        clientMutationId: string,
+      },
+    },
+    context: Context,
+  ) => {
+    const {
+      repositoryID,
+      clientMutationId,
+    } = args.input;
+
+    try {
+      const repo = await EntRepository.genEnforce(context.vc, repositoryID);
+      await genEnqueueRepoCompilation(repo);
+      return {
+        clientMutationId,
+        success: true,
+      };
+    } catch (err) {
+      return {
+        clientMutationId,
+        success: false,
+      };
+    }
   },
 };
 

@@ -2,6 +2,10 @@
 
 import amqplib from 'amqplib';
 
+import {
+  printError,
+} from '../consoleUtil';
+
 export opaque type QueueConnection = {
   connection: Object,
   channel: Object,
@@ -15,16 +19,32 @@ export opaque type QueueListenerToken = string;
 export async function genAddListenerToQueue(
   c: QueueConnection,
   queue: QueueName,
-  listener: (msg: mixed, done: () => void) => any,
+  listener: (msg: Object, done: () => void) => any,
 ): Promise<QueueListenerToken> {
   await c.channel.assertQueue(queue);
   const {consumerTag} = await c.channel.consume(
     queue,
-    msg =>
-      listener(
-        msg.content.toString('utf8'),
-        () => c.channel.ack(msg),
-      ),
+    msg => {
+      const msgContent = msg.content.toString('utf8');
+      let parsedContent = null;
+      try {
+        parsedContent = JSON.parse(msgContent);
+      } catch (err) {
+        printError('Failed to JSON.parse queue message: ' + err);
+        printError('Message: ' + msgContent);
+
+        // Ack the message since it'll never be valid
+        c.channel.ack(msg);
+        return;
+      }
+
+      if (parsedContent != null) {
+        listener(
+          parsedContent,
+          () => c.channel.ack(msg),
+        );
+      }
+    },
   );
   return consumerTag;
 }
@@ -39,10 +59,10 @@ export async function genRemoveListenerFromQueue(
 export async function genSendMessageToQueue(
   c: QueueConnection,
   queue: QueueName,
-  message: string,
+  message: Object,
 ): Promise<void> {
   await c.channel.assertQueue(queue);
-  c.channel.sendToQueue(queue, Buffer.from(message, 'utf8'));
+  c.channel.sendToQueue(queue, Buffer.from(JSON.stringify(message), 'utf8'));
 }
 
 export async function genConnectToServer(url: string): Promise<QueueConnection> {

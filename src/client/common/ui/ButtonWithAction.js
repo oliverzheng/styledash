@@ -33,4 +33,10 @@ export default class ButtonWithAction extends React.Component<PropType, StateTyp
       didClick: true,
     }, this.props.onClick);
   }
+
+  resetClick() {
+    this.setState({
+      didClick: false,
+    });
+  }
 }

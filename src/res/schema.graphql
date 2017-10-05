@@ -104,8 +104,21 @@ type AddExampleCodePayload {
 }
 
 
+input RefreshRepositoryInput {
+  clientMutationId: String
+  repositoryID: ID!
+}
+
+type RefreshRepositoryPayload {
+  clientMutationId: String
+  success: Boolean!
+  repository: Repository!
+}
+
+
 type Mutation {
   overrideComponentReactDoc(input: OverrideComponentReactDocInput!): OverrideComponentReactDocPayload
   setExampleCode(input: SetExampleCodeInput!): SetExampleCodePayload
   addExampleCode(input: AddExampleCodeInput!): AddExampleCodePayload
+  refreshRepository(input: RefreshRepositoryInput!): RefreshRepositoryPayload
 }

@@ -64,6 +64,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 async function main() {
+  printAction('Starting web server');
+
   printAction('Connecting to MySQL...');
   const dbConn = await connectToMySQL(envConfig.dbURL);
   printActionResult('Connected.');

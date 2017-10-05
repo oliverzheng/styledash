@@ -27,7 +27,7 @@ export type CompiledComponent = {
 export type CompileOptions = {
   jsonpCallback: string,
   childSpawnPoolSize: number,
-  onComponentCompiledCallback: ?((compiledComponent: CompiledComponent) => any),
+  onComponentCompiledCallback?: ?((compiledComponent: CompiledComponent) => any),
 };
 
 const nodeFilepath = process.argv[0];
