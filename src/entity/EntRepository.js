@@ -55,7 +55,10 @@ export default class EntRepository extends BaseEnt {
   static async genForViewer(vc: ViewerContext): Promise<Array<this>> {
     const perms = await EntRepositoryPermission.genAllForViewer(
       vc,
-      EntRepositoryPermission.READ_WRITE,
+      [
+        EntRepositoryPermission.READ_WRITE,
+        EntRepositoryPermission.ADMIN,
+      ],
     );
     return await Promise.all(
       perms.map(

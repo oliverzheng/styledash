@@ -250,9 +250,13 @@ export default class BaseEnt {
       if (i !== 0) {
         sql.append(SQL` AND `);
       }
-      sql
-        .append(columnName)
-        .append(SQL`= ${where[columnName]}`);
+      sql.append(columnName);
+      const columnValue = where[columnName];
+      if (Array.isArray(columnValue)) {
+        sql.append(SQL` IN (${columnValue})`);
+      } else {
+        sql.append(SQL` = ${columnValue}`);
+      }
     });
   }
 

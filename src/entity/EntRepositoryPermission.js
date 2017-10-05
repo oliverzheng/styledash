@@ -9,6 +9,7 @@ import BaseEnt, {
 } from './BaseEnt';
 import EntRepository from './EntRepository';
 import EntUser from './EntUser';
+import SQL from 'sql-template-strings';
 
 // This is an enum in the db.
 const READ_WRITE_PERMISSION = 'read_write';
@@ -65,9 +66,8 @@ export default class EntRepositoryPermission extends BaseEnt {
     const perm = await EntRepositoryPermission._genPermission(
       vc,
       repositoryID,
-      EntRepositoryPermission.ADMIN,
     );
-    return perm != null;
+    return perm != null && perm.isAdmin();
   }
 
   static async genCanViewerReadWrite(
@@ -81,7 +81,6 @@ export default class EntRepositoryPermission extends BaseEnt {
     const perm = await EntRepositoryPermission._genPermission(
       vc,
       repositoryID,
-      EntRepositoryPermission.READ_WRITE,
     );
     return perm != null;
   }
@@ -90,21 +89,28 @@ export default class EntRepositoryPermission extends BaseEnt {
     vc: ViewerContext,
     repositoryID: string,
   ): Promise<boolean> {
-    if (vc.isAllPowerful()) {
-      return true;
-    }
+    return await this.genCanViewerReadWrite(vc, repositoryID);
+  }
 
-    const perms = await EntRepositoryPermission._genAllPermissions(
+  // This is privacy agnostic. If a repo is new and no one has permissions yet,
+  // all viewers would be able to see that. If a repo is not new and has
+  // permissions, all viewer would be able to see that too.
+  static async genHasAnyPermissions(
+    vc: ViewerContext,
+    repositoryID: string,
+  ): Promise<boolean> {
+    const count = await this.genAggregateSQLWithoutPrivacy(
       vc,
-      repositoryID,
+      SQL`count(1)`,
+      { 'repository_id': repositoryID },
     );
-    return perms.length > 0;
+    invariant(typeof count === 'number', 'Must be a number');
+    return count > 0;
   }
 
   static async _genPermission(
     vc: ViewerContext,
     repositoryID: string,
-    permission: AnyPermission,
   ): Promise<?this> {
     const userID = vc.getUserID();
     if (userID == null) {
@@ -115,27 +121,9 @@ export default class EntRepositoryPermission extends BaseEnt {
       {
         repository_id: repositoryID,
         user_id: userID,
-        permission,
       },
     );
     return perms[0];
-  }
-
-  static async _genAllPermissions(
-    vc: ViewerContext,
-    repositoryID: string,
-  ): Promise<Array<this>> {
-    const userID = vc.getUserID();
-    if (userID == null) {
-      return [];
-    }
-    return await this.genWhereMulti(
-      vc,
-      {
-        repository_id: repositoryID,
-        user_id: userID,
-      },
-    );
   }
 
   static async genPermissionsThatAre(
@@ -154,15 +142,33 @@ export default class EntRepositoryPermission extends BaseEnt {
 
   static async genAllForViewer(
     vc: ViewerContext,
-    permission: AnyPermission,
+    permissions: Array<AnyPermission>,
   ): Promise<Array<this>> {
     return await this.genWhereMulti(
       vc,
       {
-        permission,
-        user_id: vc.getUserID(),
+        'permission': permissions,
+        'user_id': vc.getUserID(),
       },
     );
+  }
+
+  static async genCreate(
+    vc: ViewerContext,
+    repositoryID: string,
+    permission: AnyPermission,
+  ): Promise<EntRepositoryPermission> {
+    // Only a user's vc can create this
+    const userID = vc.getUserIDX();
+    const permID = await this._genCreate(
+      vc,
+      {
+        'repository_id': repositoryID,
+        'permission': permission,
+        'user_id': userID,
+      },
+    );
+    return await this.genEnforce(vc, permID);
   }
 
   getRepositoryID(): string {
@@ -249,20 +255,31 @@ repositoryPermissionPrivacy = (({
     const repositoryID = data['repository_id'];
     const permission = data['permission'];
 
-    // An admin can do whatever, but a user can only add readWrite permissions.
-    const allPerms = await EntRepositoryPermission._genAllPermissions(
-      vc,
-      ((repositoryID: any): string),
-    );
-    const isAdmin = allPerms.some(perm => perm.isAdmin());
-    const hasAnyPerms = allPerms.length > 0;
+    // TODO make an "assert ID type" function of some sort
+    invariant(typeof repositoryID === 'string', 'Must be a string');
 
+    const [
+      isAdmin,
+      canReadWrite,
+      hasAnyPermissions,
+    ] = await Promise.all([
+      EntRepositoryPermission.genIsViewerAdmin(vc, repositoryID),
+      EntRepositoryPermission.genCanViewerReadWrite(vc, repositoryID),
+      EntRepositoryPermission.genHasAnyPermissions(vc, repositoryID),
+    ]);
+
+    // An admin can do whatever, but a user can only add readWrite permissions.
+    // A repo without any permissions means it's up for grabs for anybody
     if (isAdmin) {
       return true;
+    } else if (!hasAnyPermissions) {
+      // The first permission created has to be an admin perm. Otherwise, no new
+      // admin permissions can be added.
+      return permission === EntRepositoryPermission.ADMIN;
     } else if (permission === EntRepositoryPermission.ADMIN) {
       return false;
     } else if (permission === EntRepositoryPermission.READ_WRITE) {
-      return hasAnyPerms;
+      return canReadWrite;
     } else {
       invariant(false, 'NYI');
     }
