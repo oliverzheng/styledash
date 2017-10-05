@@ -7,6 +7,7 @@ import filesize from 'filesize';
 
 import envConfig from '../envConfig';
 import ViewerContext from '../entity/vc';
+import EntUser from '../entity/EntUser';
 import {
   connectToMySQL,
   cleanupMySQLConnection,
@@ -44,6 +45,13 @@ async function main(): Promise<*> {
     throw new Error('Need to specify a repository name for storage.');
   }
 
+  const userID = process.argv[4];
+  if (!userID) {
+    throw new Error(
+      'Need to specify a userID to grant permissions of new repo to.',
+    );
+  }
+
   printAction('Connecting to MySQL...');
   const mysqlConnection = await connectToMySQL(envConfig.dbURL);
   printActionResult('Connected.');
@@ -52,7 +60,12 @@ async function main(): Promise<*> {
   const queueConn = await genConnectToServer(envConfig.queueURL);
   printActionResult('Connected.');
 
-  const vc = ViewerContext.getScriptViewerContext(mysqlConnection, queueConn);
+  const vc = new ViewerContext(mysqlConnection, queueConn, userID);
+
+  const user = await EntUser.genNullable(vc, userID);
+  if (!user) {
+    throw new Error('Invalid user ID');
+  }
 
   try {
     printAction('Getting git commit hash...');

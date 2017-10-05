@@ -1,5 +1,7 @@
 /** @flow */
 
+import invariant from 'invariant';
+
 import ViewerContext from './vc';
 import BaseEnt, {
   type EntConfig,
@@ -84,26 +86,31 @@ BaseEnt.registerEnt(EntRepositoryCompilation);
 
 compilationPrivacy = (({
   async genCanViewerSee(obj: EntRepositoryCompilation): Promise<boolean> {
-    const vc = obj.getViewerContext();
-    if (vc.isAllPowerful()) {
-      return true;
-    }
     return await EntRepositoryPermission.genCanViewerReadWrite(
-      vc,
+      obj.getViewerContext(),
       obj.getRepositoryID(),
     );
   },
   async genCanViewerMutate(obj: EntRepositoryCompilation): Promise<boolean> {
-    const vc = obj.getViewerContext();
-    return vc.isAllPowerful();
+    // This is immutable
+    return false;
   },
   async genCanViewerDelete(obj: EntRepositoryCompilation): Promise<boolean> {
-    return obj.getViewerContext().isAllPowerful();
+    return await EntRepositoryPermission.genCanViewerReadWrite(
+      obj.getViewerContext(),
+      obj.getRepositoryID(),
+    );
   },
   async genCanViewerCreate(
     vc: ViewerContext,
     data: {[columnName: string]: mixed},
   ): Promise<boolean> {
-    return vc.isAllPowerful();
+    const repositoryID = data['repository_id'];
+    invariant(typeof repositoryID === 'string', 'Must be a string');
+
+    return await EntRepositoryPermission.genCanViewerReadWrite(
+      vc,
+      repositoryID,
+    );
   },
 }): PrivacyType<EntRepositoryCompilation>);

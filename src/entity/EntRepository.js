@@ -39,16 +39,25 @@ export default class EntRepository extends BaseEnt {
     name: string,
     githubUsername: ?string,
     githubRepo: ?string,
+    rootCSS: ?string,
   ): Promise<EntRepository> {
     const repoID = await this._genCreate(
       vc,
       {
-        name,
-        github_username: githubUsername,
-        github_repo: githubRepo,
-        last_updated_timestamp: Math.round((new Date()).getTime() / 1000),
+        'name': name,
+        'github_username': githubUsername,
+        'github_repo': githubRepo,
+        'root_css': rootCSS,
+        'last_updated_timestamp': Math.round((new Date()).getTime() / 1000),
       },
     );
+
+    await EntRepositoryPermission.genCreate(
+      vc,
+      repoID,
+      EntRepositoryPermission.ADMIN,
+    );
+
     return await this.genEnforce(vc, repoID);
   }
 

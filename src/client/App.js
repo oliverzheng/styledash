@@ -16,6 +16,7 @@ import {
   MAIN_SITE_PATH,
   REPOSITORY_LIST_PATH,
   REPOSITORY_PATH,
+  NEW_REPOSITORY_PATH,
   COMPONENT_PATH,
   LOGIN_PATH,
   LOGOUT_PATH,
@@ -31,6 +32,7 @@ import RepositoryListPage from './pages/RepositoryListPage';
 import LoginPage from './pages/LoginPage';
 import RepositoryPage from './pages/RepositoryPage';
 import RepositorySettingsPage from './pages/RepositorySettingsPage';
+import NewRepositoryPage from './pages/NewRepositoryPage';
 import ComponentPage from './pages/ComponentPage';
 
 import './App.css';
@@ -106,6 +108,17 @@ export default class App extends React.Component<*> {
           path={LOGOUT_PATH}
           component={LoginPage}
           onEnter={this._logout}
+        />
+        {
+          /* This has to be before :repositoryID, otherwise it'll take
+           * precedence. It's janky because now this component needs to actually
+           * know what the path of this is. But the url looks nice. */
+        }
+        <Route
+          path={`${NEW_REPOSITORY_PATH}`}
+          component={NewRepositoryPage}
+          queries={NewRepositoryPage.queries}
+          onEnter={this._requireAuth}
         />
         <Route
           path={`${REPOSITORY_PATH}/:repositoryID`}

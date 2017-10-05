@@ -116,9 +116,25 @@ type RefreshRepositoryPayload {
 }
 
 
+input AddRepositoryInput {
+  clientMutationId: String
+  name: String!
+  githubUser: String!
+  githubRepo: String!
+  githubToken: String!
+  rootCSS: String
+}
+
+type AddRepositoryPayload {
+  clientMutationId: String
+  repository: Repository
+}
+
+
 type Mutation {
   overrideComponentReactDoc(input: OverrideComponentReactDocInput!): OverrideComponentReactDocPayload
   setExampleCode(input: SetExampleCodeInput!): SetExampleCodePayload
   addExampleCode(input: AddExampleCodeInput!): AddExampleCodePayload
   refreshRepository(input: RefreshRepositoryInput!): RefreshRepositoryPayload
+  addRepository(input: AddRepositoryInput!): AddRepositoryPayload
 }

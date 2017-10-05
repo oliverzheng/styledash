@@ -221,12 +221,22 @@ componentPrivacy = (({
   },
 
   async genCanViewerDelete(obj: EntComponent): Promise<boolean> {
-    // If a user deletes a repo and triggers cascading deletion of components,
-    // this is fine because cascaded deletes don't go through ent privacy.
-    return obj.getViewerContext().isAllPowerful();
+    return await EntRepositoryPermission.genCanViewerReadWrite(
+      obj.getViewerContext(),
+      obj.getRepositoryID(),
+    );
   },
 
-  async genCanViewerCreate(vc: ViewerContext): Promise<boolean> {
-    return vc.isAllPowerful();
+  async genCanViewerCreate(
+    vc: ViewerContext,
+    data: {[columnName: string]: mixed},
+  ): Promise<boolean> {
+    const repositoryID = data['repository_id'];
+    invariant(typeof repositoryID === 'string', 'Must be a string');
+
+    return await EntRepositoryPermission.genCanViewerReadWrite(
+      vc,
+      repositoryID,
+    );
   },
 }): PrivacyType<EntComponent>);

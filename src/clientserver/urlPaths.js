@@ -12,6 +12,7 @@ export const SERVER_WAITLIST_ADD_EMAIL_PATH = '/api/waitlist_add_email';
 export const MAIN_SITE_PATH = '/';
 export const REPOSITORY_LIST_PATH = '/home';
 export const REPOSITORY_PATH = '/repository';
+export const NEW_REPOSITORY_PATH = '/repository/new';
 export const COMPONENT_PATH = '/component';
 export const LOGIN_PATH = '/login';
 export const LOGOUT_PATH = '/logout';

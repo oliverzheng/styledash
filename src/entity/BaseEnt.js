@@ -382,11 +382,13 @@ export default class BaseEnt {
       defaultColumnNames,
       extendedColumnNames,
       privacy,
+      typeName,
     } = this._getEntConfig();
 
     invariant(
       await privacy.genCanViewerCreate(vc, data),
-      'Viewer cannot create obj',
+      'Viewer cannot create obj of type %s',
+      typeName,
     );
 
     const validMutationColumns = {};

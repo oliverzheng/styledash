@@ -11,6 +11,7 @@ import EntUser from '../entity/EntUser';
 import EntRepository from '../entity/EntRepository';
 import EntComponent from '../entity/EntComponent';
 import EntExample from '../entity/EntExample';
+import EntGitHubToken from '../entity/EntGitHubToken';
 import Viewer from './Viewer';
 import getResourcePath from '../getResourcePath';
 import { genEnqueueRepoCompilation } from '../compile/compileRepoQueue';
@@ -187,6 +188,55 @@ const root = {
       return {
         clientMutationId,
         success: false,
+      };
+    }
+  },
+
+  addRepository: async (
+    args: {
+      input: {
+        name: string,
+        githubUser: string,
+        githubRepo: string,
+        githubToken: string,
+        rootCSS: ?string,
+        clientMutationId: string,
+      },
+    },
+    context: Context,
+  ) => {
+    const {
+      name,
+      githubUser,
+      githubRepo,
+      githubToken,
+      rootCSS,
+      clientMutationId,
+    } = args.input;
+
+    try {
+      const repo = await EntRepository.genCreate(
+        context.vc,
+        name,
+        githubUser,
+        githubRepo,
+        rootCSS,
+      );
+      await EntGitHubToken.genCreateToken(
+        context.vc,
+        repo,
+        githubUser,
+        githubToken,
+      );
+      return {
+        clientMutationId,
+        repository: repo,
+      };
+    }
+    catch (err) {
+      return {
+        clientMutationId,
+        repository: null,
       };
     }
   },
