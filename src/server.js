@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import exphbs from 'express-handlebars';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
+import invariant from 'invariant';
 import 'source-map-support/register';
 
 import envConfig from './envConfig';
@@ -176,8 +177,10 @@ async function main() {
       graphiql(),
     );
 
-    printAction(`Setting up listener on port ${envConfig.server.port}...`);
-    app.listen(envConfig.server.port, () => {
+    const port = envConfig.server.port;
+    invariant(port != null, 'No PORT env variable');
+    printAction(`Setting up listener on port ${port}...`);
+    app.listen(port, () => {
       printActionResult('Listener setup.');
     });
   }

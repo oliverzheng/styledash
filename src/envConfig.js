@@ -11,7 +11,7 @@ let envConfig: {
   dbURL: string,
   queueURL: string,
   server: {
-    port: number,
+    port: ?number, // this is only available if we are in the www proc
     cookieSecret: string,
   },
 };
@@ -24,7 +24,6 @@ if (process.env.NODE_ENV === 'development') {
   );
 } else {
   invariant(process.env.DATABASE_URL != null, 'Undefined DATABASE_URL env');
-  invariant(process.env.PORT != null, 'Undefined PORT env');
   invariant(
     process.env.STYLEDASH_COOKIE_SECRET != null,
     'Undefined STYLEDASH_COOKIE_SECRET env',
@@ -33,7 +32,7 @@ if (process.env.NODE_ENV === 'development') {
     dbURL: nullthrows(process.env.DATABASE_URL),
     queueURL: nullthrows(process.env.RABBITMQ_URL),
     server: {
-      port: nullthrows(process.env.PORT),
+      port: process.env.PORT,
       cookieSecret: nullthrows(process.env.STYLEDASH_COOKIE_SECRET),
     }
   };

@@ -1,6 +1,7 @@
 /** @flow */
 
 import os from 'os';
+import 'source-map-support/register';
 
 import envConfig from './envConfig';
 import {
