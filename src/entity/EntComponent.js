@@ -23,6 +23,7 @@ export default class EntComponent extends BaseEnt {
         'name',
         'repository_id',
         'filepath',
+        'is_named_export',
       ],
       extendedColumnNames: [
         'compiled_bundle',
@@ -54,6 +55,10 @@ export default class EntComponent extends BaseEnt {
 
   getFilepath(): string {
     return this._getStringData('filepath');
+  }
+
+  getIsNamedExport(): boolean {
+    return this._getBooleanData('is_named_export');
   }
 
   async genRepository(): Promise<EntRepository> {
@@ -111,17 +116,19 @@ export default class EntComponent extends BaseEnt {
     name: string,
     repositoryID: string,
     filepath: string,
+    isNamedExport: boolean,
     compiledBundle: string,
     reactDoc: string,
   ): Promise<this> {
     const componentID = await this._genCreate(
       vc,
       {
-        name,
-        repository_id: repositoryID,
-        filepath,
-        compiled_bundle: compiledBundle,
-        react_doc: reactDoc,
+        'name': name,
+        'repository_id': repositoryID,
+        'filepath': filepath,
+        'is_named_export': isNamedExport,
+        'compiled_bundle': compiledBundle,
+        'react_doc': reactDoc,
       },
     );
     return await this.genEnforce(vc, componentID);
@@ -167,7 +174,10 @@ export default class EntComponent extends BaseEnt {
     const count = await this.genAggregateSQLWithoutPrivacy(
       vc,
       SQL`count(1)`,
-      { repository_id: repositoryID },
+      {
+        'repository_id': repositoryID,
+        'is_named_export': false,
+      },
     );
     invariant(typeof count === 'number', 'Must be a number');
     return count;
@@ -176,12 +186,16 @@ export default class EntComponent extends BaseEnt {
   static async genComponentInRepositoryWithFilepath(
     repo: EntRepository,
     filepath: string,
+    name: string,
+    isNamedExport: boolean,
   ): Promise<?this> {
     const components = await this.genWhereMulti(
       repo.getViewerContext(),
       {
         'repository_id': repo.getID(),
         'filepath': filepath,
+        'name': name,
+        'is_named_export': isNamedExport,
       },
     );
     invariant(
@@ -196,6 +210,7 @@ export default class EntComponent extends BaseEnt {
   componentID() { return this.getID(); }
   filepath() { return this.getFilepath(); }
   repository() { return this.genRepository(); }
+  isNamedExport() { return this.getIsNamedExport(); }
   compiledBundleURI() { return this.getCompiledBundleURI(); }
   reactDoc() { return this.genReactDoc(); }
   overrideReactDoc() { return this.genOverrideReactDoc(); }

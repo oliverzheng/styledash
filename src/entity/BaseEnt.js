@@ -156,6 +156,17 @@ export default class BaseEnt {
     return data;
   }
 
+  _getBooleanData(columnName: string): boolean {
+    const data = this._getData(columnName);
+    invariant(
+      typeof data === 'number',
+      'Data for object type %s column %s (bool) is not a number',
+      this.constructor.getEntType(),
+      columnName,
+    );
+    return !!data;
+  }
+
   _getIDData(columnName: string): string {
     return this._getNumberData(columnName).toString();
   }

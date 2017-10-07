@@ -6,7 +6,11 @@ import process from 'process';
 import tmp from 'tmp';
 import invariant from 'invariant';
 import nullthrows from 'nullthrows';
-import {parse as parseReactDocs} from 'react-docgen';
+import {
+  parse as parseReactDocs,
+  resolver,
+  defaultHandlers,
+} from 'react-docgen';
 import findRoot from 'find-root';
 import PromisePool from 'es6-promise-pool';
 
@@ -16,8 +20,11 @@ import {printError} from '../consoleUtil';
 import EntRepository from '../entity/EntRepository';
 import EntGitHubToken from '../entity/EntGitHubToken';
 
+const {findAllExportedComponentDefinitions} = resolver;
+
 export type CompiledComponent = {
   name: string,
+  isNamedExport: boolean,
   filepath: string,
   relativeFilepath: string,
   doc: Object,
@@ -198,17 +205,62 @@ function couldFilepathContainComponent(filepath: string): boolean {
   return !!filepath.match(/\.(js|jsx|tsx)$/);
 }
 
-function getComponentDoc(filepath: string): ?Object /* TODO typing */ {
+function extractExportNameHandler(
+  documentation,
+  path,
+) {
+  let name = null;
+
+  // ES6 non-default export, where the value immmediately follows the export
+  if (
+    !Array.isArray(path.parentPath.value) &&
+    path.parentPath.value.type === 'ExportNamedDeclaration'
+  ) {
+    const declaration = path.parentPath.value.declaration;
+    // TODO functional components and createClass
+    if (declaration.type === 'ClassDeclaration') {
+      name = declaration.id.name;
+    }
+  }
+  // ES6 default export, where the value immediately follows the export
+  else if (
+    !Array.isArray(path.parentPath.value) &&
+    path.parentPath.value.type === 'ExportDefaultDeclaration'
+  ) {
+    name = 'default';
+  }
+  // TODO
+  // - export where the value is a reference to an earlier declaration
+  // - commonJS export
+
+  if (name != null) {
+    documentation.set('exportName', name);
+  } else {
+    // Log something so we have an indicator to look back on this
+    printError('Did not find an export name');
+  }
+}
+
+const reactDocHandlers = [];
+reactDocHandlers.push(...defaultHandlers);
+reactDocHandlers.push(extractExportNameHandler);
+
+function getComponentDoc(filepath: string): Array<Object> {
   const src = fs.readFileSync(filepath).toString();
   try {
-    return parseReactDocs(src);
+    return parseReactDocs(
+      src,
+      findAllExportedComponentDefinitions,
+      reactDocHandlers,
+    );
   } catch (err) {
-    return null;
+    return [];
   }
 }
 
 export type ParsedComponent = {
   name: string,
+  isNamedExport: boolean,
   filepath: string,
   relativeFilepath: string,
   doc: Object,
@@ -232,6 +284,7 @@ export function parseComponents(
 
   const components: Array<{
     name: string,
+    isNamedExport: boolean,
     filepath: string,
     relativeFilepath: string,
     doc: Object,
@@ -244,15 +297,20 @@ export function parseComponents(
         return false;
       }
       if (couldFilepathContainComponent(filepath)) {
-        const doc = getComponentDoc(filepath);
-        if (doc) {
+        const docs = getComponentDoc(filepath);
+        docs.forEach(doc => {
+          const isNamedExport = doc.exportName && doc.exportName !== 'default';
+          const name = isNamedExport
+            ? doc.exportName
+            : path.basename(filepath).replace(/\.[^/.]+$/, '');
           components.push({
-            name: path.basename(filepath).replace(/\.[^/.]+$/, ''),
+            name,
+            isNamedExport,
             filepath,
             relativeFilepath: getComponentRelativeFilepath(repoPath, filepath),
             doc,
           });
-        }
+        });
       }
       return true;
     }

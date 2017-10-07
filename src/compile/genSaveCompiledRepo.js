@@ -48,6 +48,8 @@ export default async function genSaveCompiledRepo(
           EntComponent.genComponentInRepositoryWithFilepath(
             repo,
             compiledComponent.relativeFilepath,
+            compiledComponent.name,
+            compiledComponent.isNamedExport,
           );
 
         let newComponent;
@@ -62,6 +64,7 @@ export default async function genSaveCompiledRepo(
             compiledComponent.name,
             repo.getID(),
             compiledComponent.relativeFilepath,
+            compiledComponent.isNamedExport,
             compiledComponent.compiledBundle,
             JSON.stringify(compiledComponent.doc),
           );
