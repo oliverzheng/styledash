@@ -12,9 +12,9 @@ import {
   defaultHandlers,
 } from 'react-docgen';
 import findRoot from 'find-root';
-import PromisePool from 'es6-promise-pool';
 
 import walkDirectory from '../util/walkDirectory';
+import groupPaths from '../util/groupPaths';
 import genLaunchChildProcess from '../util/genLaunchChildProcess';
 import {printError} from '../consoleUtil';
 import EntRepository from '../entity/EntRepository';
@@ -22,19 +22,17 @@ import EntGitHubToken from '../entity/EntGitHubToken';
 
 const {findAllExportedComponentDefinitions} = resolver;
 
-export type CompiledComponent = {
+export type ParsedComponent = {
   name: string,
   isNamedExport: boolean,
+  exportedNameInBundle: string,
   filepath: string,
   relativeFilepath: string,
   doc: Object,
-  compiledBundle: string,
 };
 
 export type CompileOptions = {
-  jsonpCallback: string,
-  childSpawnPoolSize: number,
-  onComponentCompiledCallback?: ?((compiledComponent: CompiledComponent) => any),
+  libraryName: string,
 };
 
 const nodeFilepath = process.argv[0];
@@ -51,17 +49,13 @@ function getComponentRelativeFilepath(
 }
 
 export function getCompiledComponentsLOC(
-  compiledComponents: Array<CompiledComponent>,
+  compiledBundle: string,
 ): {
   totalLOC: number,
   totalBytes: number,
 } {
-  const totalLOC = compiledComponents.map(
-    component => component.compiledBundle.split('\n').length
-  ).reduce((a, b) => a + b);
-  const totalBytes = compiledComponents.map(
-    component => component.compiledBundle.length
-  ).reduce((a, b) => a + b);
+  const totalLOC = compiledBundle.split('\n').length;
+  const totalBytes = compiledBundle.length;
   return {
     totalLOC,
     totalBytes,
@@ -258,14 +252,6 @@ function getComponentDoc(filepath: string): Array<Object> {
   }
 }
 
-export type ParsedComponent = {
-  name: string,
-  isNamedExport: boolean,
-  filepath: string,
-  relativeFilepath: string,
-  doc: Object,
-};
-
 export function parseComponents(
   repoPath: string,
 ): Array<ParsedComponent> {
@@ -285,6 +271,7 @@ export function parseComponents(
   const components: Array<{
     name: string,
     isNamedExport: boolean,
+    exportedNameInBundle: string,
     filepath: string,
     relativeFilepath: string,
     doc: Object,
@@ -305,6 +292,7 @@ export function parseComponents(
             : path.basename(filepath).replace(/\.[^/.]+$/, '');
           components.push({
             name,
+            exportedNameInBundle: name,
             isNamedExport,
             filepath,
             relativeFilepath: getComponentRelativeFilepath(repoPath, filepath),
@@ -321,15 +309,84 @@ export function parseComponents(
 
 //// Compiling components
 
-async function compileComponent(
+function findCommonAncestorDirectory(
+  filepaths: Array<string>,
+): string {
+  invariant(filepaths.length > 0, 'Must have more than 1 filepath');
+
+  const pathGroup = groupPaths(
+    filepaths.map(p => ({path: p, content: null}))
+  );
+  // groupPaths assumes relative paths, so the result is not absolute
+  return '/' + nullthrows(Object.keys(nullthrows(pathGroup.children))[0]);
+}
+
+function getAggregateExportFileContent(
+  dir: string,
+  parsedComponents: Array<ParsedComponent>,
+): string {
+  const contents = [];
+
+  parsedComponents.forEach(pc => {
+    const relativeFilepathFromDir = path.relative(dir, pc.filepath);
+    const exportNameFromFile =
+      pc.isNamedExport ? pc.name : 'default';
+
+    contents.push(
+      `export { ${exportNameFromFile} as ${pc.exportedNameInBundle} } from './${relativeFilepathFromDir}';`
+    );
+  });
+
+  return contents.join('\n');
+}
+
+async function genCreateAggregateExportFile(
   repoPath: string,
+  parsedComponents: Array<ParsedComponent>,
+): Promise<{
   filepath: string,
+  cleanupCallback: () => void,
+}> {
+  const dir = findCommonAncestorDirectory(
+    parsedComponents.map(pc => pc.filepath)
+  );
+
+  const {
+    name,
+    fd,
+    removeCallback,
+  } = tmp.fileSync({
+    dir,
+    postfix: '.js',
+  });
+
+  // Flow thinks the extra args are required
+  (fs.writeSync: any)(fd, getAggregateExportFileContent(dir, parsedComponents));
+  fs.closeSync(fd);
+
+  return {
+    filepath: name,
+    cleanupCallback: removeCallback,
+  };
+}
+
+export async function genCompileParsedComponents(
+  repoPath: string,
   packageJSON: Object,
+  parsedComponents: Array<ParsedComponent>,
   options: CompileOptions,
 ): Promise<string> {
+  const {
+    filepath: aggregateExportFilepath,
+    cleanupCallback,
+  } = await genCreateAggregateExportFile(
+    repoPath,
+    parsedComponents,
+  );
+
   const scriptStr = createComponentWebpackSerializedScript(
     repoPath,
-    filepath,
+    aggregateExportFilepath,
     packageJSON,
     options,
   );
@@ -341,57 +398,16 @@ async function compileComponent(
     scriptStr,
   );
 
+  cleanupCallback();
+
   if (code !== 0) {
-    throw new Error(`Compiling ${filepath} failed with error: ${stderr || ''}`);
+    throw new Error(
+      `Compiling ${aggregateExportFilepath} failed with error: ${stderr || ''}`
+    );
   }
 
   invariant(stdout != null, 'Compiled bundle must be non empty');
   return stdout;
-}
-
-export async function genCompileParsedComponents(
-  repoPath: string,
-  packageJSON: Object,
-  parsedComponents: Array<ParsedComponent>,
-  options: CompileOptions,
-): Promise<Array<CompiledComponent>> {
-  const compiledComponents = [];
-  const componentsLeftToCompile = parsedComponents.slice(0);
-  const compilePool = new PromisePool(
-    () => {
-      if (componentsLeftToCompile.length === 0) {
-        return null;
-      }
-      const parsedComponent = componentsLeftToCompile.shift();
-      return compileComponent(
-        repoPath,
-        parsedComponent.filepath,
-        packageJSON,
-        options,
-      ).then(compiledBundle => {
-        return {
-          ...parsedComponent,
-          compiledBundle,
-        };
-      });
-    },
-    options.childSpawnPoolSize,
-  );
-  compilePool.addEventListener('fulfilled', event => {
-    const compiledComponent = event.data.result;
-
-    compiledComponents.push(compiledComponent);
-
-    if (options.onComponentCompiledCallback) {
-      options.onComponentCompiledCallback(compiledComponent);
-    }
-  });
-  compilePool.addEventListener('rejected', event => {
-    printError(`Error during compilation: ${event.data.error}`);
-  });
-  await compilePool.start();
-
-  return compiledComponents;
 }
 
 
@@ -484,8 +500,8 @@ function createWebpackConfig(
       // The output will be in memory, so this path doesn't matter, as long as
       // all the components have unique paths.
       path: path.dirname(relativeFilepath),
-      library: options.jsonpCallback,
-      libraryTarget: 'jsonp',
+      library: options.libraryName,
+      libraryTarget: 'var',
     },
   };
 }
@@ -527,7 +543,8 @@ export default async function genCompileRepo(
   options: CompileOptions,
 ): Promise<{
   commitHash: string,
-  components: Array<CompiledComponent>,
+  components: Array<ParsedComponent>,
+  compiledBundle: string,
 }> {
   const token = await EntGitHubToken.genTokenForRepository(repo);
   if (!token) {
@@ -549,11 +566,11 @@ export default async function genCompileRepo(
   const packageJSON = await genVerifyPackageJSON(repoPath);
   await genYarnInstall(repoPath);
 
-  const parsedComponents = parseComponents(repoPath);
-  const compiledComponents = await genCompileParsedComponents(
+  const components = parseComponents(repoPath);
+  const compiledBundle = await genCompileParsedComponents(
     repoPath,
     packageJSON,
-    parsedComponents,
+    components,
     options,
   );
 
@@ -561,6 +578,7 @@ export default async function genCompileRepo(
 
   return {
     commitHash,
-    components: compiledComponents,
+    components,
+    compiledBundle,
   };
 }

@@ -5,7 +5,7 @@ import PromisePool from 'es6-promise-pool';
 import EntComponent from '../entity/EntComponent';
 import EntRepository from '../entity/EntRepository';
 import EntRepositoryCompilation from '../entity/EntRepositoryCompilation';
-import type { CompiledComponent } from './genCompileRepo';
+import type { ParsedComponent } from './genCompileRepo';
 import {printError} from '../consoleUtil';
 
 export type SaveCompiledRepoOptions = {
@@ -18,7 +18,8 @@ export type SaveCompiledRepoOptions = {
 export default async function genSaveCompiledRepo(
   repo: EntRepository,
   commitHash: string,
-  components: Array<CompiledComponent>,
+  components: Array<ParsedComponent>,
+  compiledBundle: string,
   options: SaveCompiledRepoOptions,
 ): Promise<EntRepositoryCompilation> {
   let oldComponents = {};
@@ -48,7 +49,7 @@ export default async function genSaveCompiledRepo(
           EntComponent.genComponentInRepositoryWithFilepath(
             repo,
             compiledComponent.relativeFilepath,
-            compiledComponent.name,
+            compiledComponent.exportedNameInBundle,
             compiledComponent.isNamedExport,
           );
 
@@ -60,7 +61,7 @@ export default async function genSaveCompiledRepo(
         } else {
           newComponent = await EntComponent.genCreate(
             repo.getViewerContext(),
-            compiledComponent.name,
+            compiledComponent.exportedNameInBundle,
             repo.getID(),
             compiledComponent.relativeFilepath,
             compiledComponent.isNamedExport,
@@ -121,5 +122,5 @@ export default async function genSaveCompiledRepo(
   await deleteComponentPool.start();
 
   return await
-    EntRepositoryCompilation.genCreate(repo, commitHash, ''/* TODO next commit */);
+    EntRepositoryCompilation.genCreate(repo, commitHash, compiledBundle);
 }

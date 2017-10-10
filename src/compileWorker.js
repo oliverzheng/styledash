@@ -42,11 +42,11 @@ async function genProcessMessage(
     const {
       components,
       commitHash,
+      compiledBundle,
     } = await genCompileRepo(
       params.repo,
       {
-        jsonpCallback: 'componentOnLoad',
-        childSpawnPoolSize: SPAWN_POOL_SIZE,
+        libraryName: 'repositoryBundle',
       },
     );
 
@@ -55,6 +55,7 @@ async function genProcessMessage(
       repo,
       commitHash,
       components,
+      compiledBundle,
       {
         concurrency: SPAWN_POOL_SIZE,
         deleteOldComponents: true,

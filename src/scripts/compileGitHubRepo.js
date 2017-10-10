@@ -56,20 +56,18 @@ async function main(): Promise<*> {
     const {
       components: compiledComponents,
       commitHash,
+      compiledBundle,
     } = await genCompileRepo(
       repo,
       {
-        jsonpCallback: 'componentOnLoad',
-        childSpawnPoolSize: PROMISE_POOL_SIZE,
-        onComponentCompiledCallback: compiledComponent =>
-          printActionResult(`Compiled ${compiledComponent.relativeFilepath}`),
+        libraryName: 'repositoryBundle',
       },
     );
     printActionResult(`Compiled ${compiledComponents.length} components.`);
 
     if (compiledComponents.length > 0) {
       const {totalLOC, totalBytes} =
-        getCompiledComponentsLOC(compiledComponents);
+        getCompiledComponentsLOC(compiledBundle);
       printActionResult(
         `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
       );
@@ -80,6 +78,7 @@ async function main(): Promise<*> {
       repo,
       commitHash,
       compiledComponents,
+      compiledBundle,
       {
         concurrency: PROMISE_POOL_SIZE,
         deleteOldComponents: true,

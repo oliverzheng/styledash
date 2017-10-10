@@ -79,25 +79,20 @@ async function main(): Promise<*> {
     printAction(
       `Compiling components with ${PROMISE_POOL_SIZE} concurrent processes...`
     );
-    const compiledComponents = await genCompileParsedComponents(
+    const compiledBundle = await genCompileParsedComponents(
       directory,
       packageJSON,
       components,
       {
-        jsonpCallback: 'componentOnLoad',
-        childSpawnPoolSize: PROMISE_POOL_SIZE,
-        onComponentCompiledCallback: compiledComponent =>
-          printActionResult(`Compiled ${compiledComponent.relativeFilepath}`),
+        libraryName: 'repositoryBundle',
       },
     );
 
-    if (compiledComponents.length > 0) {
-      const {totalLOC, totalBytes} =
-        getCompiledComponentsLOC(compiledComponents);
-      printActionResult(
-        `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
-      );
-    }
+    const {totalLOC, totalBytes} =
+      getCompiledComponentsLOC(compiledBundle);
+    printActionResult(
+      `Produced a total of ${totalLOC} lines of code, ${filesize(totalBytes)}.`
+    );
 
     printAction('Saving new repo to database...');
     const repo = await EntRepository.genCreate(vc, repoName, null, null);
@@ -108,7 +103,8 @@ async function main(): Promise<*> {
     await genSaveCompiledRepo(
       repo,
       commitHash,
-      compiledComponents,
+      components,
+      compiledBundle,
       {
         concurrency: PROMISE_POOL_SIZE,
         deleteOldComponents: true, // doesn't matter, it's a new repo
