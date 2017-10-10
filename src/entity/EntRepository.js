@@ -114,9 +114,8 @@ export default class EntRepository extends BaseEnt {
   }
 
   async genComponents(): Promise<Array<EntComponent>> {
-    return await EntComponent.genWhere(
+    return await EntComponent.genDefaultExportComponentsInRepository(
       this.getViewerContext(),
-      'repository_id',
       this.getID(),
     );
   }

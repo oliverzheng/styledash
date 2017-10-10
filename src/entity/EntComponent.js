@@ -167,6 +167,19 @@ export default class EntComponent extends BaseEnt {
     return count;
   }
 
+  static async genDefaultExportComponentsInRepository(
+    vc: ViewerContext,
+    repositoryID: string,
+  ): Promise<Array<this>> {
+    return await EntComponent.genWhereMulti(
+      vc,
+      {
+        'repository_id': repositoryID,
+        'is_named_export': false,
+      },
+    );
+  };
+
   static async genComponentInRepositoryWithFilepath(
     repo: EntRepository,
     filepath: string,
