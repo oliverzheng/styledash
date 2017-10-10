@@ -20,11 +20,13 @@ type PropType = {
   initialCode: string,
   component: {
     name: string,
-    compiledBundleURI: string,
   },
   repository: {
     externalCSSURI: ?string,
     rootCSS: ?string,
+    currentCompilation: {
+      compiledBundleURI: string,
+    },
   },
   showRevert: boolean,
   canSaveInitialCode: boolean,

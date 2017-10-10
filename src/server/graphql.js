@@ -9,6 +9,7 @@ import invariant from 'invariant';
 import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
 import EntRepository from '../entity/EntRepository';
+import EntRepositoryCompilation from '../entity/EntRepositoryCompilation';
 import EntComponent from '../entity/EntComponent';
 import EntExample from '../entity/EntExample';
 import EntGitHubToken from '../entity/EntGitHubToken';
@@ -40,6 +41,8 @@ async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
       return new Viewer(vc);
     case 'repository':
       return await EntRepository.genNullable(vc, nullthrows(objID));
+    case 'repositoryCompilation':
+      return await EntRepositoryCompilation.genNullable(vc, nullthrows(objID));
     case 'component':
       return await EntComponent.genNullable(vc, nullthrows(objID));
     case 'example':
@@ -66,6 +69,9 @@ const root = {
   },
   repository: async (args: {repositoryID: string}, context: Context) => {
     return await EntRepository.genNullable(context.vc, args.repositoryID);
+  },
+  repositoryCompilation: async (args: {compilationID: string}, context: Context) => {
+    return await EntRepositoryCompilation.genNullable(context.vc, args.compilationID);
   },
   component: async (args: {componentID: string}, context: Context) => {
     return await EntComponent.genNullable(context.vc, args.componentID);

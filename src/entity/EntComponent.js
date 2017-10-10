@@ -26,7 +26,6 @@ export default class EntComponent extends BaseEnt {
         'is_named_export',
       ],
       extendedColumnNames: [
-        'compiled_bundle',
         'react_doc',
         'override_react_doc',
       ],
@@ -68,10 +67,6 @@ export default class EntComponent extends BaseEnt {
     );
   }
 
-  getCompiledBundleURI(): string {
-    return `/_componentBundle/${this.getID()}/bundle.js`;
-  }
-
   async genReactDoc(): Promise<string> {
     const doc = await this._genExtendedColumnValue('react_doc');
     invariant(typeof doc === 'string', 'Must be a string');
@@ -85,12 +80,6 @@ export default class EntComponent extends BaseEnt {
     }
     invariant(typeof doc === 'string', 'Must be a string');
     return doc;
-  }
-
-  async genCompiledBundle(): Promise<string> {
-    const bundle = await this._genExtendedColumnValue('compiled_bundle');
-    invariant(typeof bundle === 'string', 'Must be a string');
-    return bundle;
   }
 
   async genExamples(): Promise<Array<EntExample>> {
@@ -117,7 +106,6 @@ export default class EntComponent extends BaseEnt {
     repositoryID: string,
     filepath: string,
     isNamedExport: boolean,
-    compiledBundle: string,
     reactDoc: string,
   ): Promise<this> {
     const componentID = await this._genCreate(
@@ -127,7 +115,6 @@ export default class EntComponent extends BaseEnt {
         'repository_id': repositoryID,
         'filepath': filepath,
         'is_named_export': isNamedExport,
-        'compiled_bundle': compiledBundle,
         'react_doc': reactDoc,
       },
     );
@@ -147,19 +134,16 @@ export default class EntComponent extends BaseEnt {
 
   async genUpdateComponent(
     reactDoc: string,
-    bundle: string,
   ): Promise<boolean> {
     const res = await this._genMutate(
       {
         'react_doc': reactDoc,
-        'compiled_bundle': bundle,
       },
     );
 
     if (res) {
       // TODO pull this into the mutator once we have object caching
       this._data['react_doc'] = reactDoc;
-      this._data['compiled_bundle'] = bundle;
     }
 
     return res;
@@ -211,7 +195,6 @@ export default class EntComponent extends BaseEnt {
   filepath() { return this.getFilepath(); }
   repository() { return this.genRepository(); }
   isNamedExport() { return this.getIsNamedExport(); }
-  compiledBundleURI() { return this.getCompiledBundleURI(); }
   reactDoc() { return this.genReactDoc(); }
   overrideReactDoc() { return this.genOverrideReactDoc(); }
   examples() { return this.genExamples(); }

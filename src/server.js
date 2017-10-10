@@ -12,7 +12,7 @@ import invariant from 'invariant';
 import 'source-map-support/register';
 
 import envConfig from './envConfig';
-import EntComponent from './entity/EntComponent';
+import EntRepositoryCompilation from './entity/EntRepositoryCompilation';
 import EntWaitlistEmail from './entity/EntWaitlistEmail';
 import {
   connectToMySQL,
@@ -147,16 +147,22 @@ async function main() {
 
     // Business logic
     // TODO refactor this out so EntComponent doesn't have this url cloned
-    app.get('/_componentBundle/:componentID/bundle.js', async (req, res) => {
-      const component =
-        await EntComponent.genNullable(req.vc, req.params.componentID);
-      if (!component) {
-        res.status(404).send('Not found');
-        return;
-      }
-      const bundle = await component.genCompiledBundle();
-      res.type('application/javascript').send(bundle);
-    });
+    app.get(
+      '/_repositoryCompilation/bundle/:compilationID/bundle.js',
+      async (req, res) => {
+        const compilation = await EntRepositoryCompilation.genNullable(
+          req.vc,
+          req.params.compilationID,
+        );
+
+        if (!compilation) {
+          res.status(404).send('Not found');
+          return;
+        }
+        const bundle = await compilation.genCompiledBundle();
+        res.type('application/javascript').send(bundle);
+      },
+    );
 
     // GraphQL
     app.post(

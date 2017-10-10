@@ -10,9 +10,11 @@ export type Message = {
   transformedCode: string,
   component: {
     name: string,
-    compiledBundleURI: string,
   },
   repository: {
+    currentCompilation: {
+      compiledBundleURI: string,
+    },
     externalCSSURI: ?string,
     rootCSS: ?string,
   },

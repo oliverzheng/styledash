@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Relay from 'react-relay/classic';
+import invariant from 'invariant';
 
 import ComponentExample from './ui/ComponentExample';
 import AddExampleCodeMutation from './mutations/AddExampleCodeMutation';
@@ -10,10 +11,12 @@ type PropType = {
   newExampleName: string,
   component: {
     name: string,
-    compiledBundleURI: string,
     repository: {
       externalCSSURI: ?string,
       rootCSS: ?string,
+      currentCompilation: ?{
+        compiledBundleURI: string,
+      },
     },
   },
   onSave: () => any,
@@ -24,6 +27,9 @@ class ComponentNewExampleWithData extends React.Component<PropType> {
   render(): ?React$Element<*> {
     const {component, newExampleName} = this.props;
     const {repository} = component;
+    const {currentCompilation} = repository;
+
+    invariant(currentCompilation, 'Compilation must not be null');
 
     return (
       <ComponentExample
@@ -33,11 +39,11 @@ class ComponentNewExampleWithData extends React.Component<PropType> {
         }
         component={{
           name: component.name,
-          compiledBundleURI: component.compiledBundleURI,
         }}
         repository={{
           externalCSSURI: repository.externalCSSURI,
           rootCSS: repository.rootCSS,
+          currentCompilation: currentCompilation,
         }}
         showRevert={false}
         canSaveInitialCode={true}
@@ -68,10 +74,12 @@ const ComponentNewExampleWithDataContainer = Relay.createContainer(
       component: () => Relay.QL`
         fragment on Component {
           name
-          compiledBundleURI
           repository {
             externalCSSURI
             rootCSS
+            currentCompilation {
+              compiledBundleURI
+            }
           }
           ${AddExampleCodeMutation.getFragment('component')}
         }

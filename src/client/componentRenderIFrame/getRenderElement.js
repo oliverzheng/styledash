@@ -6,15 +6,19 @@ import global from 'global';
 
 export default function getRenderElement(
   componentName: string,
-  component: Class<React.Component<*>>,
+  compiledBundle: {[componentName: string]: Class<React.Component<*>>},
   transformedCode: string,
 ): React$Node {
-  // Make this in the global scope so eval can get it
-  invariant(
-    !global.hasOwnProperty(componentName),
-    'Cannot already have this in global scope',
-  );
-  global[componentName] = component;
+  const componentBundleComponentNames = Object.keys(compiledBundle);
+  componentBundleComponentNames.forEach(compiledBundleComponentName => {
+    // Make this in the global scope so eval can get it
+    invariant(
+      !global.hasOwnProperty(compiledBundleComponentName),
+      'Cannot already have this in global scope',
+    );
+    global[compiledBundleComponentName] =
+      compiledBundle[compiledBundleComponentName];
+  });
   global['React'] = React;
 
   let element;
@@ -23,7 +27,9 @@ export default function getRenderElement(
     element = eval(transformedCode);
   } finally {
     // Reset it
-    delete global[componentName];
+    componentBundleComponentNames.forEach(compiledBundleComponentName => {
+      delete global[compiledBundleComponentName];
+    });
   }
 
   return element;

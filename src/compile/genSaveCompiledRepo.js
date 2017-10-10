@@ -56,7 +56,6 @@ export default async function genSaveCompiledRepo(
         if (existingComponent) {
           await existingComponent.genUpdateComponent(
             JSON.stringify(compiledComponent.doc),
-            compiledComponent.compiledBundle,
           );
         } else {
           newComponent = await EntComponent.genCreate(
@@ -65,7 +64,6 @@ export default async function genSaveCompiledRepo(
             repo.getID(),
             compiledComponent.relativeFilepath,
             compiledComponent.isNamedExport,
-            compiledComponent.compiledBundle,
             JSON.stringify(compiledComponent.doc),
           );
         }
@@ -122,5 +120,6 @@ export default async function genSaveCompiledRepo(
   );
   await deleteComponentPool.start();
 
-  return await EntRepositoryCompilation.genCreate(repo, commitHash);
+  return await
+    EntRepositoryCompilation.genCreate(repo, commitHash, ''/* TODO next commit */);
 }

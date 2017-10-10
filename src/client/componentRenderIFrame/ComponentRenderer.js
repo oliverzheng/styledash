@@ -15,44 +15,48 @@ export type ComponentRendererProps = {
   transformedCode: string,
   component: {
     name: string,
-    compiledBundleURI: string,
   },
   repository: {
     externalCSSURI: ?string,
     rootCSS: ?string,
+    currentCompilation: {
+      compiledBundleURI: string,
+    },
   },
   // eslint-disable-next-line no-use-before-define
   onRender: (renderer: ComponentRenderer) => any,
 };
 
 type StateType = {
-  bundledComponent: ?Class<React.Component<*>>,
+  compiledBundle: ?{[componentName: string]: Class<React.Component<*>>},
 };
 
 export default class ComponentRenderer extends React.Component<ComponentRendererProps, StateType> {
   _root: ?HTMLDivElement;
 
   state = {
-    bundledComponent: null,
+    compiledBundle: null,
   };
 
   componentDidMount(): void {
-    this._loadComponentBundle(this.props.component.compiledBundleURI);
+    this._loadComponentBundle(
+      this.props.repository.currentCompilation.compiledBundleURI,
+    );
   }
 
   componentWillReceiveProps(nextProps: ComponentRendererProps): void {
-    const {compiledBundleURI} = nextProps.component;
+    const {compiledBundleURI} = nextProps.repository.currentCompilation;
     if (
-      compiledBundleURI !== this.props.component.compiledBundleURI
+      compiledBundleURI !== this.props.repository.currentCompilation.compiledBundleURI
     ) {
       this._loadComponentBundle(compiledBundleURI);
     }
   }
 
   _loadComponentBundle(bundleURI: string): void {
-    loadComponentBundle(`${bundleURI}`).then(Component => {
+    loadComponentBundle(`${bundleURI}`).then(compiledBundle => {
       this.setState({
-        bundledComponent: Component,
+        compiledBundle,
       });
     });
   }
@@ -71,14 +75,14 @@ export default class ComponentRenderer extends React.Component<ComponentRenderer
   }
 
   componentDidUpdate() {
-    if (this.state.bundledComponent != null) {
+    if (this.state.compiledBundle != null) {
       this.props.onRender(this);
     }
   }
 
   render(): ?React$Element<*> {
-    const bundledComponent = this.state.bundledComponent;
-    if (!bundledComponent) {
+    const compiledBundle = this.state.compiledBundle;
+    if (!compiledBundle) {
       return null;
     }
 
@@ -102,7 +106,7 @@ export default class ComponentRenderer extends React.Component<ComponentRenderer
         {externalCSSStyle}
         {rootCSSStyle}
         <div className="ComponentRenderer-root" ref={c => this._root = c}>
-          {getRenderElement(component.name, bundledComponent, transformedCode)}
+          {getRenderElement(component.name, compiledBundle, transformedCode)}
         </div>
       </div>
     );

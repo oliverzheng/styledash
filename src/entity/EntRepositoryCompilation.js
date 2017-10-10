@@ -23,6 +23,7 @@ export default class EntRepositoryCompilation extends BaseEnt {
         'added_timestamp',
       ],
       extendedColumnNames: [
+        'compiled_bundle',
       ],
       immutableColumnNames: [
         'id',
@@ -60,6 +61,7 @@ export default class EntRepositoryCompilation extends BaseEnt {
   static async genCreate(
     repo: EntRepository,
     commit: string,
+    compiledBundle: string,
   ): Promise<this> {
     const vc = repo.getViewerContext();
     const id = await this._genCreate(
@@ -67,6 +69,7 @@ export default class EntRepositoryCompilation extends BaseEnt {
       {
         'repository_id': repo.getID(),
         'commit_hash': commit,
+        'compiled_bundle': compiledBundle,
         'added_timestamp': Math.round((new Date()).getTime() / 1000),
       },
     );
@@ -80,6 +83,18 @@ export default class EntRepositoryCompilation extends BaseEnt {
   getCommitHash(): string {
     return this._getStringData('commit_hash');
   }
+
+  async genCompiledBundle(): Promise<string> {
+    const bundle = await this._genExtendedColumnValue('compiled_bundle');
+    invariant(typeof bundle === 'string', 'Must be a string');
+    return bundle;
+  }
+
+  getCompiledBundleURI(): string {
+    return `/_repositoryCompilation/bundle/${this.getID()}/bundle.js`;
+  }
+
+  compiledBundleURI() { return this.getCompiledBundleURI(); }
 }
 
 BaseEnt.registerEnt(EntRepositoryCompilation);

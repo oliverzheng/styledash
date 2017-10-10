@@ -22,7 +22,6 @@ type PropType = {
       externalCSSURI: ?string,
     },
     filepath: string,
-    compiledBundleURI: string,
     reactDoc: string,
     overrideReactDoc: ?string,
     examples: Array<Object>,
@@ -196,7 +195,6 @@ const ComponentPageWithDataContainer = Relay.createContainer(
             externalCSSURI
           }
           filepath
-          compiledBundleURI
           reactDoc
           overrideReactDoc
           examples {

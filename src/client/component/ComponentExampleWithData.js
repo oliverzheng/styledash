@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Relay from 'react-relay/classic';
+import invariant from 'invariant';
 
 import ComponentExample from './ui/ComponentExample';
 import SetExampleCodeMutation from './mutations/SetExampleCodeMutation';
@@ -13,10 +14,12 @@ type PropType = {
     code: string,
     component: {
       name: string,
-      compiledBundleURI: string,
       repository: {
         externalCSSURI: ?string,
         rootCSS: ?string,
+        currentCompilation: ?{
+          compiledBundleURI: string,
+        },
       },
     },
   },
@@ -28,6 +31,9 @@ class ComponentExampleWithData extends React.Component<PropType> {
     const {example} = this.props;
     const {component} = example;
     const {repository} = component;
+    const {currentCompilation} = repository;
+
+    invariant(currentCompilation, 'Compilation must not be null');
 
     return (
       <ComponentExample
@@ -35,11 +41,11 @@ class ComponentExampleWithData extends React.Component<PropType> {
         initialCode={example.code}
         component={{
           name: component.name,
-          compiledBundleURI: component.compiledBundleURI,
         }}
         repository={{
           externalCSSURI: repository.externalCSSURI,
           rootCSS: repository.rootCSS,
+          currentCompilation: currentCompilation,
         }}
         showRevert={true}
         onSave={this._onSave}
@@ -69,10 +75,12 @@ const ComponentExampleWithDataContainer = Relay.createContainer(
           code
           component {
             name
-            compiledBundleURI
             repository {
               externalCSSURI
               rootCSS
+              currentCompilation {
+                compiledBundleURI
+              }
             }
           }
           ${SetExampleCodeMutation.getFragment('example')}

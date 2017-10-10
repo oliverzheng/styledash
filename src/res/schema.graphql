@@ -25,8 +25,17 @@ type Repository implements Node {
   rootCSS: String
   lastUpdatedTimestamp: Int!
 
+  currentCompilation: RepositoryCompilation
+
   componentsCount: Int!
   components: [Component]!
+}
+
+type RepositoryCompilation implements Node {
+  id: ID!
+  commitHash: String!
+  addedTimestamp: Int!
+  compiledBundleURI: String!
 }
 
 type Component implements Node {
@@ -35,7 +44,6 @@ type Component implements Node {
   name: String!
   repository: Repository!
   filepath: String!
-  compiledBundleURI: String!
   reactDoc: String!
   overrideReactDoc: String
   examples: [Example]!
