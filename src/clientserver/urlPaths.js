@@ -14,6 +14,7 @@ export const REPOSITORY_LIST_PATH = '/home';
 export const REPOSITORY_PATH = '/repository';
 export const NEW_REPOSITORY_PATH = '/repository/new';
 export const COMPONENT_PATH = '/component';
+export const ACCOUNT_PATH = '/account';
 export const LOGIN_PATH = '/login';
 export const LOGOUT_PATH = '/logout';
 export const COMPONENT_RENDER_PATH = '/componentRenderIFrame';

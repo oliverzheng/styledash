@@ -18,6 +18,7 @@ import {
   REPOSITORY_PATH,
   NEW_REPOSITORY_PATH,
   COMPONENT_PATH,
+  ACCOUNT_PATH,
   LOGIN_PATH,
   LOGOUT_PATH,
 } from '../clientserver/urlPaths';
@@ -29,6 +30,7 @@ import {
 } from './util/authentication';
 
 import RepositoryListPage from './pages/RepositoryListPage';
+import AccountPage from './pages/AccountPage';
 import LoginPage from './pages/LoginPage';
 import RepositoryPage from './pages/RepositoryPage';
 import RepositorySettingsPage from './pages/RepositorySettingsPage';
@@ -98,6 +100,12 @@ export default class App extends React.Component<*> {
           path={REPOSITORY_LIST_PATH}
           component={RepositoryListPage}
           queries={RepositoryListPage.queries}
+          onEnter={this._requireAuth}
+        />
+        <Route
+          path={ACCOUNT_PATH}
+          component={AccountPage}
+          queries={AccountPage.queries}
           onEnter={this._requireAuth}
         />
         <Route

@@ -11,6 +11,7 @@ import {
 import FullWidthPageContainer from './FullWidthPageContainer';
 import {
   REPOSITORY_LIST_PATH,
+  ACCOUNT_PATH,
   LOGIN_PATH,
   LOGOUT_PATH,
 } from '../../../clientserver/urlPaths';
@@ -53,7 +54,7 @@ export default class PageHeader extends React.Component<*, StateType> {
       links = null;
     } else if (isLoggedIn) {
       links = [(
-        <Link key="account" href="#">Account</Link>
+        <Link key="account" href={ACCOUNT_PATH}>Account</Link>
       ), (
         <Link key="help" href="#">Help</Link>
       ), (
