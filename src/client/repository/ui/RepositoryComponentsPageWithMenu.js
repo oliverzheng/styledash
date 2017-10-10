@@ -4,7 +4,7 @@ import React from 'react';
 import nullthrows from 'nullthrows';
 import classnames from 'classnames';
 
-import groupPaths, { type PathGroup } from '../../util/groupPaths';
+import groupPaths, { type PathGroup } from '../../../util/groupPaths';
 
 import PageWithMenu, { type Section } from '../../pages/ui/PageWithMenu';
 import TextColor from '../../common/ui/TextColor';
