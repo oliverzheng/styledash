@@ -4,7 +4,6 @@ CREATE TABLE `component` (
   `repository_id` bigint(20) unsigned NOT NULL,
   `filepath` varchar(256) NOT NULL,
   `is_named_export` tinyint(1) NOT NULL DEFAULT '0',
-  `compiled_bundle` longtext,
   `react_doc` longtext NOT NULL,
   `override_react_doc` longtext,
   PRIMARY KEY (`id`),
