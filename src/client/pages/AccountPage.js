@@ -7,9 +7,7 @@ import PageHeader from './ui/PageHeader';
 import AccountPageWithData from '../account/AccountPageWithData';
 
 type PropType = {
-  viewer: {
-    user: Object,
-  },
+  viewer: Object,
 };
 
 class AccountPage extends React.Component<PropType> {
@@ -17,7 +15,7 @@ class AccountPage extends React.Component<PropType> {
     return (
       <div>
         <PageHeader />
-        <AccountPageWithData user={this.props.viewer.user} />
+        <AccountPageWithData viewer={this.props.viewer} />
       </div>
     );
   }
@@ -29,9 +27,7 @@ const AccountPageContainer = Relay.createContainer(
     fragments: {
       viewer: () => Relay.QL`
         fragment on Viewer {
-          user {
-            ${AccountPageWithData.getFragment('user')}
-          }
+          ${AccountPageWithData.getFragment('viewer')}
         }
       `,
     },

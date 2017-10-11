@@ -6,8 +6,13 @@ import Relay from 'react-relay/classic';
 import PageWithMenu from '../pages/ui/PageWithMenu';
 
 type PropType = {
-  user: {
-    firstName: string,
+  viewer: {
+    user: {
+      firstName: string,
+    },
+    githubAccess: ?{
+      user: string,
+    },
   },
 };
 
@@ -19,16 +24,29 @@ class AccountPageWithData extends React.Component<PropType> {
         sections={[{
           menuTitle: 'GitHub',
           sectionTitle: 'GitHub',
-          children: (
-            // TODO
-            <div>
-              github
-            </div>
-          ),
+          children: this._renderGitHubSection(),
         }]}
         wide={false}
       />
     );
+  }
+
+  _renderGitHubSection(): React$Element<*> {
+    const {githubAccess} = this.props.viewer;
+
+    if (githubAccess) {
+      return (
+        <div>
+          Connected to GitHub as {githubAccess.user}.
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          Connect to GitHub.
+        </div>
+      );
+    }
   }
 }
 
@@ -36,9 +54,14 @@ const AccountPageWithDataContainer = Relay.createContainer(
   AccountPageWithData,
   {
     fragments: {
-      user: () => Relay.QL`
-        fragment on User {
-          firstName
+      viewer: () => Relay.QL`
+        fragment on Viewer {
+          user {
+            firstName
+          }
+          githubAccess {
+            user
+          }
         }
       `,
     },
