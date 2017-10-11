@@ -5,6 +5,7 @@ import nullthrows from 'nullthrows';
 import ViewerContext from '../entity/vc';
 import EntRepository from '../entity/EntRepository';
 import EntUser from '../entity/EntUser';
+import EntGitHubToken from '../entity/EntGitHubToken';
 
 export default class Viewer {
   _vc: ViewerContext;
@@ -27,4 +28,5 @@ export default class Viewer {
 
   /* TODO (graphql resolver) */
   user() { return this.genUser(); }
+  githubAccess() { return EntGitHubToken.genForViewer(this._vc); }
 }

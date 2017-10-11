@@ -46,6 +46,12 @@ export default class EntGitHubToken extends BaseEnt {
     };
   }
 
+  static async genForViewer(
+    vc: ViewerContext,
+  ): Promise<?this> {
+    return (await this.genWhere(vc, 'user_id', vc.getUserIDX()))[0];
+  }
+
   static async genCreateToken(
     vc: ViewerContext,
     githubUserID: number,
@@ -140,6 +146,10 @@ export default class EntGitHubToken extends BaseEnt {
   getToken(): string {
     return this._getStringData('token');
   }
+
+  // TODO graphql resolvers
+  user() { return this.getGitHubUser(); }
+  hasAllRequiredScope() { return true; /* TODO */ }
 }
 
 BaseEnt.registerEnt(EntGitHubToken);

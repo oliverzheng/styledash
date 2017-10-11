@@ -8,11 +8,11 @@ import invariant from 'invariant';
 
 import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
+import EntGitHubToken from '../entity/EntGitHubToken';
 import EntRepository from '../entity/EntRepository';
 import EntRepositoryCompilation from '../entity/EntRepositoryCompilation';
 import EntComponent from '../entity/EntComponent';
 import EntExample from '../entity/EntExample';
-import EntGitHubToken from '../entity/EntGitHubToken';
 import Viewer from './Viewer';
 import getResourcePath from '../getResourcePath';
 import { genEnqueueRepoCompilation } from '../compile/compileRepoQueue';
@@ -39,6 +39,10 @@ async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
   switch (type) {
     case 'viewer':
       return new Viewer(vc);
+    case 'user':
+      return await EntUser.genNullable(vc, nullthrows(objID));
+    case 'githubAccess':
+      return await EntGitHubToken.genNullable(vc, nullthrows(objID));
     case 'repository':
       return await EntRepository.genNullable(vc, nullthrows(objID));
     case 'repositoryCompilation':
@@ -66,6 +70,9 @@ const root = {
   },
   user: async (args: {userID: string}, context: Context) => {
     return await EntUser.genNullable(context.vc, args.userID);
+  },
+  githubAccess: async (args: {githubTokenID: string}, context: Context) => {
+    return await EntGitHubToken.genNullable(context.vc, args.githubTokenID);
   },
   repository: async (args: {repositoryID: string}, context: Context) => {
     return await EntRepository.genNullable(context.vc, args.repositoryID);

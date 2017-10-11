@@ -5,6 +5,7 @@ interface Node {
 type Viewer implements Node {
   id: ID!
   user: User!
+  githubAccess: GitHubAccess
   repositories: [Repository]!
 }
 
@@ -15,6 +16,12 @@ type User implements Node {
   lastName: String!
   fullName: String!
   email: String!
+}
+
+type GitHubAccess implements Node {
+  id: ID!
+  user: String!
+  hasAllRequiredScope: Boolean!
 }
 
 type Repository implements Node {
