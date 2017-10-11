@@ -127,9 +127,11 @@ type RefreshRepositoryPayload {
 input AddRepositoryInput {
   clientMutationId: String
   name: String!
+  githubUserID: Int!
   githubUser: String!
   githubRepo: String!
   githubToken: String!
+  githubScope: String!
   rootCSS: String
 }
 

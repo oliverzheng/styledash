@@ -20,6 +20,7 @@ export default class EntGitHubToken extends BaseEnt {
       defaultColumnNames: [
         'id',
         'user_id',
+        'github_user_id',
         'github_user',
         'token',
         'scopes',
@@ -30,8 +31,9 @@ export default class EntGitHubToken extends BaseEnt {
       extendedColumnNames: [
       ],
       immutableColumnNames: [
-        'user_id',
         'id',
+        'user_id',
+        'github_user_id',
       ],
       foreignKeys: {
         'user_id': {
@@ -46,20 +48,58 @@ export default class EntGitHubToken extends BaseEnt {
 
   static async genCreateToken(
     vc: ViewerContext,
+    githubUserID: number,
     githubUser: string,
     token: string,
+    scope: string,
   ): Promise<EntGitHubToken> {
     const tokenID = await this._genCreate(
       vc,
       {
         'user_id': vc.getUserIDX(),
+        'github_user_id': githubUserID,
         'github_user': githubUser,
         'token': token,
+        'scopes': scope,
         'added_timestamp': Math.round((new Date()).getTime() / 1000),
         'modified_timestamp': Math.round((new Date()).getTime() / 1000),
       },
     );
+    // TODO add repositoryTokens for all repos the user is a collab of
     return await this.genEnforce(vc, tokenID);
+  }
+
+  static async genSetTokenForUser(
+    vc: ViewerContext,
+    githubUserID: number,
+    githubUser: string,
+    token: string,
+    scope: string,
+  ): Promise<EntGitHubToken> {
+    const existingToken =
+      (await this.genWhere(vc, 'user_id', vc.getUserIDX()))[0];
+
+    if (existingToken && existingToken.getGitHubUserID() === githubUserID) {
+      await existingToken._genMutate(
+        {
+          'github_user': githubUser,
+          'token': token,
+          'scopes': scope,
+        },
+      );
+      // TODO just put this into genMutate :|
+      existingToken._data['github_user'] = githubUser;
+      existingToken._data['token'] = token;
+      existingToken._data['scopes'] = scope;
+      return existingToken;
+
+    } else {
+      if (existingToken) {
+        await existingToken.genDelete();
+      }
+
+      return this.genCreateToken(vc, githubUserID, githubUser, token, scope);
+    }
   }
 
   static async genFindTokenForRepository(
@@ -87,6 +127,10 @@ export default class EntGitHubToken extends BaseEnt {
 
   getUserID(): string {
     return this._getIDData('user_id');
+  }
+
+  getGitHubUserID(): number {
+    return this._getNumberData('github_user_id');
   }
 
   getGitHubUser(): string {

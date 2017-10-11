@@ -14,6 +14,10 @@ let envConfig: {
     port: ?number, // this is only available if we are in the www proc
     cookieSecret: string,
   },
+  github: {
+    clientID: string,
+    clientSecret: string,
+  },
 };
 
 if (process.env.NODE_ENV === 'development') {
@@ -34,7 +38,11 @@ if (process.env.NODE_ENV === 'development') {
     server: {
       port: process.env.PORT,
       cookieSecret: nullthrows(process.env.STYLEDASH_COOKIE_SECRET),
-    }
+    },
+    github: {
+      clientID: nullthrows(process.env.GITHUB_CLIENT_ID),
+      clientSecret: nullthrows(process.env.GITHUB_CLIENT_SECRET),
+    },
   };
 }
 

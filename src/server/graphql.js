@@ -202,9 +202,11 @@ const root = {
     args: {
       input: {
         name: string,
+        githubUserID: number,
         githubUser: string,
         githubRepo: string,
         githubToken: string,
+        githubScope: string,
         rootCSS: ?string,
         clientMutationId: string,
       },
@@ -213,9 +215,11 @@ const root = {
   ) => {
     const {
       name,
+      githubUserID,
       githubUser,
       githubRepo,
       githubToken,
+      githubScope,
       rootCSS,
       clientMutationId,
     } = args.input;
@@ -231,8 +235,10 @@ const root = {
       );
       await EntGitHubToken.genCreateToken(
         context.vc,
+        githubUserID,
         githubUser,
         githubToken,
+        githubScope,
       );
       // TODO token repo management
       return {

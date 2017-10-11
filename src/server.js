@@ -36,6 +36,9 @@ import {
 
   SERVER_WAITLIST_ADD_EMAIL_PATH,
 
+  SERVER_GITHUB_OAUTH_LOGIN_ACCOUNT,
+  SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT,
+
   MAIN_SITE_PATH,
   REPOSITORY_LIST_PATH,
   REPOSITORY_PATH,
@@ -56,6 +59,10 @@ import {
   requireAuth,
   register,
 } from './server/authentication';
+import {
+  githubLoginRedirect,
+  githubCallback,
+} from './server/githubOauth';
 import getClientAssetURLs from './server/getClientAssetURLs';
 import getResourcePath from './getResourcePath';
 import {getClientBuildDir} from './prodCompileConstants';
@@ -100,6 +107,16 @@ async function main() {
     app.post(SERVER_LOGOUT_PATH, logout());
     app.get(SERVER_IS_LOGGED_IN_PATH, isLoggedIn());
     app.post(SERVER_REGISTER_PATH, register());
+
+    // GitHub
+    app.get(
+      SERVER_GITHUB_OAUTH_LOGIN_ACCOUNT,
+      githubLoginRedirect(SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT),
+    );
+    app.get(
+      SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT,
+      githubCallback(SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT, ACCOUNT_PATH),
+    );
 
     if (process.env.NODE_ENV === 'production') {
       app.use('/_static', express.static(getClientBuildDir()));
