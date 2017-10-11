@@ -546,11 +546,14 @@ export default async function genCompileRepo(
   components: Array<ParsedComponent>,
   compiledBundle: string,
 }> {
-  const token = await EntGitHubToken.genTokenForRepository(repo);
-  if (!token) {
+  const entToken = await EntGitHubToken.genFindTokenForRepository(repo);
+  if (!entToken) {
     throw new Error(`No GitHub token available for repo ${repo.getID()}`);
   }
+  const token = entToken.getToken();
 
+  // TODO use the githubRepoID instead of username/repo, which could change if
+  // someone renamed it or transferred it.
   const cloneURL = getGitHubCloneRepoURL(
     nullthrows(repo.getGitHubUsername()),
     nullthrows(repo.getGitHubRepo()),

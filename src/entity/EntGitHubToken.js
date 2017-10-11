@@ -1,5 +1,7 @@
 /** @flow */
 
+import invariant from 'invariant';
+
 import ViewerContext from './vc';
 import BaseEnt, {
   type EntConfig,
@@ -7,6 +9,7 @@ import BaseEnt, {
 } from './BaseEnt';
 import EntRepository from './EntRepository';
 import EntUser from './EntUser';
+import EntGitHubRepositoryToken from './EntGitHubRepositoryToken';
 
 let githubTokenPrivacy;
 
@@ -16,9 +19,6 @@ export default class EntGitHubToken extends BaseEnt {
       tableName: 'github_token',
       defaultColumnNames: [
         'id',
-        // TODO github access is granted for all of a user's repos. how does
-        // this work then?
-        'repository_id',
         'user_id',
         'github_user',
         'token',
@@ -30,15 +30,10 @@ export default class EntGitHubToken extends BaseEnt {
       extendedColumnNames: [
       ],
       immutableColumnNames: [
-        'repository_id',
         'user_id',
         'id',
       ],
       foreignKeys: {
-        'repository_id': {
-          referenceEnt: EntRepository,
-          onDelete: 'cascade',
-        },
         'user_id': {
           referenceEnt: EntUser,
           onDelete: 'cascade',
@@ -49,31 +44,14 @@ export default class EntGitHubToken extends BaseEnt {
     };
   }
 
-  static async genTokenForRepository(
-    repo: EntRepository,
-  ): Promise<?string> {
-    const tokens = await this.genWhere(
-      repo.getViewerContext(),
-      'repository_id',
-      repo.getID(),
-    );
-    // TODO figure out which token is still valid
-    if (tokens.length > 0) {
-      return tokens[0].getToken();
-    }
-    return null;
-  }
-
   static async genCreateToken(
     vc: ViewerContext,
-    repo: EntRepository,
     githubUser: string,
     token: string,
   ): Promise<EntGitHubToken> {
     const tokenID = await this._genCreate(
       vc,
       {
-        'repository_id': repo.getID(),
         'user_id': vc.getUserIDX(),
         'github_user': githubUser,
         'token': token,
@@ -84,8 +62,27 @@ export default class EntGitHubToken extends BaseEnt {
     return await this.genEnforce(vc, tokenID);
   }
 
-  getRepositoryID(): string {
-    return this._getIDData('repository_id');
+  static async genFindTokenForRepository(
+    repo: EntRepository,
+  ): Promise<?this> {
+    const githubRepoID = repo.getGitHubRepoID();
+    invariant(
+      githubRepoID,
+      'Must have a github repo ID to be able to get a github token',
+    );
+
+    const repoTokens = await
+      EntGitHubRepositoryToken.genRepositoryTokensForGitHubRepoID(
+        repo.getViewerContext(),
+        githubRepoID,
+      );
+    // TODO how does token expiration work with this?
+    const firstToken = repoTokens[0];
+    if (!firstToken) {
+      return null;
+    }
+
+    return await firstToken.genGitHubToken();
   }
 
   getUserID(): string {

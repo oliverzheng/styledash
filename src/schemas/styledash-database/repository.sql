@@ -4,6 +4,7 @@ CREATE TABLE `repository` (
   `external_css_url` text CHARACTER SET latin1,
   `root_css` text,
   `last_updated_timestamp` int(11) NOT NULL,
+  `github_repo_id` int(11) DEFAULT NULL,
   `github_username` varchar(100) DEFAULT NULL,
   `github_repo` varchar(100) DEFAULT NULL,
   `github_branch` varchar(100) DEFAULT NULL,

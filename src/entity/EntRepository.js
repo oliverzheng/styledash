@@ -21,6 +21,7 @@ export default class EntRepository extends BaseEnt {
         'external_css_url',
         'root_css',
         'last_updated_timestamp',
+        'github_repo_id',
         'github_username',
         'github_repo',
         'github_branch',
@@ -29,6 +30,7 @@ export default class EntRepository extends BaseEnt {
       ],
       immutableColumnNames: [
         'id',
+        'github_repo_id',
       ],
       typeName: 'repository',
       privacy: repoPrivacy,
@@ -38,6 +40,7 @@ export default class EntRepository extends BaseEnt {
   static async genCreate(
     vc: ViewerContext,
     name: string,
+    githubRepoID: number,
     githubUsername: ?string,
     githubRepo: ?string,
     rootCSS: ?string,
@@ -46,6 +49,7 @@ export default class EntRepository extends BaseEnt {
       vc,
       {
         'name': name,
+        'github_repo_id': githubRepoID,
         'github_username': githubUsername,
         'github_repo': githubRepo,
         'root_css': rootCSS,
@@ -91,6 +95,10 @@ export default class EntRepository extends BaseEnt {
 
   getLastUpdatedTimestamp(): number {
     return this._getNumberData('last_updated_timestamp');
+  }
+
+  getGitHubRepoID(): ?number {
+    return this._getNullableNumberData('github_repo_id');
   }
 
   getGitHubUsername(): ?string {

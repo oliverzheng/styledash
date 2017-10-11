@@ -95,7 +95,7 @@ async function main(): Promise<*> {
     );
 
     printAction('Saving new repo to database...');
-    const repo = await EntRepository.genCreate(vc, repoName, null, null);
+    const repo = await EntRepository.genCreate(vc, repoName, 0, null, null);
     const repoID = repo.getID();
     printActionResult(`Saved as repo #${repoID}.`);
 
