@@ -81,6 +81,13 @@ export default class EntRepository extends BaseEnt {
     );
   }
 
+  static async genFromGitHubRepoID(
+    vc: ViewerContext,
+    githubRepoID: number,
+  ): Promise<Array<this>> {
+    return await this.genWhere(vc, 'github_repo_id', githubRepoID);
+  }
+
   getName(): string {
     return this._getStringData('name');
   }

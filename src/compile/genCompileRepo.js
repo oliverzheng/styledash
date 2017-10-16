@@ -570,12 +570,15 @@ export default async function genCompileRepo(
   await genYarnInstall(repoPath);
 
   const components = parseComponents(repoPath);
-  const compiledBundle = await genCompileParsedComponents(
-    repoPath,
-    packageJSON,
-    components,
-    options,
-  );
+  let compiledBundle = '';
+  if (components.length > 0) {
+    compiledBundle = await genCompileParsedComponents(
+      repoPath,
+      packageJSON,
+      components,
+      options,
+    );
+  }
 
   cleanupCallback();
 

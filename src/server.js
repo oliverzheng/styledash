@@ -39,6 +39,8 @@ import {
   SERVER_GITHUB_OAUTH_LOGIN_ACCOUNT,
   SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT,
 
+  SERVER_GITHUB_WEBHOOK_PATH,
+
   MAIN_SITE_PATH,
   REPOSITORY_LIST_PATH,
   REPOSITORY_PATH,
@@ -58,11 +60,13 @@ import {
   isLoggedIn,
   requireAuth,
   register,
+  grantAllPowerfulScriptViewerContext,
 } from './server/authentication';
 import {
   githubLoginRedirect,
   githubCallback,
 } from './server/githubOauth';
+import githubWebhook from './server/githubWebhook';
 import getClientAssetURLs from './server/getClientAssetURLs';
 import getResourcePath from './getResourcePath';
 import {getClientBuildDir} from './prodCompileConstants';
@@ -103,12 +107,18 @@ async function main() {
 
     // Auth
     app.post(SERVER_LOGIN_PATH, login());
+    app.post(
+      [
+        SERVER_GITHUB_WEBHOOK_PATH,
+      ],
+      grantAllPowerfulScriptViewerContext(),
+    );
     app.all('*', authenticate({ loginPath: SERVER_LOGIN_PATH, loginMethod: 'POST' }));
     app.post(SERVER_LOGOUT_PATH, logout());
     app.get(SERVER_IS_LOGGED_IN_PATH, isLoggedIn());
     app.post(SERVER_REGISTER_PATH, register());
 
-    // GitHub
+    // GitHub OAuth
     app.get(
       SERVER_GITHUB_OAUTH_LOGIN_ACCOUNT,
       githubLoginRedirect(SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT),
@@ -116,6 +126,12 @@ async function main() {
     app.get(
       SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT,
       githubCallback(SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT, ACCOUNT_PATH),
+    );
+
+    // Github webhook
+    app.post(
+      SERVER_GITHUB_WEBHOOK_PATH,
+      githubWebhook(),
     );
 
     if (process.env.NODE_ENV === 'production') {

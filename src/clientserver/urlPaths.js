@@ -14,10 +14,14 @@ export const SERVER_REGISTER_PATH = '/api/register';
 // Main site
 export const SERVER_WAITLIST_ADD_EMAIL_PATH = '/api/waitlist_add_email';
 
-// Github - each is a pair of URLs where the login eventually redirects to the
-// callback.
+// Github OAuth: each is a pair of URLs where the login eventually redirects to
+// the callback.
 export const SERVER_GITHUB_OAUTH_LOGIN_ACCOUNT = '/github/login/account';
 export const SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT = '/github/callback/account';
+
+// Github webhook
+export const SERVER_GITHUB_WEBHOOK_PATH = '/github/webhook';
+
 
 //// Client/server shared
 

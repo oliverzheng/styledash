@@ -46,6 +46,7 @@ function getCookieUserIDFromRequest(req: Object): ?string {
 
 export function initAuth(dbConn: MySQLConnection, queueConn: QueueConnection) {
   const anonymousVC = new ViewerContext(dbConn, queueConn, null);
+  const scriptVC = ViewerContext.getScriptViewerContext(dbConn, queueConn);
 
   passport.use(new LocalStrategy(
     {
@@ -84,7 +85,13 @@ export function initAuth(dbConn: MySQLConnection, queueConn: QueueConnection) {
     },
   ));
 
-  return passport.initialize({ userProperty: 'vc' }); 
+  return [
+    passport.initialize({ userProperty: 'vc' }),
+    (req: Object, res: Object, next: Function) => {
+      req.scriptVC = scriptVC;
+      next();
+    },
+  ];
 }
 
 // Exposing authentication. Only /api/login gets special auth handler;
@@ -124,6 +131,9 @@ export function authenticate(
   const {loginPath, loginMethod} = options;
   return (req: Object, res: Object, next: Function) => {
     if (req.url === loginPath && req.method === loginMethod) {
+      next();
+    } else if (req.vc != null) {
+      // We've granted special VC access to this url
       next();
     } else {
       passport.authenticate('cookie', (err, vc, info) => {
@@ -219,5 +229,12 @@ export function register() {
       // We don't change the login status when registering.
       isLoggedIn: vc.isAuthenticated(),
     });
+  };
+}
+
+export function grantAllPowerfulScriptViewerContext() {
+  return async (req: Object, res: Object, next: Function) => {
+    req.vc = req.scriptVC;
+    next();
   };
 }
