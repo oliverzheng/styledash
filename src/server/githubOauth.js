@@ -4,16 +4,17 @@ import url from 'url';
 import nullthrows from 'nullthrows';
 import jwt from 'jsonwebtoken';
 import invariant from 'invariant';
-import request from 'request-promise-native';
 import GitHubOAuth from 'github-oauth';
 
 import ViewerContext from '../entity/vc';
 import EntGitHubToken from '../entity/EntGitHubToken';
 import envConfig from '../envConfig';
 import {printError} from '../consoleUtil';
-
-const SCOPE = 'repo write:repo_hook';
-const GITHUB_USER_AGENT = 'styledash';
+import {
+  genGitHubRequest,
+  type GitHubResponseTokenScope,
+  GITHUB_SCOPE,
+} from './github';
 
 function getGitHubOauth(
   req: Object,
@@ -28,25 +29,9 @@ function getGitHubOauth(
       host: req.get('host'),
     }),
     callbackURI: callbackURL,
-    scope: SCOPE,
+    scope: GITHUB_SCOPE,
     state,
   });
-}
-
-type GitHubResponseTokenScope = {
-  scope: string,
-};
-
-function transformGitHubRequestToIncludeScope(
-  body,
-  response,
-  resolveWithFullResponse,
-) {
-  const scope = response.headers['x-oauth-scopes'];
-  return {
-    ...body,
-    scope,
-  };
 }
 
 async function genLoggedInGitHubUser(
@@ -55,15 +40,10 @@ async function genLoggedInGitHubUser(
   userID: number,
   user: string,
 }> {
-  const res = await request({
-    url: 'https://api.github.com/user',
-    headers: {
-      'Authorization': 'token ' + accessToken,
-      'User-Agent': GITHUB_USER_AGENT,
-    },
-    json: true,
-    transform: transformGitHubRequestToIncludeScope,
-  });
+  const res = await genGitHubRequest(
+    '/user',
+    accessToken,
+  );
 
   return {
     userID: res.id,
