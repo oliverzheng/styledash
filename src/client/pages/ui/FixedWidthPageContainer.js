@@ -6,14 +6,14 @@ import classnames from 'classnames';
 import './FixedWidthPageContainer.css';
 
 export type FixedWidthPageContainerProps = {
-  wide?: ?boolean,
+  width: 'wide' | 'normal' | 'narrow',
   className?: ?string,
   children?: React$Node,
 };
 
 export default class FixedWidthPageContainer extends React.Component<FixedWidthPageContainerProps> {
   static defaultProps = {
-    wide: false,
+    width: 'normal',
   };
 
   render(): React$Element<*> {
@@ -23,7 +23,7 @@ export default class FixedWidthPageContainer extends React.Component<FixedWidthP
           classnames(
             'FixedWidthPageContainer-root',
             this.props.className,
-            { 'FixedWidthPageContainer-wide': this.props.wide },
+            'FixedWidthPageContainer-width-' + this.props.width,
           )
         }>
         {this.props.children}

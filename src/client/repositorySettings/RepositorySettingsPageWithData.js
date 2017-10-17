@@ -38,7 +38,7 @@ class RepositorySettingsPageWithData extends React.Component<PropType> {
             </div>
           ),
         }]}
-        wide={false}
+        width="normal"
       />
     );
   }

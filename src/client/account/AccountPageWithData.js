@@ -26,7 +26,7 @@ class AccountPageWithData extends React.Component<PropType> {
           sectionTitle: 'GitHub',
           children: this._renderGitHubSection(),
         }]}
-        wide={false}
+        width="normal"
       />
     );
   }

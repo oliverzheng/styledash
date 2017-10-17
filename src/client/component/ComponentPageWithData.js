@@ -102,7 +102,7 @@ class ComponentPageWithData extends React.Component<PropType, StateType> {
           pageTitle={component.name}
           pageTitleAux={aux}
           sections={sections}
-          wide={false}
+          width="normal"
         />
       </div>
     );

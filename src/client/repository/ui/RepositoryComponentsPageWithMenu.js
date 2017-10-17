@@ -53,7 +53,7 @@ export default class RepositoryComponentsPageWithMenu extends React.Component<Pr
           </Button>
         }
         sections={sections}
-        wide={true}
+        width="wide"
       />
     );
   }

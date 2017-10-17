@@ -12,18 +12,18 @@
   position: fixed;
 }
 
-.PageWithMenu-wide .PageWithMenu-menu {
+.PageWithMenu-width-wide .PageWithMenu-menu {
   width: 230px;
 }
 
-.PageWithMenu-wide .PageWithMenu-content {
+.PageWithMenu-width-wide .PageWithMenu-content {
   margin-left: 270px;
 }
 
-.PageWithMenu-narrow .PageWithMenu-menu {
+.PageWithMenu-width-normal .PageWithMenu-menu {
   width: 200px;
 }
 
-.PageWithMenu-narrow .PageWithMenu-content {
+.PageWithMenu-width-normal .PageWithMenu-content {
   margin-left: 240px;
 }
