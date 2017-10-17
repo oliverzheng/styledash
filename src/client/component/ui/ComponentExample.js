@@ -6,7 +6,7 @@ import classnames from 'classnames';
 
 import ComponentRenderIFrame from './ComponentRenderIFrame';
 import CodeEditor from './CodeEditor';
-import Card, { CardSection, CardFooterSection } from '../../common/ui/Card';
+import Card, { CardSection } from '../../common/ui/Card';
 import Spacing from '../../common/ui/Spacing';
 import Button from '../../common/ui/Button';
 import ButtonWithAction from '../../common/ui/ButtonWithAction';
@@ -93,7 +93,7 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
 
     return (
       <Card>
-        <CardSection noPadding={true} className="ComponentExample-render">
+        <CardSection padding={false} className="ComponentExample-render">
           <ComponentRenderIFrame
             ref={c => this._iframe = c}
             title={this.props.exampleID}
@@ -101,7 +101,7 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
             onSerializedElement={this._onSerializedElement}
           />
         </CardSection>
-        <CardFooterSection className="ComponentExample-codeSection">
+        <CardSection className="ComponentExample-codeSection">
           <div
             className={
               classnames('ComponentExample-codeTitle', FontSize.small)
@@ -118,7 +118,7 @@ export default class ComponentExample extends React.Component<PropType, StateTyp
             maxHeight={150}
             ref={c => this._ce = c}
           />
-        </CardFooterSection>
+        </CardSection>
       </Card>
     );
   }

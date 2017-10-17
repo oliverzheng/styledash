@@ -1,7 +1,4 @@
 .RepositoryListCard-card {
   height: 140px;
-}
-
-.RepositoryListCard-footer {
-  text-align: right;
+  padding: 15px;
 }

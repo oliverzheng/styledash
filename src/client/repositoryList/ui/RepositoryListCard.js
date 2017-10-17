@@ -34,7 +34,10 @@ export default class RepositoryListCard extends React.Component<PropType> {
       <LinkCard
         href={`/repository/${id}`}
         className={classnames('RepositoryListCard-card', className)}>
-        <CardSection fillHeight={true}>
+        <CardSection
+          fillHeight={true}
+          border={false}
+          padding={false}>
           <SectionHeader className={Spacing.margin.bottom.n8}>
             <LinkText>
               {name}
@@ -44,7 +47,10 @@ export default class RepositoryListCard extends React.Component<PropType> {
             {pluralize('Component', componentsCount, true)}
           </SubText>
         </CardSection>
-        <CardSection className="RepositoryListCard-footer">
+        <CardSection
+          align="right"
+          border={false}
+          padding={false}>
           <SubText>
             Last updated {relativeDate(lastUpdatedTimestamp * 1000)}
           </SubText>

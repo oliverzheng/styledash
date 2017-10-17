@@ -1,7 +1,6 @@
 .Card-root {
   border: 1px solid #CACACA;
   border-radius: 4px;
-  padding: 15px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -12,27 +11,29 @@
   flex-grow: 0;
 }
 
+.Card-section-hasAlign {
+  display: flex;
+}
+
 .Card-section.Card-section-fillHeight {
   flex-grow: 1;
   overflow: hidden;
 }
 
-.Card-section-footer {
-  padding-top: 15px;
-  margin: 0 -15px -15px -15px;
+.Card-section-align-right {
+  margin-left: auto;
+}
+
+/* Use additive styles instead of noPadding, so callers can specify no padding
+ * and add their own padding */
+.Card-section-padding {
   padding: 10px 15px;
-  border-top: 1px solid #CACACA;
 }
 
-.Card-section-noPadding:first-child {
-  margin-top: -15px;
+.Card-section-border {
+  border-bottom: 1px solid #CACACA;
 }
 
-.Card-section-noPadding {
-  margin-left: -15px;
-  margin-right: -15px;
-}
-
-.Card-section-noPadding:last-child {
-  margin-bottom: -15px;
+.Card-section-border:last-child {
+  border-bottom: 0;
 }

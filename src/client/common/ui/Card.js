@@ -7,20 +7,33 @@ import invariant from 'invariant';
 import './Card.css';
 
 type CardSectionPropType = {
-  fillHeight?: boolean,
-  noPadding?: boolean,
+  fillHeight: boolean,
+  padding: boolean,
+  border: boolean,
+  align: 'left' | 'right',
   className?: ?string,
   children: React$Node,
 };
 
-// TODO add borders
 export class CardSection extends React.Component<CardSectionPropType> {
   static defaultProps = {
     fillHeight: false,
-    noPadding: false,
+    padding: true,
+    border: true,
+    align: 'left',
   };
 
   render(): React$Element<*> {
+    let {children} = this.props;
+    const hasAlign = this.props.align !== 'left';
+    if (hasAlign) {
+      children = (
+        <div className={'Card-section-align-' + this.props.align}>
+          {children}
+        </div>
+      );
+    }
+
     return (
       <div
         className={classnames(
@@ -28,25 +41,12 @@ export class CardSection extends React.Component<CardSectionPropType> {
           this.props.className,
           {
             'Card-section-fillHeight': this.props.fillHeight,
-            'Card-section-noPadding': this.props.noPadding,
+            'Card-section-padding': this.props.padding,
+            'Card-section-border': this.props.border,
+            'Card-section-hasAlign': hasAlign,
           },
         )}>
-        {this.props.children}
-      </div>
-    );
-  }
-}
-
-export class CardFooterSection extends React.Component<*> {
-  render(): React$Element<*> {
-    return (
-      <div
-        className={classnames(
-          'Card-section',
-          'Card-section-footer',
-          this.props.className,
-        )}>
-        {this.props.children}
+        {children}
       </div>
     );
   }
@@ -60,7 +60,7 @@ export default class Card extends React.Component<*> {
     React.Children.forEach(children, child => {
       const isChildCardSection =
         typeof child === 'object' &&
-        (child.type === CardSection || child.type === CardFooterSection);
+        child.type === CardSection;
 
       if (hasCardSection == null) {
         hasCardSection = isChildCardSection;

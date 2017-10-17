@@ -4,7 +4,7 @@ import React from 'react';
 import classnames from 'classnames';
 
 import LinkCard, {LinkText} from '../../common/ui/LinkCard';
-import {CardSection, CardFooterSection} from '../../common/ui/Card';
+import { CardSection } from '../../common/ui/Card';
 import {
   renderSerializedElementWithStyles,
   type SerializedElement,
@@ -28,15 +28,15 @@ export default class RepositoryComponentsCard extends React.Component<Repository
         className={classnames('RepositoryComponentsCard-card', className)}>
         <CardSection
           className="RepositoryComponentsCard-preview"
-          noPadding={true}
+          padding={false}
           fillHeight={true}>
           {this._renderPreview()}
         </CardSection>
-        <CardFooterSection>
+        <CardSection>
           <LinkText onHover={{darken: true, underline: false}}>
             {name}
           </LinkText>
-        </CardFooterSection>
+        </CardSection>
       </LinkCard>
     );
   }
