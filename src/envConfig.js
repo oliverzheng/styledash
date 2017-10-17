@@ -18,6 +18,7 @@ let envConfig: {
     clientID: string,
     clientSecret: string,
   },
+  externalHostOverride: ?string,
 };
 
 if (process.env.NODE_ENV === 'development') {
@@ -43,7 +44,16 @@ if (process.env.NODE_ENV === 'development') {
       clientID: nullthrows(process.env.GITHUB_CLIENT_ID),
       clientSecret: nullthrows(process.env.GITHUB_CLIENT_SECRET),
     },
+    externalHostOverride: process.env.EXTERNAL_HOST_OVERRIDE,
   };
 }
 
 export default envConfig;
+
+export function getExternalHost(req: Object): string {
+  if (envConfig.externalHostOverride) {
+    return envConfig.externalHostOverride;
+  }
+
+  return `${req.protocol}://${req.get('Host')}`;
+}

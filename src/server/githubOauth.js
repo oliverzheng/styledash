@@ -12,7 +12,6 @@ import envConfig from '../envConfig';
 import {printError} from '../consoleUtil';
 import {
   genGitHubRequest,
-  type GitHubResponseTokenScope,
   GITHUB_SCOPE,
 } from './github';
 
@@ -36,7 +35,8 @@ function getGitHubOauth(
 
 async function genLoggedInGitHubUser(
   accessToken: string,
-): Promise<GitHubResponseTokenScope & {
+): Promise<{
+  scope: string,
   userID: number,
   user: string,
 }> {
@@ -46,8 +46,8 @@ async function genLoggedInGitHubUser(
   );
 
   return {
-    userID: res.id,
-    user: res.login,
+    userID: res.body.id,
+    user: res.body.login,
     scope: res.scope,
   };
 }
