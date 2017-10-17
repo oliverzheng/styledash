@@ -12,7 +12,7 @@ import EntGitHubToken from '../entity/EntGitHubToken';
 import envConfig from '../envConfig';
 import {printError} from '../consoleUtil';
 
-const SCOPE = 'repo';
+const SCOPE = 'repo write:repo_hook';
 const GITHUB_USER_AGENT = 'styledash';
 
 function getGitHubOauth(
@@ -149,9 +149,8 @@ export function githubCallback(
       const {
         access_token: accessToken,
         token_type: tokenType,
-        scope,
       } = oauthBody;
-      if (!accessToken || tokenType !== 'bearer' || scope !== SCOPE) {
+      if (!accessToken || tokenType !== 'bearer') {
         printError(
           'Failed to get valid github access token: ' + JSON.stringify(oauthBody)
         );
