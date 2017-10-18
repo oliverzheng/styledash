@@ -1,0 +1,9 @@
+.NewRepositoryWizard-actionButtons {
+  display: flex;
+  justify-content: center;
+}
+
+.NewRepositoryWizard-repositorySelect {
+  min-width: 160px;
+  text-align: left;
+}

@@ -1,0 +1,37 @@
+body /* override .Button */ .Select-root-isOpen {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.Select-dropdown {
+  box-sizing: border-box;
+  background: #FFF;
+  top: 100%;
+  left: -1px;
+  right: -1px;
+  max-height: 160px;
+  overflow: auto;
+  border: 1px solid #CACACA;
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  text-align: left;
+  padding: 5px 0;
+}
+
+.Select-root:hover > .Select-dropdown {
+  border-color: #B1B1B1;
+}
+
+.Select-Option {
+  font-size: 14px;
+  padding: 3px 9px;
+}
+
+.Select-Option:hover {
+  cursor: pointer;
+  color: #000;
+}
+
+.Select-Option-checkmark {
+  float: right;
+}

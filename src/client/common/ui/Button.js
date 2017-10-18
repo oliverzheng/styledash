@@ -16,6 +16,7 @@ export type ButtonProps = {
   disabled?: boolean,
   glyph?: ?GlyphType,
   purpose?: 'primary' | 'secondary',
+  glyphPlacement?: 'left' | 'right',
 
   className?: ?string,
   children?: ?React$Node,
@@ -28,6 +29,7 @@ export default class Button extends React.Component<ButtonProps> {
     disabled: false,
     glyph: null,
     purpose: 'primary',
+    glyphPlacement: 'left',
   };
 
   render(): React$Node {
@@ -37,6 +39,7 @@ export default class Button extends React.Component<ButtonProps> {
       disabled,
       glyph,
       purpose,
+      glyphPlacement,
       className,
       children,
     } = this.props;
@@ -59,8 +62,19 @@ export default class Button extends React.Component<ButtonProps> {
 
     let icon = null;
     if (glyph) {
+      const isIconLeft = glyphPlacement === 'left';
       icon = (
-        <Icon glyph={glyph} size={18} className="Button-icon" />
+        <Icon
+          glyph={glyph}
+          size={18}
+          className={classnames(
+            'Button-icon',
+            {
+              'Button-icon-left': isIconLeft,
+              'Button-icon-right': !isIconLeft,
+            },
+          )}
+        />
       );
     }
 

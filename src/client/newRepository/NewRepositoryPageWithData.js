@@ -6,50 +6,52 @@ import {
   browserHistory,
 } from 'react-router';
 
-import CardWizard from '../common/ui/CardWizard';
-import PageTitle from '../pages/ui/PageTitle';
-import FixedWidthPageContainer from '../pages/ui/FixedWidthPageContainer';
-import Spacing from '../common/ui/Spacing';
-import InputField from '../common/ui/InputField';
 import AddRepositoryMutation from '../newRepository/mutations/AddRepositoryMutation';
+import NewRepositoryWizard from './ui/NewRepositoryWizard';
 
 type PropType = {
   viewer: {
+    githubAccess: ?{
+      user: string,
+    },
   },
   relay: Object,
 };
 
 class NewRepositoryPageWithData extends React.Component<PropType> {
   render(): React$Node {
+    const {githubAccess} = this.props.viewer;
+
+    let github = null;
+    if (githubAccess) {
+      github = {
+        username: githubAccess.user,
+        repositories: [{
+          repoID: 1,
+          name: 'derp',
+        }, {
+          repoID: 2,
+          name: 'herp',
+        }, {
+          repoID: 3,
+          name: 'nerp',
+        }, {
+          repoID: 4,
+          name: 'berp',
+        }, {
+          repoID: 5,
+          name: 'berp',
+        }, {
+          repoID: 6,
+          name: 'berp',
+        }, {
+          repoID: 7,
+          name: 'berp',
+        }],
+      };
+    }
     return (
-      <FixedWidthPageContainer width="narrow">
-        <PageTitle className={Spacing.margin.bottom.n36}>
-          Add New Repository
-        </PageTitle>
-        <CardWizard
-          pages={[{
-            name: 'Select Repository',
-            content: (
-              <div>
-                <InputField ref="name" placeholder="Name" /><br />
-                <InputField ref="githubUser" placeholder="GitHub Username" /><br />
-                <InputField ref="githubRepo" placeholder="GitHub Repo" /><br />
-                <InputField ref="githubToken" placeholder="GitHub Token" /><br />
-                RootCSS: <br />
-                <textarea ref="rootCSS" /><br />
-              </div>
-            ),
-            canGoToNextPage: true,
-          }, {
-            name: 'Edit Details',
-            content: (
-              <div>Edit stuff</div>
-            ),
-            canGoToNextPage: true,
-          }]}
-          onComplete={() => {}}
-        />
-      </FixedWidthPageContainer>
+      <NewRepositoryWizard github={github} />
     );
   }
 
@@ -95,7 +97,7 @@ const NewRepositoryPageWithDataContainer = Relay.createContainer(
       viewer: () => Relay.QL`
         fragment on Viewer {
           githubAccess {
-            id
+            user
           }
         }
       `,

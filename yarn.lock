@@ -6200,6 +6200,12 @@ react-error-overlay@^1.0.10:
     settle-promise "1.0.0"
     source-map "0.5.6"
 
+react-portal@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-portal/-/react-portal-3.1.0.tgz#865c44fb72a1da106c649206936559ce891ee899"
+  dependencies:
+    prop-types "^15.5.8"
+
 react-relay@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/react-relay/-/react-relay-1.2.0.tgz#82ade555f787d6309eacb1fac0c14c3b0c61c4c5"

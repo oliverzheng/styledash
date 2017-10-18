@@ -39,10 +39,18 @@
 }
 
 .Button-root .Button-icon {
-  margin-right: 8px;
   position: relative;
   top: 5px;
   line-height: 0;
+}
+
+.Button-icon-left {
+  margin-right: 8px;
+}
+
+.Button-icon-right {
+  margin-left: 6px;
+  float: right;
 }
 
 .Button-root:hover .Button-icon > svg {
