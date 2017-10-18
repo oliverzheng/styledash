@@ -45,7 +45,7 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
           pages={[{
             name: 'Select Repository',
             content: this._renderFirstPage(),
-            canGoToNextPage: true,
+            canGoToNextPage: this.state.selectedGitHubRepoID != null,
           }, {
             name: 'Edit Details',
             content: this._renderSecondPage(),
@@ -117,7 +117,12 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
           Connect to your GitHub account and select a repository to get started.
         </Paragraph>
 
-        <div className="NewRepositoryWizard-actionButtons">
+        <div
+          className={classnames(
+            Spacing.margin.top.n32,
+            Spacing.margin.bottom.n24,
+            'NewRepositoryWizard-actionButtons',
+          )}>
           {connectButton}
           {selectRepoButton}
         </div>

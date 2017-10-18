@@ -22,6 +22,14 @@ type GitHubAccess implements Node {
   id: ID!
   user: String!
   hasAllRequiredScope: Boolean!
+  githubRepos: [GitHubRepo]!
+}
+
+type GitHubRepo implements Node {
+  id: ID!
+  repoID: Int!
+  repoOwner: String!
+  repoName: String!
 }
 
 type Repository implements Node {

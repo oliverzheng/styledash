@@ -13,6 +13,11 @@ type PropType = {
   viewer: {
     githubAccess: ?{
       user: string,
+      githubRepos: Array<{
+        repoID: number,
+        repoOwner: string,
+        repoName: string,
+      }>,
     },
   },
   relay: Object,
@@ -26,28 +31,14 @@ class NewRepositoryPageWithData extends React.Component<PropType> {
     if (githubAccess) {
       github = {
         username: githubAccess.user,
-        repositories: [{
-          repoID: 1,
-          name: 'derp',
-        }, {
-          repoID: 2,
-          name: 'herp',
-        }, {
-          repoID: 3,
-          name: 'nerp',
-        }, {
-          repoID: 4,
-          name: 'berp',
-        }, {
-          repoID: 5,
-          name: 'berp',
-        }, {
-          repoID: 6,
-          name: 'berp',
-        }, {
-          repoID: 7,
-          name: 'berp',
-        }],
+        repositories: githubAccess.githubRepos.map(
+          r => ({
+            repoID: r.repoID,
+            name: r.repoOwner === githubAccess.user
+              ? r.repoName
+              : `${r.repoOwner}/${r.repoName}`,
+          }),
+        ),
       };
     }
     return (
@@ -98,6 +89,11 @@ const NewRepositoryPageWithDataContainer = Relay.createContainer(
         fragment on Viewer {
           githubAccess {
             user
+            githubRepos {
+              repoID
+              repoOwner
+              repoName
+            }
           }
         }
       `,

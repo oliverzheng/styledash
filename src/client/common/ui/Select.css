@@ -9,7 +9,7 @@ body /* override .Button */ .Select-root-isOpen {
   top: 100%;
   left: -1px;
   right: -1px;
-  max-height: 160px;
+  max-height: 220px;
   overflow: auto;
   border: 1px solid #CACACA;
   border-top: 0;
@@ -24,7 +24,7 @@ body /* override .Button */ .Select-root-isOpen {
 
 .Select-Option {
   font-size: 14px;
-  padding: 3px 9px;
+  padding: 5px 9px;
 }
 
 .Select-Option:hover {

@@ -45,9 +45,12 @@ async function genLoggedInGitHubUser(
     accessToken,
   );
 
+  const {body} = res;
+  invariant(!Array.isArray(body), 'Must be object');
+
   return {
-    userID: res.body.id,
-    user: res.body.login,
+    userID: body.id,
+    user: body.login,
     scope: res.scope,
   };
 }

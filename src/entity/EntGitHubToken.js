@@ -10,6 +10,7 @@ import BaseEnt, {
 import EntRepository from './EntRepository';
 import EntUser from './EntUser';
 import EntGitHubRepositoryToken from './EntGitHubRepositoryToken';
+import { genGitHubUserRepos } from '../server/github';
 
 let githubTokenPrivacy;
 
@@ -150,6 +151,7 @@ export default class EntGitHubToken extends BaseEnt {
   // TODO graphql resolvers
   user() { return this.getGitHubUser(); }
   hasAllRequiredScope() { return true; /* TODO */ }
+  githubRepos() { return genGitHubUserRepos(this.getToken()); }
 }
 
 BaseEnt.registerEnt(EntGitHubToken);
