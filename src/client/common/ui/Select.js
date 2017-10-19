@@ -160,9 +160,6 @@ export default class Select extends React.Component<SelectProps, SelectState> {
     });
   }
 
-  // TODO need to upgrade react-portal. This is currently a bug, where clicking
-  // on the select button after opening won't close it.
-  // See https://github.com/tajo/react-portal/pull/170
   _isElementOutside = (element: HTMLElement) => {
     const buttonEl = ReactDOM.findDOMNode(nullthrows(this._button));
     return !nullthrows(buttonEl).contains(element);
