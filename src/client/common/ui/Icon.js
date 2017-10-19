@@ -12,6 +12,7 @@ import chevronDown from '../icons/chevron_down.svg';
 import gear from '../icons/gear.svg';
 import github from '../icons/github.svg';
 import pencil from '../icons/pencil.svg';
+import plus from '../icons/plus.svg';
 import save from '../icons/save.svg';
 
 import './Icon.css';
@@ -24,6 +25,7 @@ export type GlyphType =
   'gear' |
   'github' |
   'pencil' |
+  'plus' |
   'save';
 
 type IconSize = 18;
@@ -101,6 +103,8 @@ export default class Icon extends React.Component<PropType> {
         return github;
       case 'pencil':
         return pencil;
+      case 'plus':
+        return plus;
       case 'save':
         return save;
       default:

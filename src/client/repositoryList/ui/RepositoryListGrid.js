@@ -13,15 +13,17 @@ type PropType = {
     componentsCount: number,
     lastUpdatedTimestamp: number,
   }>,
+  className?: ?string,
 };
 
 const CARD_WIDTH = 250;
 
 export default class RepositoryListGrid extends React.Component<PropType> {
   render(): React$Element<*> {
-    const {repositories} = this.props;
+    const {repositories, className} = this.props;
     return (
       <LayoutGrid
+        className={className}
         columnCount={3}
         sizing={{
           itemSize: CARD_WIDTH,
