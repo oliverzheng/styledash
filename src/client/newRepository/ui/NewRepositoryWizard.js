@@ -29,6 +29,13 @@ type PropType = {
     username: string,
     repositories: Array<Repo>,
   },
+  addRepo: (
+    name: string,
+    repoID: number,
+    repoOwner: string,
+    repoName: string,
+    rootCSS: ?string,
+  ) => void,
 };
 
 type StateType = {
@@ -239,8 +246,12 @@ body {
     invariant(selectedGitHubRepoID != null, 'Should have a repoID now');
     const repo = nullthrows(this._getGitHubRepoByID(selectedGitHubRepoID));
 
-    console.log('repo', repo.repoName);
-    console.log('name', this.state.repoName);
-    console.log('css', this.state.css);
+    this.props.addRepo(
+      nullthrows(this.state.repoName),
+      repo.repoID,
+      repo.repoOwner,
+      repo.repoName,
+      this.state.css,
+    );
   }
 }

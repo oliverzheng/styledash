@@ -4,6 +4,7 @@ import React from 'react';
 import classnames from 'classnames';
 
 import Button from './Button';
+import ButtonWithAction from './ButtonWithAction';
 import Card, { CardSection } from './Card';
 import Spacing from './Spacing';
 
@@ -46,6 +47,8 @@ export default class CardWizard extends React.Component<PropType, StateType> {
       );
     }
 
+    const isLastPage = this.state.pageIndex === pages.length - 1;
+    const ButtonClass = isLastPage ? ButtonWithAction : Button;
     return (
       <Card>
         {this._renderMenu()}
@@ -54,15 +57,11 @@ export default class CardWizard extends React.Component<PropType, StateType> {
         </CardSection>
         <CardSection align="right" className="CardWizard-section">
           {prevButton}
-          <Button
+          <ButtonClass
             disabled={!currentPage.canGoToNextPage}
             onClick={this._next}>
-            {
-              (this.state.pageIndex === pages.length - 1)
-                ? 'Complete'
-                : 'Next'
-            }
-          </Button>
+            { isLastPage ? 'Complete' : 'Next' }
+          </ButtonClass>
         </CardSection>
       </Card>
     );

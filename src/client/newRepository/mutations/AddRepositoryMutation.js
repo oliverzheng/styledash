@@ -18,9 +18,9 @@ export default class AddRepositoryMutation extends Relay.Mutation {
   getVariables() {
     return {
       name: this.props.name,
-      githubUser: this.props.githubUser,
-      githubRepo: this.props.githubRepo,
-      githubToken: this.props.githubToken,
+      githubRepoID: this.props.githubRepoID,
+      githubRepoOwner: this.props.githubRepoOwner,
+      githubRepoName: this.props.githubRepoName,
       rootCSS: this.props.rootCSS,
     };
   }

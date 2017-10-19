@@ -16,6 +16,7 @@ import EntExample from '../entity/EntExample';
 import Viewer from './Viewer';
 import getResourcePath from '../getResourcePath';
 import { genEnqueueRepoCompilation } from '../compile/compileRepoQueue';
+import genAddRepository from './genAddRepository';
 
 const schema = buildSchema(
   fs.readFileSync(getResourcePath('schema.graphql')).toString()
@@ -57,6 +58,7 @@ async function resolveNode(vc: ViewerContext, id: string): Promise<?Object> {
 }
 
 type Context = {
+  req: Object,
   vc: ViewerContext,
 };
 
@@ -209,11 +211,9 @@ const root = {
     args: {
       input: {
         name: string,
-        githubUserID: number,
-        githubUser: string,
-        githubRepo: string,
-        githubToken: string,
-        githubScope: string,
+        githubRepoID: number,
+        githubRepoOwner: string,
+        githubRepoName: string,
         rootCSS: ?string,
         clientMutationId: string,
       },
@@ -222,32 +222,24 @@ const root = {
   ) => {
     const {
       name,
-      githubUserID,
-      githubUser,
-      githubRepo,
-      githubToken,
-      githubScope,
+      githubRepoID,
+      githubRepoOwner,
+      githubRepoName,
       rootCSS,
       clientMutationId,
     } = args.input;
 
     try {
-      const repo = await EntRepository.genCreate(
+      const repo = await genAddRepository(
         context.vc,
+        context.req,
         name,
-        0, // TODO
-        githubUser,
-        githubRepo,
+        githubRepoID,
+        githubRepoOwner,
+        githubRepoName,
         rootCSS,
       );
-      await EntGitHubToken.genCreateToken(
-        context.vc,
-        githubUserID,
-        githubUser,
-        githubToken,
-        githubScope,
-      );
-      // TODO token repo management
+
       return {
         clientMutationId,
         repository: repo,
@@ -271,6 +263,7 @@ export function graphqlAPI() {
   return graphqlHTTP((req, res) => ({
     ...graphQLHandlerOpts,
     context: {
+      req,
       vc: req.vc,
     },
     graphiql: false,
@@ -281,6 +274,7 @@ export function graphiql() {
   return graphqlHTTP((req, res) => ({
     ...graphQLHandlerOpts,
     context: {
+      req,
       vc: req.vc,
     },
     graphiql: true,

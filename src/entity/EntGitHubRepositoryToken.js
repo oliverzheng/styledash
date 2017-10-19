@@ -77,6 +77,20 @@ export default class EntGitHubRepositoryToken extends BaseEnt {
       githubRepoID,
     );
   }
+
+  static async genCreate(
+    githubRepoID: number,
+    token: EntGitHubToken,
+  ): Promise<this> {
+    const id = await this._genCreate(
+      token.getViewerContext(),
+      {
+        'github_repo_id': githubRepoID,
+        'github_token_id': token.getID(),
+      },
+    );
+    return await this.genEnforce(token.getViewerContext(), id);
+  }
 }
 
 BaseEnt.registerEnt(EntGitHubRepositoryToken);

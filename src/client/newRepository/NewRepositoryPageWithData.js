@@ -35,28 +35,23 @@ class NewRepositoryPageWithData extends React.Component<PropType> {
       };
     }
     return (
-      <NewRepositoryWizard github={github} />
+      <NewRepositoryWizard github={github} addRepo={this._addRepo} />
     );
   }
 
-  _addRepo = () => {
-    const name = this.refs.name.getElement().value;
-    const githubUser = this.refs.githubUser.getElement().value;
-    const githubRepo = this.refs.githubRepo.getElement().value;
-    const githubToken = this.refs.githubToken.getElement().value;
-    const rootCSS = this.refs.rootCSS.value;
-
-    if (!name || !githubUser || !githubRepo || !githubToken) {
-      this.refs.addButton.resetClick();
-      return;
-    }
-
+  _addRepo = (
+    name: string,
+    repoID: number,
+    repoOwner: string,
+    repoName: string,
+    rootCSS: ?string,
+  ) => {
     this.props.relay.commitUpdate(
       new AddRepositoryMutation({
         name,
-        githubUser,
-        githubRepo,
-        githubToken,
+        githubRepoID: repoID,
+        githubRepoOwner: repoOwner,
+        githubRepoName: repoName,
         rootCSS,
       }),
       {
