@@ -2,7 +2,9 @@
 
 import React from 'react';
 import classnames from 'classnames';
+import titleCase from 'title-case';
 import invariant from 'invariant';
+import nullthrows from 'nullthrows';
 
 import CardWizard from '../../common/ui/CardWizard';
 import PageTitle from '../../pages/ui/PageTitle';
@@ -10,27 +12,36 @@ import FixedWidthPageContainer from '../../pages/ui/FixedWidthPageContainer';
 import Spacing from '../../common/ui/Spacing';
 import Paragraph from '../../common/ui/Paragraph';
 import Button from '../../common/ui/Button';
+import InputField from '../../common/ui/InputField';
+import Textarea from '../../common/ui/Textarea';
 import Select, { Option } from '../../common/ui/Select';
 
 import './NewRepositoryWizard.css';
 
+type Repo = {
+  repoID: number,
+  repoOwner: string,
+  repoName: string,
+};
+
 type PropType = {
   github: ?{
     username: string,
-    repositories: Array<{
-      repoID: number,
-      name: string,
-    }>,
+    repositories: Array<Repo>,
   },
 };
 
 type StateType = {
   selectedGitHubRepoID: ?number,
+  repoName: ?string,
+  css: ?string,
 };
 
 export default class NewRepositoryWizard extends React.Component<PropType, StateType> {
   state = {
     selectedGitHubRepoID: null,
+    repoName: null,
+    css: null,
   };
 
   render(): React$Node {
@@ -44,20 +55,21 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
         <CardWizard
           pages={[{
             name: 'Select Repository',
-            content: this._renderFirstPage(),
+            renderContent: this._renderFirstPage,
             canGoToNextPage: this.state.selectedGitHubRepoID != null,
           }, {
             name: 'Edit Details',
-            content: this._renderSecondPage(),
-            canGoToNextPage: true,
+            renderContent: this._renderSecondPage,
+            onEnter: this._setDefaultRepoName,
+            canGoToNextPage: !!this.state.repoName,
           }]}
-          onComplete={() => {}}
+          onComplete={this._onComplete}
         />
       </FixedWidthPageContainer>
     );
   }
 
-  _renderFirstPage() {
+  _renderFirstPage = () => {
     const {github} = this.props;
 
     let connectButton;
@@ -82,7 +94,11 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
                 key={repo.repoID}
                 value={repo.repoID}
                 selected={repo.repoID === this.state.selectedGitHubRepoID}>
-                {repo.name}
+                {
+                  repo.repoOwner === github.username
+                    ? repo.repoName
+                    : `${repo.repoOwner}/${repo.repoName}`
+                }
               </Option>
             )
           }
@@ -121,7 +137,7 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
           className={classnames(
             Spacing.margin.top.n32,
             Spacing.margin.bottom.n24,
-            'NewRepositoryWizard-actionButtons',
+            'NewRepositoryWizard-userInput',
           )}>
           {connectButton}
           {selectRepoButton}
@@ -137,7 +153,94 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
     });
   }
 
-  _renderSecondPage() {
-    return <div>Edit stuff</div>;
+  _getGitHubRepoByID(repoID: number): ?Repo {
+    const {github} = this.props;
+    if (!github) {
+      return null;
+    }
+
+    return nullthrows(github.repositories.filter(r => r.repoID === repoID)[0]);
+  }
+
+  _renderSecondPage = () => {
+    return (
+      <div
+        className={
+          classnames(Spacing.padding.horiz.n4, Spacing.padding.vert.n8)
+        }>
+        <div className={Spacing.margin.bottom.n32}>
+          <Paragraph>
+            Select a name for the repo on Styledash.
+          </Paragraph>
+          <div className="NewRepositoryWizard-userInput">
+            <InputField
+              defaultValue={this.state.repoName}
+              placeholder="Name on Styledash"
+              onChange={this._onRepoNameChange}
+            />
+          </div>
+        </div>
+        <div className={Spacing.margin.bottom.n32}>
+          <Paragraph>
+            Optionally add any global CSS required for all components to render
+            correctly, such as fonts, colors, backgrounds, etc. This is usually
+            what's in the <code>body</code> selector.
+          </Paragraph>
+          <div className="NewRepositoryWizard-userInput">
+            <Textarea
+              className="NewRepositoryWizard-textarea"
+              placeholder={
+              `
+@import url(http://fontcss)
+body {
+  color: #CCC;
+  font-family: 'Special Font';
+}
+              `.trim()
+              }
+              code
+              onChange={this._onCSSChange}
+            />
+          </div>
+        </div>
+        <div className={Spacing.margin.bottom.n12}>
+          <Paragraph>
+            You'll be able to edit these in the settings later too.
+          </Paragraph>
+        </div>
+      </div>
+    );
+  }
+
+  _setDefaultRepoName = () => {
+    const {selectedGitHubRepoID} = this.state;
+    invariant(selectedGitHubRepoID != null, 'Should have a repoID now');
+
+    const repo = nullthrows(this._getGitHubRepoByID(selectedGitHubRepoID));
+    this.setState({
+      repoName: titleCase(repo.repoName),
+    });
+  }
+
+  _onRepoNameChange = (e: SyntheticInputEvent<*>) => {
+    this.setState({
+      repoName: e.target.value,
+    });
+  }
+
+  _onCSSChange = (e: SyntheticInputEvent<*>) => {
+    this.setState({
+      css: e.target.value,
+    });
+  }
+
+  _onComplete = () => {
+    const {selectedGitHubRepoID} = this.state;
+    invariant(selectedGitHubRepoID != null, 'Should have a repoID now');
+    const repo = nullthrows(this._getGitHubRepoByID(selectedGitHubRepoID));
+
+    console.log('repo', repo.repoName);
+    console.log('name', this.state.repoName);
+    console.log('css', this.state.css);
   }
 }

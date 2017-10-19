@@ -95,6 +95,7 @@
     "style-loader": "0.18.2",
     "sw-precache-webpack-plugin": "0.11.4",
     "throttle-debounce": "^1.0.1",
+    "title-case": "^2.1.1",
     "tmp": "^0.0.33",
     "url": "^0.11.0",
     "url-loader": "0.5.9",

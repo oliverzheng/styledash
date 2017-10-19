@@ -1,4 +1,4 @@
-.NewRepositoryWizard-actionButtons {
+.NewRepositoryWizard-userInput {
   display: flex;
   justify-content: center;
 }
@@ -6,4 +6,9 @@
 .NewRepositoryWizard-repositorySelect {
   min-width: 200px;
   text-align: left;
+}
+
+.NewRepositoryWizard-textarea {
+  width: 300px;
+  height: 115px;
 }

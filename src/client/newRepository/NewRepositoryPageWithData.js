@@ -31,14 +31,7 @@ class NewRepositoryPageWithData extends React.Component<PropType> {
     if (githubAccess) {
       github = {
         username: githubAccess.user,
-        repositories: githubAccess.githubRepos.map(
-          r => ({
-            repoID: r.repoID,
-            name: r.repoOwner === githubAccess.user
-              ? r.repoName
-              : `${r.repoOwner}/${r.repoName}`,
-          }),
-        ),
+        repositories: githubAccess.githubRepos,
       };
     }
     return (

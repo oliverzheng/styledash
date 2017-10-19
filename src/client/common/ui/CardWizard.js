@@ -12,7 +12,8 @@ import './CardWizard.css';
 type PropType = {
   pages: Array<{
     name: string,
-    content: React$Node,
+    renderContent: () => React$Node,
+    onEnter?: () => void,
     canGoToNextPage: boolean,
   }>,
   onComplete: () => any,
@@ -49,7 +50,7 @@ export default class CardWizard extends React.Component<PropType, StateType> {
       <Card>
         {this._renderMenu()}
         <CardSection className="CardWizard-section">
-          {currentPage.content}
+          {currentPage.renderContent()}
         </CardSection>
         <CardSection align="right" className="CardWizard-section">
           {prevButton}
@@ -98,17 +99,37 @@ export default class CardWizard extends React.Component<PropType, StateType> {
   }
 
   _next = () => {
+    if (this.state.pageIndex === this.props.pages.length - 1) {
+      const {onComplete} = this.props;
+      if (onComplete) {
+        onComplete();
+      }
+      return;
+    }
+
+    const newPageIndex =
+      Math.min(this.props.pages.length - 1, this.state.pageIndex + 1);
+    const {onEnter} = this.props.pages[newPageIndex];
+    if (onEnter) {
+      onEnter();
+    }
+
     this.setState({
-      pageIndex:
-        Math.min(this.props.pages.length - 1, this.state.pageIndex + 1),
+      pageIndex: newPageIndex,
       furthestCompletedPageIndex:
         Math.max(this.state.furthestCompletedPageIndex, this.state.pageIndex + 1),
     });
   }
 
   _prev = () => {
+    const newPageIndex = Math.max(0, this.state.pageIndex - 1);
+    const {onEnter} = this.props.pages[newPageIndex];
+    if (onEnter) {
+      onEnter();
+    }
+
     this.setState({
-      pageIndex: Math.max(0, this.state.pageIndex - 1),
+      pageIndex: newPageIndex,
     });
   }
 }
