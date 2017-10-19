@@ -17,6 +17,7 @@ import Viewer from './Viewer';
 import getResourcePath from '../getResourcePath';
 import { genEnqueueRepoCompilation } from '../compile/compileRepoQueue';
 import genAddRepository from './genAddRepository';
+import genDeleteRepository from './genDeleteRepository';
 
 const schema = buildSchema(
   fs.readFileSync(getResourcePath('schema.graphql')).toString()
@@ -249,6 +250,37 @@ const root = {
       return {
         clientMutationId,
         repository: null,
+      };
+    }
+  },
+
+  deleteRepository: async (
+    args: {
+      input: {
+        repositoryID: string,
+        clientMutationId: string,
+      },
+    },
+    context: Context,
+  ) => {
+    const {
+      repositoryID,
+      clientMutationId,
+    } = args.input;
+
+    try {
+      const repo = await EntRepository.genEnforce(context.vc, repositoryID);
+      await genDeleteRepository(repo);
+
+      return {
+        clientMutationId,
+        viewer: new Viewer(context.vc),
+      };
+    }
+    catch (err) {
+      return {
+        clientMutationId,
+        viewer: new Viewer(context.vc),
       };
     }
   },

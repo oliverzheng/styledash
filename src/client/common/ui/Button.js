@@ -15,7 +15,7 @@ export type ButtonProps = {
   onClick?: ?(() => any),
   disabled?: boolean,
   glyph?: ?GlyphType,
-  purpose?: 'primary' | 'secondary',
+  purpose?: 'primary' | 'secondary' | 'warning',
   glyphPlacement?: 'left' | 'right',
 
   className?: ?string,
@@ -46,13 +46,15 @@ export default class Button extends React.Component<ButtonProps> {
 
     const isPrimary = purpose === 'primary';
     const isSecondary = purpose === 'secondary';
+    const isWarning = purpose === 'warning';
     const forwardProps = {
       className: classnames(
         'Button-root',
         {
           'Button-disabled': disabled,
-          'Button-primary': isPrimary,
+          'Button-primary': isPrimary || isWarning,
           'Button-secondary': isSecondary,
+          'Button-warning': isWarning,
         },
         TextColor.normal,
         className,

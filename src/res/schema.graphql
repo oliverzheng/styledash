@@ -153,6 +153,15 @@ type AddRepositoryPayload {
   repository: Repository
 }
 
+input DeleteRepositoryInput {
+  clientMutationId: String
+  repositoryID: ID!
+}
+
+type DeleteRepositoryPayload {
+  clientMutationId: String
+  viewer: Viewer!
+}
 
 type Mutation {
   overrideComponentReactDoc(input: OverrideComponentReactDocInput!): OverrideComponentReactDocPayload
@@ -160,4 +169,5 @@ type Mutation {
   addExampleCode(input: AddExampleCodeInput!): AddExampleCodePayload
   refreshRepository(input: RefreshRepositoryInput!): RefreshRepositoryPayload
   addRepository(input: AddRepositoryInput!): AddRepositoryPayload
+  deleteRepository(input: DeleteRepositoryInput!): DeleteRepositoryPayload
 }

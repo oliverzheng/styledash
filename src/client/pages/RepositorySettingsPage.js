@@ -8,11 +8,12 @@ import RepositorySettingsPageWithData from '../repositorySettings/RepositorySett
 
 type PropType = {
   repository: ?Object,
+  viewer: Object,
 };
 
 class RepositorySettingsPage extends React.Component<PropType> {
   render(): ?React$Element<*> {
-    const {repository} = this.props;
+    const {repository, viewer} = this.props;
     if (!repository) {
       // TODO 404 page. Use React error boundaries
       return null;
@@ -21,7 +22,10 @@ class RepositorySettingsPage extends React.Component<PropType> {
     return (
       <div>
         <PageHeader />
-        <RepositorySettingsPageWithData repository={repository} />
+        <RepositorySettingsPageWithData
+          repository={repository}
+          viewer={viewer}
+        />
       </div>
     );
   }
@@ -36,6 +40,11 @@ const RepositorySettingsPageContainer = Relay.createContainer(
           ${RepositorySettingsPageWithData.getFragment('repository')}
         }
       `,
+      viewer: () => Relay.QL`
+        fragment on Viewer {
+          ${RepositorySettingsPageWithData.getFragment('viewer')}
+        }
+      `,
     },
   },
 );
@@ -44,6 +53,11 @@ RepositorySettingsPageContainer.queries = {
   repository: () => Relay.QL`
     query {
       repository(repositoryID: $repositoryID)
+    }
+  `,
+  viewer: () => Relay.QL`
+    query {
+      viewer
     }
   `,
 };

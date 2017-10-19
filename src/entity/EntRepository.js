@@ -1,5 +1,8 @@
 /** @flow */
 
+import SQL from 'sql-template-strings';
+import invariant from 'invariant';
+
 import ViewerContext from './vc';
 import BaseEnt, {
   type EntConfig,
@@ -86,6 +89,19 @@ export default class EntRepository extends BaseEnt {
     githubRepoID: number,
   ): Promise<Array<this>> {
     return await this.genWhere(vc, 'github_repo_id', githubRepoID);
+  }
+
+  static async genGitHubRepoIDCount(
+    vc: ViewerContext,
+    githubRepoID: number,
+  ): Promise<number> {
+    const count = await this.genAggregateSQLWithoutPrivacy(
+      vc,
+      SQL`count(1)`,
+      { 'github_repo_id': githubRepoID },
+    );
+    invariant(typeof count === 'number', 'Must be a number');
+    return count;
   }
 
   getName(): string {

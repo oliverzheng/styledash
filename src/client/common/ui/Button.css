@@ -25,6 +25,15 @@
   padding-right: 0;
 }
 
+.Button-root.Button-warning {
+  color: #B90101;
+  border-color: #EFC4C4;
+}
+.Button-root.Button-warning:hover {
+  color: #940A0A;
+  border-color: #EC8787;
+}
+
 .Button-root:hover {
   border-color: #B1B1B1;
   color: #333;

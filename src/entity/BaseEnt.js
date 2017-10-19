@@ -33,7 +33,6 @@ export type EntConfig<EntType> = {
 export type PrivacyType<EntType> = {
   genCanViewerSee(obj: EntType): Promise<boolean>,
   genCanViewerMutate(obj: EntType): Promise<boolean>,
-  // TODO use delete in mutators
   genCanViewerDelete(obj: EntType): Promise<boolean>,
   genCanViewerCreate(
     vc: ViewerContext,
@@ -519,6 +518,12 @@ export default class BaseEnt {
   // interweaved between another delete's select-for-updates in a way that makes
   // them deadlock each other?
   async genDelete(): Promise<void> {
+    const {privacy} = this.constructor._getEntConfig();
+    invariant(
+      await privacy.genCanViewerDelete(this),
+      'Viewer cannot delete obj',
+    );
+
     const dependents = genForeignKeyDependentsRecursively(this.constructor);
 
     type Deletion = {
