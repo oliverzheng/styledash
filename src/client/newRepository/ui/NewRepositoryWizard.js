@@ -14,7 +14,7 @@ import Paragraph from '../../common/ui/Paragraph';
 import Button from '../../common/ui/Button';
 import InputField from '../../common/ui/InputField';
 import Textarea from '../../common/ui/Textarea';
-import Select, { Option } from '../../common/ui/Select';
+import Select, { SelectOption } from '../../common/ui/Select';
 
 import './NewRepositoryWizard.css';
 
@@ -97,7 +97,7 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
           placeholder="Select a repository">
           {
             github.repositories.map(repo =>
-              <Option
+              <SelectOption
                 key={repo.repoID}
                 value={repo.repoID}
                 selected={repo.repoID === this.state.selectedGitHubRepoID}>
@@ -106,7 +106,7 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
                     ? repo.repoName
                     : `${repo.repoOwner}/${repo.repoName}`
                 }
-              </Option>
+              </SelectOption>
             )
           }
         </Select>

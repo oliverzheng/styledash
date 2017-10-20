@@ -19,7 +19,7 @@ type OptionProps = {
   children: React$Node,
 };
 
-export class Option extends React.Component<OptionProps> {
+export class SelectOption extends React.Component<OptionProps> {
   static defaultProps = {
     selected: false,
   };
@@ -77,7 +77,7 @@ export default class Select extends React.Component<SelectProps, SelectState> {
     if (children) {
       React.Children.forEach(children, child => {
         invariant(
-          typeof child === 'object' && child.type === Option,
+          typeof child === 'object' && child.type === SelectOption,
           'Each child must be Option',
         );
         const childProps = (child: any).props;
@@ -133,7 +133,7 @@ export default class Select extends React.Component<SelectProps, SelectState> {
         {
           React.Children.map(this.props.children, child => {
             invariant(
-              typeof child === 'object' && child.type === Option,
+              typeof child === 'object' && child.type === SelectOption,
               'Children must all be Options',
             );
             return React.cloneElement(
