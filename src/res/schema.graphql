@@ -137,6 +137,7 @@ input AddRepositoryInput {
 type AddRepositoryPayload {
   clientMutationId: String
   repository: Repository
+  viewer: Viewer!
 }
 
 input DeleteRepositoryInput {
