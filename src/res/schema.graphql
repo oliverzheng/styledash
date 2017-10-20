@@ -60,7 +60,6 @@ type Component implements Node {
   repository: Repository!
   filepath: String!
   reactDoc: String!
-  overrideReactDoc: String
   examples: [Example]!
   githubURL: String
 }
@@ -81,19 +80,6 @@ type Query {
   repository(repositoryID: ID!): Repository
   component(componentID: ID!): Component
   example(exampleID: ID!): Example
-}
-
-
-input OverrideComponentReactDocInput {
-  clientMutationId: String
-  componentID: ID!
-  overrideReactDoc: String!
-}
-
-type OverrideComponentReactDocPayload {
-  clientMutationId: String
-  success: Boolean!
-  component: Component!
 }
 
 
@@ -164,7 +150,6 @@ type DeleteRepositoryPayload {
 }
 
 type Mutation {
-  overrideComponentReactDoc(input: OverrideComponentReactDocInput!): OverrideComponentReactDocPayload
   setExampleCode(input: SetExampleCodeInput!): SetExampleCodePayload
   addExampleCode(input: AddExampleCodeInput!): AddExampleCodePayload
   refreshRepository(input: RefreshRepositoryInput!): RefreshRepositoryPayload

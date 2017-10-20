@@ -23,7 +23,6 @@ type PropType = {
     },
     filepath: string,
     reactDoc: string,
-    overrideReactDoc: ?string,
     examples: Array<Object>,
     githubURL: ?string,
   },
@@ -196,7 +195,6 @@ const ComponentPageWithDataContainer = Relay.createContainer(
           }
           filepath
           reactDoc
-          overrideReactDoc
           examples {
             name
             ${ComponentExampleWithData.getFragment('example')}
