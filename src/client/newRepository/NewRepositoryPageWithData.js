@@ -53,6 +53,7 @@ class NewRepositoryPageWithData extends React.Component<PropType> {
         githubRepoOwner: repoOwner,
         githubRepoName: repoName,
         rootCSS,
+        viewer: this.props.viewer,
       }),
       {
         onSuccess: response => {
@@ -83,6 +84,7 @@ const NewRepositoryPageWithDataContainer = Relay.createContainer(
               repoName
             }
           }
+          ${AddRepositoryMutation.getFragment('viewer')}
         }
       `,
     },

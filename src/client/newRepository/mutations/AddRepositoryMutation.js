@@ -5,6 +5,11 @@ import RelayMutationType from 'react-relay/lib/RelayMutationType';
 
 export default class AddRepositoryMutation extends Relay.Mutation {
   static fragments = {
+    viewer: () => Relay.QL`
+      fragment on Viewer {
+        id
+      }
+    `,
   };
 
   getMutation() {
@@ -32,6 +37,12 @@ export default class AddRepositoryMutation extends Relay.Mutation {
           id
           repositoryID
         }
+        viewer {
+          id
+          repositories {
+            id
+          }
+        }
       }
     `;
   }
@@ -56,6 +67,11 @@ export default class AddRepositoryMutation extends Relay.Mutation {
           }
         `,
       ],
+    }, {
+      type: 'FIELDS_CHANGE',
+      fieldIDs: {
+        viewer: this.props.viewer.id,
+      },
     }];
   }
 }
