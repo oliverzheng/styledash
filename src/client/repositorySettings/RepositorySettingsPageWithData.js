@@ -8,8 +8,11 @@ import {
 } from 'react-router';
 
 import PageWithMenu from '../pages/ui/PageWithMenu';
+import Button from '../common/ui/Button';
 import ButtonWithAction from '../common/ui/ButtonWithAction';
 import Paragraph from '../common/ui/Paragraph';
+import Spacing from '../common/ui/Spacing';
+import ModalDialog from '../common/ui/ModalDialog';
 import RefreshRepositoryMutation from './mutations/RefreshRepositoryMutation';
 import DeleteRepositoryMutation from './mutations/DeleteRepositoryMutation';
 import {
@@ -27,6 +30,7 @@ type PropType = {
 
 class RepositorySettingsPageWithData extends React.Component<PropType> {
   _refreshButton: ?ButtonWithAction;
+  _deleteModalDialog: ?ModalDialog;
 
   render(): ?React$Element<*> {
     const {repository} = this.props;
@@ -58,11 +62,27 @@ class RepositorySettingsPageWithData extends React.Component<PropType> {
               <Paragraph>
                 This cannot be undone.
               </Paragraph>
-              <ButtonWithAction
+              <Button
                 purpose="warning"
-                onClick={this._onDeleteRepoClick}>
+                onClick={this._showModal}>
                 Delete repository
-              </ButtonWithAction>
+              </Button>
+              <ModalDialog
+                body={
+                  <Paragraph className={Spacing.margin.vert.n12}>
+                    This will <strong>irreversibly delete everything</strong> in
+                    this repository. Do you realy wish to continue?
+                  </Paragraph>
+                }
+                renderPrimaryButton={modal =>
+                  <ButtonWithAction
+                    onClick={this._deleteRepo}
+                    purpose="warning">
+                    Really delete repository
+                  </ButtonWithAction>
+                }
+                ref={c => this._deleteModalDialog = c}
+              />
             </div>
           ),
         }]}
@@ -84,7 +104,11 @@ class RepositorySettingsPageWithData extends React.Component<PropType> {
     );
   }
 
-  _onDeleteRepoClick = () => {
+  _showModal = () => {
+    nullthrows(this._deleteModalDialog).show();
+  }
+
+  _deleteRepo = () => {
     this.props.relay.commitUpdate(
       new DeleteRepositoryMutation({
         repository: this.props.repository,
