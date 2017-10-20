@@ -112,13 +112,6 @@ export default class EntUser extends BaseEnt {
   getEmail(): string {
     return this._getStringData('email');
   }
-
-  /* TODO (graphql resolver) */
-  userID() { return this.getID(); }
-  firstName() { return this.getFirstName(); }
-  lastName() { return this.getLastName(); }
-  fullName() { return this.getFullName(); }
-  email() { return this.getEmail(); }
 }
 
 BaseEnt.registerEnt(EntUser);

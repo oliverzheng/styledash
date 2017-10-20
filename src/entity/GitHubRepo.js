@@ -1,5 +1,7 @@
 /** @flow */
 
+import invariant from 'invariant';
+
 export default class GitHubRepo {
   _repoID: number;
   _owner: string;
@@ -15,11 +17,19 @@ export default class GitHubRepo {
     this._name = name;
   }
 
-  getID(): string {
-    return 'github-repo:' + this._repoID.toString();
+  serialize(): string {
+    return `${this._repoID}:${this._owner}:${this._name}`;
   }
 
-  getRepoID(): number {
+  static deserialize(serialization: string): this {
+    const split = serialization.split(':');
+    invariant(split.length === 3, 'Invalid serialization %s', serialization);
+    const repoID = parseInt(split[0], 10);
+    invariant(typeof repoID === 'number', 'RepoID not a number: %s', split[0]);
+    return new this(repoID, split[1], split[2]);
+  }
+
+  getID(): number {
     return this._repoID;
   }
 
@@ -30,10 +40,4 @@ export default class GitHubRepo {
   getName(): string {
     return this._name;
   }
-
-  // TODO GraphQL resolvers
-  id() { return this.getID(); }
-  repoID() { return this.getRepoID(); }
-  repoOwner() { return this.getOwner(); }
-  repoName() { return this.getName(); }
 }

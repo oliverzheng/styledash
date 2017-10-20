@@ -114,15 +114,6 @@ export default class EntExample extends BaseEnt {
       component.getID(),
     );
   }
-
-  // Mutations
-
-  /* TODO (graphql resolver) */
-  name() { return this.getName(); }
-  exampleID() { return this.getID(); }
-  component() { return this.genComponent(); }
-  code() { return this.getCode(); }
-  serializedElement() { return this.getSerializedElement(); }
 }
 
 BaseEnt.registerEnt(EntExample);

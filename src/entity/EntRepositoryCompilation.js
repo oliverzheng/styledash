@@ -84,6 +84,10 @@ export default class EntRepositoryCompilation extends BaseEnt {
     return this._getStringData('commit_hash');
   }
 
+  getAddedTimestamp(): number {
+    return this._getNumberData('added_timestamp');
+  }
+
   async genCompiledBundle(): Promise<string> {
     const bundle = await this._genExtendedColumnValue('compiled_bundle');
     invariant(typeof bundle === 'string', 'Must be a string');
@@ -93,8 +97,6 @@ export default class EntRepositoryCompilation extends BaseEnt {
   getCompiledBundleURI(): string {
     return `/_repositoryCompilation/bundle/${this.getID()}/bundle.js`;
   }
-
-  compiledBundleURI() { return this.getCompiledBundleURI(); }
 }
 
 BaseEnt.registerEnt(EntRepositoryCompilation);

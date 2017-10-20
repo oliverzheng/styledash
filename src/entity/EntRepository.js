@@ -154,17 +154,6 @@ export default class EntRepository extends BaseEnt {
   async genCurrentRepositoryCompilation(): Promise<?EntRepositoryCompilation> {
     return (await EntRepositoryCompilation.genForRepository(this))[0];
   }
-
-
-  /* TODO (graphql resolver) */
-  name() { return this.getName(); }
-  repositoryID() { return this.getID(); }
-  externalCSSURI() { return this.getExternalCSSUrl(); }
-  rootCSS() { return this.getRootCSS(); }
-  componentsCount() { return this.genComponentsCount(); }
-  components() { return this.genComponents(); }
-  currentCompilation() { return this.genCurrentRepositoryCompilation(); }
-  lastUpdatedTimestamp() { return this.getLastUpdatedTimestamp(); }
 }
 
 BaseEnt.registerEnt(EntRepository);

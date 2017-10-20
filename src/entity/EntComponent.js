@@ -201,17 +201,6 @@ export default class EntComponent extends BaseEnt {
     );
     return components[0];
   }
-
-  /* TODO (graphql resolver) */
-  name() { return this.getName(); }
-  componentID() { return this.getID(); }
-  filepath() { return this.getFilepath(); }
-  repository() { return this.genRepository(); }
-  isNamedExport() { return this.getIsNamedExport(); }
-  reactDoc() { return this.genReactDoc(); }
-  overrideReactDoc() { return this.genOverrideReactDoc(); }
-  examples() { return this.genExamples(); }
-  githubURL() { return this.genGitHubURL(); }
 }
 
 BaseEnt.registerEnt(EntComponent);
