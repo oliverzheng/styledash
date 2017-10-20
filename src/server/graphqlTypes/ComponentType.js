@@ -56,7 +56,7 @@ const ComponentType = new GraphQLObjectType({
         return component.genReactDoc();
       },
     },
-    gthubURL: {
+    githubURL: {
       type: GraphQLString,
       resolve(component: EntComponent) {
         return component.genGitHubURL();
