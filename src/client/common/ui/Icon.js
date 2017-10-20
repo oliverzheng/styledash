@@ -11,6 +11,7 @@ import checkmark from '../icons/checkmark.svg';
 import chevronDown from '../icons/chevron_down.svg';
 import gear from '../icons/gear.svg';
 import github from '../icons/github.svg';
+import hourglass from '../icons/hourglass.svg';
 import pencil from '../icons/pencil.svg';
 import plus from '../icons/plus.svg';
 import save from '../icons/save.svg';
@@ -24,6 +25,7 @@ export type GlyphType =
   'chevron-down' |
   'gear' |
   'github' |
+  'hourglass' |
   'pencil' |
   'plus' |
   'save';
@@ -101,6 +103,8 @@ export default class Icon extends React.Component<PropType> {
         return gear;
       case 'github':
         return github;
+      case 'hourglass':
+        return hourglass;
       case 'pencil':
         return pencil;
       case 'plus':

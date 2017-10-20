@@ -2,6 +2,9 @@
 
 import React from 'react';
 import Relay from 'react-relay/classic';
+import {
+  browserHistory,
+} from 'react-router';
 
 import RepositoryComponentsPageWithMenu from './ui/RepositoryComponentsPageWithMenu';
 
@@ -17,10 +20,23 @@ type PropType = {
         serializedElement: ?string,
       }>
     }>,
+    currentCompilation: ?{
+      id: string,
+    },
   },
 };
 
 class RepositoryPageWithData extends React.Component<PropType> {
+  constructor(props: PropType) {
+    super(props);
+
+    if (!props.repository.currentCompilation) {
+      browserHistory.push(
+        `/repository/${props.repository.repositoryID}/settingUp`
+      );
+    }
+  }
+
   render(): ?React$Element<*> {
     const {repository} = this.props;
 
@@ -58,6 +74,9 @@ const RepositoryPageWithDataContainer = Relay.createContainer(
             examples {
               serializedElement
             }
+          }
+          currentCompilation {
+            id
           }
         }
       `,

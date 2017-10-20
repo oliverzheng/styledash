@@ -60,7 +60,7 @@ class NewRepositoryPageWithData extends React.Component<PropType> {
           const repoID =
             AddRepositoryMutation.getRepositoryIDFromResponse(response);
           if (repoID) {
-            browserHistory.push(`/repository/${repoID}`);
+            browserHistory.push(`/repository/${repoID}/settingUp`);
           } else {
             // TODO whelp
           }

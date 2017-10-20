@@ -34,6 +34,7 @@ import AccountPage from './pages/AccountPage';
 import LoginPage from './pages/LoginPage';
 import RepositoryPage from './pages/RepositoryPage';
 import RepositorySettingsPage from './pages/RepositorySettingsPage';
+import RepositorySettingUpPage from './pages/RepositorySettingUpPage';
 import NewRepositoryPage from './pages/NewRepositoryPage';
 import ComponentPage from './pages/ComponentPage';
 
@@ -138,6 +139,12 @@ export default class App extends React.Component<*> {
           path={`${REPOSITORY_PATH}/:repositoryID/settings`}
           component={RepositorySettingsPage}
           queries={RepositorySettingsPage.queries}
+          onEnter={this._requireAuth}
+        />
+        <Route
+          path={`${REPOSITORY_PATH}/:repositoryID/settingup`}
+          component={RepositorySettingUpPage}
+          queries={RepositorySettingUpPage.queries}
           onEnter={this._requireAuth}
         />
         <Route
