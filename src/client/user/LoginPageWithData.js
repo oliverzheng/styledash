@@ -19,6 +19,7 @@ import FixedWidthPageContainer from '../pages/ui/FixedWidthPageContainer';
 import PageTitle from '../pages/ui/PageTitle';
 import {
   REPOSITORY_LIST_PATH,
+  REGISTER_PATH,
 } from '../../clientserver/urlPaths';
 import {
   genIsLoggedIn,
@@ -131,6 +132,17 @@ export default class LoginPageWithData extends React.Component<*, StateType> {
         <div
           className={classnames(
             Spacing.margin.top.n40,
+            Spacing.alignText.center,
+          )}>
+          <SubText>
+            <Link href={REGISTER_PATH}>
+              Have an invite code?
+            </Link>
+          </SubText>
+        </div>
+        <div
+          className={classnames(
+            Spacing.margin.top.n28,
             Spacing.alignText.center,
           )}>
           <SubText>

@@ -224,6 +224,17 @@ export default class RegisterPageWithData extends React.Component<*, StateType> 
             Spacing.alignText.center,
           )}>
           <SubText>
+            <Link href={LOGIN_PATH}>
+              Have an account?
+            </Link>
+          </SubText>
+        </div>
+        <div
+          className={classnames(
+            Spacing.margin.top.n28,
+            Spacing.alignText.center,
+          )}>
+          <SubText>
             Having trouble?<br />
             Email{' '}
             <Link href="mailto:support@styledash.io">
