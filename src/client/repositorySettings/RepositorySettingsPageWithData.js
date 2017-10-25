@@ -71,7 +71,7 @@ class RepositorySettingsPageWithData extends React.Component<PropType> {
                 body={
                   <Paragraph className={Spacing.margin.vert.n12}>
                     This will <strong>irreversibly delete everything</strong> in
-                    this repository. Do you realy wish to continue?
+                    this repository. Do you really wish to continue?
                   </Paragraph>
                 }
                 renderPrimaryButton={modal =>
