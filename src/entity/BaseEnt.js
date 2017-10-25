@@ -271,6 +271,8 @@ export default class BaseEnt {
       const columnValue = where[columnName];
       if (Array.isArray(columnValue)) {
         sql.append(SQL` IN (${columnValue})`);
+      } else if (columnValue == null) {
+        sql.append(SQL` IS ${columnValue}`);
       } else {
         sql.append(SQL` = ${columnValue}`);
       }
