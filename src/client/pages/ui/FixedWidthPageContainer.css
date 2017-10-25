@@ -15,3 +15,7 @@
 .FixedWidthPageContainer-width-narrow {
   width: 680px;
 }
+
+.FixedWidthPageContainer-width-supernarrow {
+  width: 270px;
+}

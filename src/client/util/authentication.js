@@ -166,3 +166,10 @@ export async function genRegister(
     isLoggedIn: json.isLoggedIn,
   };
 }
+
+export function getMessageFromLoginErrorType(type: string): ?string {
+  if (type === 'invalidCredentials') {
+    return 'Incorrect email or password.';
+  }
+  return null;
+}

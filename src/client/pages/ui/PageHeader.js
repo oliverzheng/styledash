@@ -18,11 +18,19 @@ import {
 
 import './PageHeader.css';
 
+type PropType = {
+  showLoginWhenLoggedOut: boolean,
+};
+
 type StateType = {
   isLoggedIn: ?boolean,
 };
 
-export default class PageHeader extends React.Component<*, StateType> {
+export default class PageHeader extends React.Component<PropType, StateType> {
+  static defaultProps = {
+    showLoginWhenLoggedOut: true,
+  };
+
   state = {
     isLoggedIn: null,
   };
@@ -62,7 +70,9 @@ export default class PageHeader extends React.Component<*, StateType> {
       )];
     } else {
       links = (
-        <Link href={LOGIN_PATH}>Login</Link>
+        this.props.showLoginWhenLoggedOut
+          ? <Link href={LOGIN_PATH}>Login</Link>
+          : null
       );
     }
 

@@ -6,7 +6,7 @@ import classnames from 'classnames';
 import './FixedWidthPageContainer.css';
 
 export type FixedWidthPageContainerProps = {
-  width: 'wide' | 'normal' | 'narrow',
+  width: 'wide' | 'normal' | 'narrow' | 'supernarrow',
   className?: ?string,
   children?: React$Node,
 };

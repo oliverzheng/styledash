@@ -1,3 +1,7 @@
+body .Spacing-alignText-center {
+  text-align: center;
+}
+
 body .Spacing-margin-bottom-4 {
   margin-bottom: 4px;
 }

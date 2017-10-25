@@ -3,6 +3,10 @@
 import './Spacing.css';
 
 const Spacing = {
+  alignText: {
+    center: 'Spacing-alignText-center',
+  },
+
   margin: {
     bottom: {
       n4: 'Spacing-margin-bottom-4',
