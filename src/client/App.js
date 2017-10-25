@@ -21,6 +21,7 @@ import {
   ACCOUNT_PATH,
   LOGIN_PATH,
   LOGOUT_PATH,
+  REGISTER_PATH,
 } from '../clientserver/urlPaths';
 import {
   genIsLoggedIn,
@@ -32,6 +33,7 @@ import {
 import RepositoryListPage from './pages/RepositoryListPage';
 import AccountPage from './pages/AccountPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import RepositoryPage from './pages/RepositoryPage';
 import RepositorySettingsPage from './pages/RepositorySettingsPage';
 import RepositorySettingUpPage from './pages/RepositorySettingUpPage';
@@ -39,6 +41,11 @@ import NewRepositoryPage from './pages/NewRepositoryPage';
 import ComponentPage from './pages/ComponentPage';
 
 import './App.css';
+
+const UNAUTHED_PATHS = [
+  LOGIN_PATH,
+  REGISTER_PATH,
+];
 
 export default class App extends React.Component<*> {
 
@@ -65,8 +72,8 @@ export default class App extends React.Component<*> {
     if (prevIsLoggedIn == null) {
       // Just found out if we are logged in or not
 
-      if (!isLoggedIn) {
-        // Turns out we aren't logged in
+      if (!isLoggedIn && !UNAUTHED_PATHS.includes(window.location.pathname)) {
+        // Turns out we aren't logged in. Only redirect if we need to.
         browserHistory.push(LOGIN_PATH);
       }
       // If we are logged in, everything is fine.
@@ -117,6 +124,10 @@ export default class App extends React.Component<*> {
           path={LOGOUT_PATH}
           component={LoginPage}
           onEnter={this._logout}
+        />
+        <Route
+          path={REGISTER_PATH}
+          component={RegisterPage}
         />
         {
           /* This has to be before :repositoryID, otherwise it'll take

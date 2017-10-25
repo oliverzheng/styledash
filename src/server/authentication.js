@@ -1,5 +1,6 @@
 /** @flow */
 
+import nullthrows from 'nullthrows';
 import passport from 'passport';
 import {Strategy as LocalStrategy} from 'passport-local';
 import CustomStrategy from 'passport-custom';
@@ -8,6 +9,7 @@ import type {MySQLConnection} from '../storage/mysql';
 import type {QueueConnection} from '../storage/queue';
 import ViewerContext from '../entity/vc';
 import EntUser from '../entity/EntUser';
+import EntInviteCode from '../entity/EntInviteCode';
 import {
   isEmailValid,
   isPasswordValid,
@@ -15,6 +17,7 @@ import {
   isLastNameValid,
   type RegisterErrorType,
 } from '../clientserver/authentication';
+import genRegisterUser from './genRegisterUser';
 
 function setCookieUserIDOnResponse(res: Object, userID: ?string) {
   if (userID != null) {
@@ -189,8 +192,10 @@ export function register() {
       password,
       firstName,
       lastName,
+      inviteCode,
     } = req.method === 'GET' ? req.query : req.body;
 
+    let entInvite: ?EntInviteCode = null;
     let errorType: ?RegisterErrorType;
 
     if (vc.isAuthenticated()) {
@@ -203,6 +208,15 @@ export function register() {
       errorType = 'invalidFirstName';
     } else if (!lastName || !isLastNameValid(lastName)) {
       errorType = 'invalidLastName';
+
+    // eslint-disable-next-line no-cond-assign
+    } else if (
+      !inviteCode ||
+      !(entInvite = await EntInviteCode.genInviteCode(vc, inviteCode))
+    ) {
+      errorType = 'invalidInviteCode';
+    } else if (entInvite && entInvite.isUsed()) {
+      errorType = 'inviteCodeAlreadyUsed';
     } else if (await EntUser.genIsEmailAlreadyInUse(vc, email)) {
       errorType = 'emailAlreadyInUse';
     }
@@ -210,12 +224,13 @@ export function register() {
     let user = null;
     let error = null;
     if (!errorType) {
-      user = await EntUser.genCreate(
+      user = await genRegisterUser(
         vc,
         email,
         password,
         firstName,
         lastName,
+        nullthrows(entInvite),
       );
     } else {
       error = {

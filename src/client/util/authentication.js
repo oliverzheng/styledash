@@ -135,6 +135,7 @@ export async function genRegister(
   password: string,
   firstName: string,
   lastName: string,
+  inviteCode: string,
 ): Promise<{
   registerSuccess: boolean,
   registerError: ?{
@@ -154,6 +155,7 @@ export async function genRegister(
         password,
         firstName,
         lastName,
+        inviteCode,
       }),
       credentials: 'same-origin',
     },
@@ -172,4 +174,27 @@ export function getMessageFromLoginErrorType(type: string): ?string {
     return 'Incorrect email or password.';
   }
   return null;
+}
+
+export function getMessageFromRegisterErrorType(type: ?RegisterErrorType): ?string {
+  switch (type) {
+    case 'invalidEmail':
+      return 'Enter a valid email address.';
+    case 'invalidPassword':
+      return 'Password has to have at least 8 characters.';
+    case 'invalidFirstName':
+      return 'Enter a first name with at least 1 character.';
+    case 'invalidLastName':
+      return 'Enter a last name with at least 1 character.';
+    case 'invalidInviteCode':
+      return 'Invalid invite code.';
+    case 'inviteCodeAlreadyUsed':
+      return 'Invite code already used.';
+    case 'passwordMismatch':
+      return 'Passwords do not match';
+    case 'emailAlreadyInUse':
+      return 'Email address is already in use.'
+    default:
+        return null;
+  }
 }

@@ -50,6 +50,14 @@ export default class EntInviteCode extends BaseEnt {
     };
   }
 
+  static async genInviteCode(
+    vc: ViewerContext,
+    code: string,
+  ): Promise<?this> {
+    const rows = await this.genWhere(vc, 'code', code);
+    return rows[0];
+  }
+
   static async genUnusedForWaitlistEmail(
     vc: ViewerContext,
     waitlistEmail: EntWaitlistEmail,

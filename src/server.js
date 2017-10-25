@@ -49,6 +49,7 @@ import {
   ACCOUNT_PATH,
   LOGIN_PATH,
   LOGOUT_PATH,
+  REGISTER_PATH,
   COMPONENT_RENDER_PATH,
 } from './clientserver/urlPaths';
 import {graphqlAPI, graphiql} from './server/graphql';
@@ -175,6 +176,7 @@ async function main() {
         ACCOUNT_PATH,
         LOGIN_PATH,
         LOGOUT_PATH,
+        REGISTER_PATH,
         COMPONENT_RENDER_PATH,
       ].map(urlPath => urlPath + '(/*)?'),
       showReactApp,

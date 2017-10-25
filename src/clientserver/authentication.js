@@ -6,6 +6,9 @@ export type RegisterErrorType =
   'invalidPassword' |
   'invalidFirstName' |
   'invalidLastName' |
+  'invalidInviteCode' |
+  'inviteCodeAlreadyUsed' |
+  'passwordMismatch' |
   'emailAlreadyInUse';
 
 export function isEmailValid(email: string): boolean {
