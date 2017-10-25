@@ -90,7 +90,8 @@ export default class EntComponent extends BaseEnt {
     const repository = await this.genRepository();
     const user = repository.getGitHubUsername();
     const repo = repository.getGitHubRepo();
-    const branch = repository.getGitHubBranch();
+    // TODO Actual branch support
+    const branch = repository.getGitHubBranch() || 'master';
     if (!user || !repo || !branch) {
       return null;
     }
