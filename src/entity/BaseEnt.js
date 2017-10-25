@@ -177,6 +177,14 @@ export default class BaseEnt {
     return this._getNumberData(columnName).toString();
   }
 
+  _getNullableIDData(columnName: string): ?string {
+    const id = this._getNullableNumberData(columnName);
+    if (id == null) {
+      return null;
+    }
+    return id.toString();
+  }
+
   // Do not persist this. It's a runtime identifier only, since the code gets
   // mangled.
   static getEntType(): string {
