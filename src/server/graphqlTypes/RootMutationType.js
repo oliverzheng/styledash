@@ -9,6 +9,7 @@ import AddExampleCodeField from './mutations/AddExampleCodeField';
 import RefreshRepositoryField from './mutations/RefreshRepositoryField';
 import AddRepositoryField from './mutations/AddRepositoryField';
 import DeleteRepositoryField from './mutations/DeleteRepositoryField';
+import UnlinkGitHubField from './mutations/UnlinkGitHubField';
 
 const RootMutationType = new GraphQLObjectType({
   name: 'RootMutationType',
@@ -18,6 +19,7 @@ const RootMutationType = new GraphQLObjectType({
     refreshRepository: RefreshRepositoryField,
     addRepository: AddRepositoryField,
     deleteRepository: DeleteRepositoryField,
+    unlinkGitHub: UnlinkGitHubField,
   },
 });
 

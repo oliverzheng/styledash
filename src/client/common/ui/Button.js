@@ -7,6 +7,9 @@ import url from 'url';
 
 import TextColor from './TextColor';
 import Icon, { type GlyphType } from './Icon';
+import {
+  NON_ROUTER_SERVER_PATHS,
+} from '../../../clientserver/urlPaths';
 
 import './Button.css';
 
@@ -86,7 +89,12 @@ export default class Button extends React.Component<ButtonProps> {
     }
 
     if (href != null) {
-      if (url.parse(href).host == null) {
+      // TODO consolidate this logic with Link - extract out a RouterLink that's
+      // not visual but has logic around hrefs.
+      if (
+        url.parse(href).host == null &&
+        !NON_ROUTER_SERVER_PATHS.includes(href)
+      ) {
         return (
           <RouterLink to={href} {...forwardProps}>
             {icon}

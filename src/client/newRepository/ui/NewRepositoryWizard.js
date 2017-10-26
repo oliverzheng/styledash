@@ -15,6 +15,9 @@ import Button from '../../common/ui/Button';
 import InputField from '../../common/ui/InputField';
 import Textarea from '../../common/ui/Textarea';
 import Select, { SelectOption } from '../../common/ui/Select';
+import {
+  SERVER_GITHUB_OAUTH_LOGIN_NEW_REPOSITORY,
+} from '../../../clientserver/urlPaths';
 
 import './NewRepositoryWizard.css';
 
@@ -113,7 +116,7 @@ export default class NewRepositoryWizard extends React.Component<PropType, State
       );
     } else {
       connectButton = (
-        <Button glyph="github">
+        <Button glyph="github" href={SERVER_GITHUB_OAUTH_LOGIN_NEW_REPOSITORY}>
           Connect to GitHub
         </Button>
       );

@@ -140,6 +140,7 @@ type AddRepositoryPayload {
   viewer: Viewer!
 }
 
+
 input DeleteRepositoryInput {
   clientMutationId: String
   repositoryID: ID!
@@ -150,10 +151,22 @@ type DeleteRepositoryPayload {
   viewer: Viewer!
 }
 
+
+input UnlinkGitHubInput {
+  clientMutationId: String
+}
+
+type UnlinkGitHubPayload {
+  clientMutationId: String
+  viewer: Viewer!
+}
+
+
 type Mutation {
   setExampleCode(input: SetExampleCodeInput!): SetExampleCodePayload
   addExampleCode(input: AddExampleCodeInput!): AddExampleCodePayload
   refreshRepository(input: RefreshRepositoryInput!): RefreshRepositoryPayload
   addRepository(input: AddRepositoryInput!): AddRepositoryPayload
   deleteRepository(input: DeleteRepositoryInput!): DeleteRepositoryPayload
+  unlinkGitHub(input: UnlinkGitHubInput!): UnlinkGitHubPayload
 }

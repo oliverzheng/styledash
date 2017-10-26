@@ -4,6 +4,9 @@ import React from 'react';
 import classnames from 'classnames';
 import {Link as RouterLink} from 'react-router';
 import url from 'url';
+import {
+  NON_ROUTER_SERVER_PATHS,
+} from '../../../clientserver/urlPaths';
 
 import './Link.css';
 
@@ -49,7 +52,10 @@ export default class Link extends React.Component<PropType> {
         'Link-root-underlineOnHover': underline,
       },
     );
-    if (url.parse(href).host == null) {
+    if (
+      url.parse(href).host == null &&
+      !NON_ROUTER_SERVER_PATHS.includes(href)
+    ) {
       return (
         <RouterLink
           to={href}

@@ -18,9 +18,17 @@ export const SERVER_WAITLIST_ADD_EMAIL_PATH = '/api/waitlist_add_email';
 // the callback.
 export const SERVER_GITHUB_OAUTH_LOGIN_ACCOUNT = '/github/login/account';
 export const SERVER_GITHUB_OAUTH_CALLBACK_ACCOUNT = '/github/callback/account';
+export const SERVER_GITHUB_OAUTH_LOGIN_NEW_REPOSITORY = '/github/login/newrepository';
+export const SERVER_GITHUB_OAUTH_CALLBACK_NEW_REPOSITORY = '/github/callback/newrepository';
 
 // Github webhook
 export const SERVER_GITHUB_WEBHOOK_PATH = '/github/webhook';
+
+// URLs the client needs to go to but are server-based
+export const NON_ROUTER_SERVER_PATHS = [
+  SERVER_GITHUB_OAUTH_LOGIN_ACCOUNT,
+  SERVER_GITHUB_OAUTH_LOGIN_NEW_REPOSITORY,
+];
 
 
 //// Client/server shared
