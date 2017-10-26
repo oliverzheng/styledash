@@ -19,6 +19,7 @@ export type VisualProps = {
 
 type PropType = VisualProps & {
   href: string,
+  plainLink: boolean, // no router
   className?: ?string,
   children?: React$Node,
 };
@@ -33,6 +34,7 @@ export const defaultVisualProps = {
 export default class Link extends React.Component<PropType> {
   static defaultProps = {
     ...defaultVisualProps,
+    plainLink: false,
   };
 
   render(): React$Element<*> {
@@ -40,6 +42,7 @@ export default class Link extends React.Component<PropType> {
       href,
       onHover,
       children,
+      plainLink,
       className,
       ...rest
     } = this.props;
@@ -53,6 +56,7 @@ export default class Link extends React.Component<PropType> {
       },
     );
     if (
+      !plainLink &&
       url.parse(href).host == null &&
       !NON_ROUTER_SERVER_PATHS.includes(href)
     ) {

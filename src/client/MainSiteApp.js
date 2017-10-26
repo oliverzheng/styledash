@@ -9,8 +9,11 @@ import 'whatwg-fetch'; // polyfill global fetch
 import InputField from './common/ui/InputField';
 import ButtonWithAction from './common/ui/ButtonWithAction';
 import Spacing from './common/ui/Spacing';
+import SubText from './common/ui/SubText';
+import Link from './common/ui/Link';
 import {
   SERVER_WAITLIST_ADD_EMAIL_PATH,
+  LOGIN_PATH,
 } from '../clientserver/urlPaths';
 import {isEmailValid} from '../clientserver/authentication';
 
@@ -57,7 +60,13 @@ export default class MainSiteApp extends React.Component<*, StateType> {
             }>
             Be notified when Styledash is available.
           </div>
-          <div className="MainSiteApp-notify-email">
+          <div
+            className={
+              classnames(
+                'MainSiteApp-notify-email',
+                Spacing.margin.bottom.n40,
+              )
+            }>
             <InputField
               value={this.state.email}
               onChange={this._onEmailChange}
@@ -73,6 +82,13 @@ export default class MainSiteApp extends React.Component<*, StateType> {
               onClick={this._registerEmail}>
               Notify Me
             </ButtonWithAction>
+          </div>
+          <div>
+            <SubText>
+              <Link href={LOGIN_PATH} plainLink>
+                Have an account?
+              </Link>
+            </SubText>
           </div>
         </div>
       );
