@@ -74,6 +74,7 @@ export default class MainSiteApp extends React.Component<*, StateType> {
               className={
                 classnames('MainSiteApp-notify-input', Spacing.margin.right.n4)
               }
+              type="email"
               ref={c => this._emailInput = c}
             />
             <ButtonWithAction

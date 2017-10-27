@@ -171,6 +171,7 @@ export default class RegisterPageWithData extends React.Component<*, StateType> 
                   Spacing.margin.bottom.n12,
                 )}
                 ref={c => this._email = c}
+                type="email"
                 placeholder="Email"
               />
               {
