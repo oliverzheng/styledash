@@ -9,6 +9,7 @@ import GitHubOAuth from 'github-oauth';
 import ViewerContext from '../entity/vc';
 import EntGitHubToken from '../entity/EntGitHubToken';
 import envConfig from '../envConfig';
+import isHTTPS from './isHTTPS';
 import {printError} from '../consoleUtil';
 import {
   genGitHubRequest,
@@ -24,7 +25,7 @@ function getGitHubOauth(
     githubClient: nullthrows(envConfig.github.clientID),
     githubSecret: nullthrows(envConfig.github.clientSecret),
     baseURL: url.format({
-      protocol: req.protocol,
+      protocol: isHTTPS(req) ? 'https' : 'http',
       host: req.get('host'),
     }),
     callbackURI: callbackURL,
