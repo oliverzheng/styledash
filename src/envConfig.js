@@ -49,11 +49,3 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export default envConfig;
-
-export function getExternalHost(req: Object): string {
-  if (envConfig.externalHostOverride) {
-    return envConfig.externalHostOverride;
-  }
-
-  return `${req.protocol}://${req.get('Host')}`;
-}

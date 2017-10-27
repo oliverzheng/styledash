@@ -4,7 +4,7 @@ import invariant from 'invariant';
 
 import ViewerContext from '../entity/vc';
 import EntRepository from '../entity/EntRepository';
-import { getExternalHost } from '../envConfig';
+import getExternalHost from './getExternalHost';
 import { genEnqueueRepoCompilation } from '../compile/compileRepoQueue';
 import { printAction, printError } from '../consoleUtil';
 import { SERVER_GITHUB_WEBHOOK_PATH } from '../clientserver/urlPaths';
