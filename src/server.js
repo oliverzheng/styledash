@@ -95,7 +95,9 @@ async function main() {
   try {
     // Setup
     const app = express();
-    app.use(morgan('dev'));
+    app.use(morgan(
+      ':remote-addr - [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer"'
+    ));
     app.use(cookieParser(envConfig.server.cookieSecret));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
