@@ -95,6 +95,7 @@ async function main() {
   try {
     // Setup
     const app = express();
+    app.set('trust proxy', true);
     app.use(morgan(
       ':remote-addr - [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer"'
     ));
